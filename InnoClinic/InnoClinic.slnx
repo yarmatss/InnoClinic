@@ -1,1 +1,11 @@
-<Solution />
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="../docs/profiles_erd.md" />
+  </Folder>
+  <Folder Name="/Profiles/">
+    <Project Path="Profiles/Profiles.API/Profiles.API.csproj" Id="82eb973d-f53e-4846-b912-ba9c90d8f68c" />
+    <Project Path="Profiles/Profiles.BLL/Profiles.BLL.csproj" Id="2f6b1986-6794-4b3a-a0af-7be9623f4a6e" />
+    <Project Path="Profiles/Profiles.DAL/Profiles.DAL.csproj" Id="71e33e93-cbb9-4db7-b155-10e566dafa65" />
+    <Project Path="Profiles/Profiles.Domain/Profiles.Domain.csproj" Id="2908cdc1-5c8b-417b-8be3-fac418e5aab9" />
+  </Folder>
+</Solution>
