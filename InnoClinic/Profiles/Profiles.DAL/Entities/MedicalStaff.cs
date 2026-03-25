@@ -1,14 +1,11 @@
 ﻿using Profiles.Domain.Enums;
 
-namespace Profiles.Domain.Entities;
+namespace Profiles.DAL.Entities;
 
-public class MedicalStaff
+public class MedicalStaff : Person
 {
-    public Guid Id { get; set; }
-    public Guid PersonId { get; set; }
-    public Person Person { get; set; } = null!;
     public StaffType StaffType { get; set; }
-    public string LicenseNumber { get; set; } = string.Empty;
+    public string LicenseNumber { get; set; } = null!;
     public DateTime HireDate { get; set; }
     public bool IsActive { get; set; } = true;
 

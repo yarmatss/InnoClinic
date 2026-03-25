@@ -2,32 +2,33 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Npgsql;
 using Profiles.DAL.Data;
 
 namespace Profiles.DAL;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddDataAccess(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        var baseConnectionString = configuration.GetConnectionString("DefaultConnection");
-
-        var builder = new NpgsqlConnectionStringBuilder(baseConnectionString)
+        public IServiceCollection AddDataAccess(IConfiguration configuration)
         {
-            Password = configuration["DbPassword"]
-        };
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string not found.");
 
-        services.AddDbContext<ProfilesDbContext>(options =>
-            options.UseNpgsql(builder.ConnectionString));
+            services.AddDbContext<ProfilesDbContext>(options =>
+                options.UseNpgsql(connectionString));
 
-        return services;
+            return services;
+        }
     }
 
-    public static async Task ApplyMigrationsAsync(this IHost host)
+    extension(IHost host)
     {
-        using var scope = host.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ProfilesDbContext>();
-        await context.Database.MigrateAsync();
+        public async Task ApplyMigrationsAsync()
+        {
+            using var scope = host.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ProfilesDbContext>();
+            await context.Database.MigrateAsync();
+        }
     }
 }

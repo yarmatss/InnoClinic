@@ -1,4 +1,4 @@
-﻿namespace Profiles.Domain.Entities;
+﻿namespace Profiles.DAL.Entities;
 
 public class StaffSpecialization
 {

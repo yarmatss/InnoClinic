@@ -12,24 +12,6 @@ namespace Profiles.DAL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Persons",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FirstName = table.Column<string>(type: "text", nullable: false),
-                    LastName = table.Column<string>(type: "text", nullable: false),
-                    MiddleName = table.Column<string>(type: "text", nullable: true),
-                    BirthDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Gender = table.Column<string>(type: "text", nullable: false),
-                    NationalId = table.Column<string>(type: "text", nullable: false),
-                    ContactPhone = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Persons", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Specializations",
                 columns: table => new
                 {
@@ -47,22 +29,22 @@ namespace Profiles.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
                     StaffType = table.Column<int>(type: "integer", nullable: false),
                     LicenseNumber = table.Column<string>(type: "text", nullable: false),
                     HireDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    SupervisorId = table.Column<Guid>(type: "uuid", nullable: true)
+                    SupervisorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
+                    MiddleName = table.Column<string>(type: "text", nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Gender = table.Column<string>(type: "text", nullable: false),
+                    NationalId = table.Column<string>(type: "text", nullable: false),
+                    ContactPhone = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Staff", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Staff_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Staff_Staff_SupervisorId",
                         column: x => x.SupervisorId,
@@ -76,20 +58,20 @@ namespace Profiles.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
                     InsuranceNumber = table.Column<string>(type: "text", nullable: false),
                     EmergencyContact = table.Column<string>(type: "text", nullable: true),
-                    PrimaryDoctorId = table.Column<Guid>(type: "uuid", nullable: true)
+                    PrimaryDoctorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
+                    MiddleName = table.Column<string>(type: "text", nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Gender = table.Column<string>(type: "text", nullable: false),
+                    NationalId = table.Column<string>(type: "text", nullable: false),
+                    ContactPhone = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Patients", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Patients_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Patients_Staff_PrimaryDoctorId",
                         column: x => x.PrimaryDoctorId,
@@ -125,21 +107,9 @@ namespace Profiles.DAL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Patients_PersonId",
-                table: "Patients",
-                column: "PersonId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Patients_PrimaryDoctorId",
                 table: "Patients",
                 column: "PrimaryDoctorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Staff_PersonId",
-                table: "Staff",
-                column: "PersonId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Staff_SupervisorId",
@@ -150,6 +120,13 @@ namespace Profiles.DAL.Migrations
                 name: "IX_StaffSpecialization_SpecializationId",
                 table: "StaffSpecialization",
                 column: "SpecializationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StaffSpecialization_StaffId_IsPrimary",
+                table: "StaffSpecialization",
+                columns: new[] { "StaffId", "IsPrimary" },
+                unique: true,
+                filter: "\"IsPrimary\" = true");
         }
 
         /// <inheritdoc />
@@ -166,9 +143,6 @@ namespace Profiles.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Staff");
-
-            migrationBuilder.DropTable(
-                name: "Persons");
         }
     }
 }

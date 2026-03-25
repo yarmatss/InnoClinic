@@ -12,7 +12,7 @@ using Profiles.DAL.Data;
 namespace Profiles.DAL.Migrations
 {
     [DbContext(typeof(ProfilesDbContext))]
-    [Migration("20260324135532_InitialCreate")]
+    [Migration("20260325120341_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,71 +25,7 @@ namespace Profiles.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Profiles.Domain.Entities.MedicalStaff", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("HireDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("LicenseNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("PersonId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("StaffType")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("SupervisorId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonId")
-                        .IsUnique();
-
-                    b.HasIndex("SupervisorId");
-
-                    b.ToTable("Staff");
-                });
-
-            modelBuilder.Entity("Profiles.Domain.Entities.Patient", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("EmergencyContact")
-                        .HasColumnType("text");
-
-                    b.Property<string>("InsuranceNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("PersonId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("PrimaryDoctorId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonId")
-                        .IsUnique();
-
-                    b.HasIndex("PrimaryDoctorId");
-
-                    b.ToTable("Patients");
-                });
-
-            modelBuilder.Entity("Profiles.Domain.Entities.Person", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.MedicalStaff", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -109,6 +45,67 @@ namespace Profiles.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LicenseNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NationalId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StaffType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("SupervisorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupervisorId");
+
+                    b.ToTable("Staff");
+                });
+
+            modelBuilder.Entity("Profiles.DAL.Entities.Patient", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ContactPhone")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EmergencyContact")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InsuranceNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -120,12 +117,17 @@ namespace Profiles.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("PrimaryDoctorId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Persons");
+                    b.HasIndex("PrimaryDoctorId");
+
+                    b.ToTable("Patients");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.Specialization", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.Specialization", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -143,7 +145,7 @@ namespace Profiles.DAL.Migrations
                     b.ToTable("Specializations");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.StaffSpecialization", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.StaffSpecialization", b =>
                 {
                     b.Property<Guid>("StaffId")
                         .HasColumnType("uuid");
@@ -161,54 +163,42 @@ namespace Profiles.DAL.Migrations
 
                     b.HasIndex("SpecializationId");
 
+                    b.HasIndex("StaffId", "IsPrimary")
+                        .IsUnique()
+                        .HasFilter("\"IsPrimary\" = true");
+
                     b.ToTable("StaffSpecialization");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.MedicalStaff", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.MedicalStaff", b =>
                 {
-                    b.HasOne("Profiles.Domain.Entities.Person", "Person")
-                        .WithOne("StaffProfile")
-                        .HasForeignKey("Profiles.Domain.Entities.MedicalStaff", "PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Profiles.Domain.Entities.MedicalStaff", "Supervisor")
+                    b.HasOne("Profiles.DAL.Entities.MedicalStaff", "Supervisor")
                         .WithMany()
                         .HasForeignKey("SupervisorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Person");
-
                     b.Navigation("Supervisor");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.Patient", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.Patient", b =>
                 {
-                    b.HasOne("Profiles.Domain.Entities.Person", "Person")
-                        .WithOne("PatientProfile")
-                        .HasForeignKey("Profiles.Domain.Entities.Patient", "PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Profiles.Domain.Entities.MedicalStaff", "PrimaryDoctor")
+                    b.HasOne("Profiles.DAL.Entities.MedicalStaff", "PrimaryDoctor")
                         .WithMany()
                         .HasForeignKey("PrimaryDoctorId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Person");
-
                     b.Navigation("PrimaryDoctor");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.StaffSpecialization", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.StaffSpecialization", b =>
                 {
-                    b.HasOne("Profiles.Domain.Entities.Specialization", "Specialization")
+                    b.HasOne("Profiles.DAL.Entities.Specialization", "Specialization")
                         .WithMany("StaffSpecializations")
                         .HasForeignKey("SpecializationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Profiles.Domain.Entities.MedicalStaff", "MedicalStaff")
+                    b.HasOne("Profiles.DAL.Entities.MedicalStaff", "MedicalStaff")
                         .WithMany("StaffSpecializations")
                         .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -219,19 +209,12 @@ namespace Profiles.DAL.Migrations
                     b.Navigation("Specialization");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.MedicalStaff", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.MedicalStaff", b =>
                 {
                     b.Navigation("StaffSpecializations");
                 });
 
-            modelBuilder.Entity("Profiles.Domain.Entities.Person", b =>
-                {
-                    b.Navigation("PatientProfile");
-
-                    b.Navigation("StaffProfile");
-                });
-
-            modelBuilder.Entity("Profiles.Domain.Entities.Specialization", b =>
+            modelBuilder.Entity("Profiles.DAL.Entities.Specialization", b =>
                 {
                     b.Navigation("StaffSpecializations");
                 });
