@@ -1,4 +1,8 @@
+using Profiles.DAL;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDataAccess(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddAuthorization();
@@ -12,10 +16,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.ApplyMigrationsAsync();
 }
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();        
+app.UseAuthorization();
 
 app.Run();
