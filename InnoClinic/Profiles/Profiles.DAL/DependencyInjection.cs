@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Profiles.DAL.Data;
+using Profiles.DAL.Interfaces;
+using Profiles.DAL.Repositories;
 using Profiles.Domain.Constants;
 
 namespace Profiles.DAL;
@@ -18,6 +20,10 @@ public static class DependencyInjection
 
             services.AddDbContext<ProfilesDbContext>(options =>
                 options.UseNpgsql(connectionString));
+
+            services.AddScoped<IPatientRepository, PatientRepository>();
+            services.AddScoped<IMedicalStaffRepository, MedicalStaffRepository>();
+            services.AddScoped<ISpecializationRepository, SpecializationRepository>();
 
             return services;
         }
