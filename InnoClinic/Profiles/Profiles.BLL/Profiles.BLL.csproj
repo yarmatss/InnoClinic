@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Mapster" Version="10.0.6" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Profiles.DAL\Profiles.DAL.csproj" />
   </ItemGroup>
 

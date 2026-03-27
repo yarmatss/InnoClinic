@@ -1,8 +1,9 @@
+using Profiles.BLL;
 using Profiles.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDataAccess(builder.Configuration);
+builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddAuthorization();
