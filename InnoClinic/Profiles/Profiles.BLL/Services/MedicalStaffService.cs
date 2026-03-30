@@ -1,10 +1,10 @@
 ﻿using Mapster;
+using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Common;
-using Profiles.Domain.Errors;
 
 namespace Profiles.BLL.Services;
 
@@ -26,8 +26,9 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
     public async Task<Result<IReadOnlyList<MedicalStaffModel>>> GetAllActiveAsync(
         CancellationToken cancellationToken)
     {
-        var activeEntities = await staffRepository.
-            GetByConditionAsync(s => s.IsActive, cancellationToken);
+        var activeEntities = await staffRepository.GetByConditionAsync(
+            s => s.IsActive,
+            cancellationToken);
         
         return Result.Success(activeEntities.Adapt<IReadOnlyList<MedicalStaffModel>>());
     }

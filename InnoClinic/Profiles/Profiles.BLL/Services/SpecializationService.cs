@@ -1,10 +1,10 @@
 ﻿using Mapster;
+using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Common;
-using Profiles.Domain.Errors;
 
 namespace Profiles.BLL.Services;
 

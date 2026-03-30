@@ -1,6 +1,4 @@
-﻿using Profiles.Domain.Common;
-
-namespace Profiles.Domain.Errors;
+﻿namespace Profiles.Domain.Common;
 
 public abstract class DomainErrors
 {
