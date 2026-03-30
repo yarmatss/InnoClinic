@@ -5,5 +5,6 @@ public enum StaffType
     None = 0,
     Doctor = 1,
     Nurse = 2,
-    Administrator = 3
+    Administrator = 3,
+    Receptionist = 4
 }
