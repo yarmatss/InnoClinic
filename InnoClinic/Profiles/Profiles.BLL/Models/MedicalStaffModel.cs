@@ -5,7 +5,7 @@ namespace Profiles.BLL.Models;
 public class MedicalStaffModel : PersonModel
 {
     public StaffType StaffType { get; set; }
-    public string LicenseNumber { get; set; } = null!;
+    public required string LicenseNumber { get; set; }
     public DateTime HireDate { get; set; }
     public bool IsActive { get; set; } = true;
 

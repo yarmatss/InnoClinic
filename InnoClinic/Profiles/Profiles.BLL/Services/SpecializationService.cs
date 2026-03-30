@@ -37,9 +37,11 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         SpecializationModel model,
         CancellationToken cancellationToken)
     {
-        var existingEntity = await specializationRepository.GetByIdAsync(id,
-                                                                         cancellationToken,
-                                                                         trackChanges: true);
+        var existingEntity = await specializationRepository.GetByIdAsync(
+            id,
+            cancellationToken,
+            trackChanges: true);
+
         if (existingEntity is null)
             return SpecializationErrors.NotFound;
 

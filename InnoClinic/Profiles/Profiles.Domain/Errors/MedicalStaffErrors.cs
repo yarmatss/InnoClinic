@@ -2,8 +2,7 @@
 
 namespace Profiles.Domain.Errors;
 
-public static class MedicalStaffErrors
+public class MedicalStaffErrors : DomainErrors
 {
-    public static readonly Error NotFound = new(
-        "MedicalStaff.NotFound", "The requested medical staff member was not found.");
+    public static readonly Error NotFound = CreateNotFound("MedicalStaff");
 }

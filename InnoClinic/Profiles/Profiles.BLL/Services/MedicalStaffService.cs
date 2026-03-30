@@ -37,9 +37,11 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         MedicalStaffModel model, 
         CancellationToken cancellationToken)
     {
-        var existingEntity = await staffRepository.GetByIdAsync(id,
-                                                                cancellationToken,
-                                                                trackChanges: true);
+        var existingEntity = await staffRepository.GetByIdAsync(
+            id,
+            cancellationToken,
+            trackChanges: true);
+
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
@@ -53,9 +55,11 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
 
     public async Task<Result> DeactivateAsync(Guid id, CancellationToken cancellationToken)
     {
-        var existingEntity = await staffRepository.GetByIdAsync(id,
-                                                                cancellationToken,
-                                                                trackChanges: true);
+        var existingEntity = await staffRepository.GetByIdAsync(
+            id,
+            cancellationToken,
+            trackChanges: true);
+
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
@@ -72,9 +76,11 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         IReadOnlyList<StaffSpecializationModel> assignments,
         CancellationToken cancellationToken)
     {
-        var existingEntity = await staffRepository.GetByIdAsync(staffId,
-                                                                cancellationToken,
-                                                                trackChanges: true);
+        var existingEntity = await staffRepository.GetByIdAsync(
+            staffId,
+            cancellationToken,
+            trackChanges: true);
+
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 

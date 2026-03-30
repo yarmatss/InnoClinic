@@ -2,8 +2,7 @@
 
 namespace Profiles.Domain.Errors;
 
-public static class SpecializationErrors
+public class SpecializationErrors : DomainErrors
 {
-    public static readonly Error NotFound = new(
-        "Specialization.NotFound", "The requested specialization was not found.");
+    public static readonly Error NotFound = CreateNotFound("Specialization");
 }

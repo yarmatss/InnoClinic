@@ -2,6 +2,6 @@
 
 public class SpecializationModel : BaseModel
 {
-    public string Name { get; set; } = null!;
+    public required string Name { get; set; }
     public string? Code { get; set; }
 }

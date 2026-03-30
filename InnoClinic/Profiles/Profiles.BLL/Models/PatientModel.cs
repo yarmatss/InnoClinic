@@ -2,7 +2,7 @@
 
 public class PatientModel : PersonModel
 {
-    public string InsuranceNumber { get; set; } = null!;
+    public required string InsuranceNumber { get; set; }
     public string? EmergencyContact { get; set; }
 
     public Guid? PrimaryDoctorId { get; set; }
