@@ -14,13 +14,16 @@ public static class MedicalStaffEndpoints
         {
             var group = routes.MapGroup(ApiRoutes.MedicalStaff).WithTags("Medical Staff");
 
-            group.MapPost("/", CreateStaffAsync);
             group.MapGet("/{id:guid}", GetStaffByIdAsync).WithName("GetStaffById");
             group.MapGet("/active", GetAllActiveStaffAsync);
+
+            group.MapPost("/", CreateStaffAsync);
+
             group.MapPut("/{id:guid}", UpdateStaffAsync);
-            group.MapDelete("/{id:guid}", DeactivateStaffAsync);
             group.MapPut("/{id:guid}/specializations", AssignSpecializationsAsync);
 
+            group.MapDelete("/{id:guid}", DeactivateStaffAsync);
+            
             return group;
         }
     }

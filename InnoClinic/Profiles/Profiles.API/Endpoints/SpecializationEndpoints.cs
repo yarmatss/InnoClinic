@@ -14,8 +14,10 @@ public static class SpecializationEndpoints
         {
             var group = routes.MapGroup(ApiRoutes.Specializations).WithTags("Specializations");
 
-            group.MapPost("/", CreateSpecializationAsync);
             group.MapGet("/", GetAllSpecializationsAsync);
+
+            group.MapPost("/", CreateSpecializationAsync);
+            
             group.MapPut("/{id:guid}", UpdateSpecializationAsync);
 
             return group;

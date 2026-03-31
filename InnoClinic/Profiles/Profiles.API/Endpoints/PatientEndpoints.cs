@@ -14,9 +14,11 @@ public static class PatientEndpoints
         {
             var group = routes.MapGroup(ApiRoutes.Patients).WithTags("Patients");
 
-            group.MapPost("/", CreatePatientAsync);
             group.MapGet("/", GetAllPatientsAsync);
             group.MapGet("/{id:guid}", GetPatientByIdAsync);
+
+            group.MapPost("/", CreatePatientAsync);
+            
             group.MapPut("/{id:guid}", UpdatePatientAsync);
 
             return group;
