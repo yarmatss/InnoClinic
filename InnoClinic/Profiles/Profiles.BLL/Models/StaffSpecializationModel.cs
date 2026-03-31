@@ -6,5 +6,5 @@ public class StaffSpecializationModel
     public Guid SpecializationId { get; set; }
 
     public bool IsPrimary { get; set; }
-    public DateTime CertificationDate { get; set; }
+    public DateOnly CertificationDate { get; set; }
 }

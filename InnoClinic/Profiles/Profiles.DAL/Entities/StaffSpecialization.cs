@@ -9,5 +9,5 @@ public class StaffSpecialization
     public Specialization Specialization { get; set; } = null!;
 
     public bool IsPrimary { get; set; }
-    public DateTime CertificationDate { get; set; }
+    public DateOnly CertificationDate { get; set; }
 }

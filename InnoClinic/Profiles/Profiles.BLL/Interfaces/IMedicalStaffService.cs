@@ -9,6 +9,8 @@ public interface IMedicalStaffService
         MedicalStaffModel model, 
         CancellationToken cancellationToken);
 
+    Task<Result<MedicalStaffModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+
     Task<Result<IReadOnlyList<MedicalStaffModel>>> GetAllActiveAsync(CancellationToken cancellationToken);
     
     Task<Result<MedicalStaffModel>> UpdateAsync(

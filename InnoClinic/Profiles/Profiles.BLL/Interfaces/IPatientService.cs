@@ -9,6 +9,9 @@ public interface IPatientService
         PatientModel model, 
         CancellationToken cancellationToken);
 
+    Task<Result<IReadOnlyList<PatientModel>>> GetAllAsync(
+        CancellationToken cancellationToken);
+
     Task<Result<PatientModel>> GetByIdAsync(
         Guid id, 
         CancellationToken cancellationToken);

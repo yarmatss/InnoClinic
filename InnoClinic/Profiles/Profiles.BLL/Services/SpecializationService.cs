@@ -45,6 +45,7 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         if (existingEntity is null)
             return SpecializationErrors.NotFound;
 
+        model.Id = id;
         model.Adapt(existingEntity);
 
         specializationRepository.MarkUpdate(existingEntity);
