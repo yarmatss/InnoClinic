@@ -22,6 +22,16 @@ internal class PatientService(IPatientRepository patientRepository) : IPatientSe
         return entity.Adapt<PatientModel>();
     }
 
+    public async Task<Result<IReadOnlyList<PatientModel>>> GetAllAsync(
+        CancellationToken cancellationToken)
+    {
+        var entities = await patientRepository.GetAllAsync(cancellationToken);
+
+        var models = entities.Adapt<IReadOnlyList<PatientModel>>();
+
+        return Result.Success(models);
+    }
+
     public async Task<Result<PatientModel>> GetByIdAsync(
         Guid id, 
         CancellationToken cancellationToken)
@@ -43,6 +53,7 @@ internal class PatientService(IPatientRepository patientRepository) : IPatientSe
         if (existingEntity is null)
             return PatientErrors.NotFound;
 
+        model.Id = id;
         model.Adapt(existingEntity);
 
         patientRepository.MarkUpdate(existingEntity);

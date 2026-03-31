@@ -1,5 +1,7 @@
+using Profiles.API.Endpoints;
 using Profiles.BLL;
 using Profiles.DAL;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,11 +19,16 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
     await app.ApplyMigrationsAsync();
 }
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.MapPatientEndpoints();
+app.MapMedicalStaffEndpoints();
+app.MapSpecializationEndpoints();
 
 app.Run();

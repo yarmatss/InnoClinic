@@ -23,6 +23,21 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         return entity.Adapt<MedicalStaffModel>();
     }
 
+    public async Task<Result<MedicalStaffModel>> GetByIdAsync(
+        Guid id, 
+        CancellationToken cancellationToken)
+    {
+        var existingEntity = await staffRepository.GetByIdAsync(
+            id,
+            cancellationToken,
+            trackChanges: false);
+
+        if (existingEntity is null)
+            return MedicalStaffErrors.NotFound;
+
+        return existingEntity.Adapt<MedicalStaffModel>();
+    }
+
     public async Task<Result<IReadOnlyList<MedicalStaffModel>>> GetAllActiveAsync(
         CancellationToken cancellationToken)
     {
@@ -46,6 +61,7 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
+        model.Id = id;
         model.Adapt(existingEntity);
 
         staffRepository.MarkUpdate(existingEntity);
@@ -85,9 +101,15 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
-        existingEntity.StaffSpecializations = assignments.Adapt<List<StaffSpecialization>>();
+        existingEntity.StaffSpecializations.Clear();
+        await staffRepository.SaveChangesAsync(cancellationToken);
 
-        staffRepository.MarkUpdate(existingEntity);
+        var newSpecializations = assignments.Adapt<List<StaffSpecialization>>();
+        foreach (var spec in newSpecializations)
+        {
+            existingEntity.StaffSpecializations.Add(spec);
+        }
+
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
