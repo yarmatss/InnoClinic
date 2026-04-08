@@ -2,10 +2,14 @@
 
 using Microsoft.Extensions.Logging;
 
+/// <summary>
+/// 1000-1999: Request logging;
+/// 5000-5999: Critical exceptions
+/// </summary>
 public static partial class LoggerExtensions
 {
     [LoggerMessage(
-        EventId = 1,
+        EventId = 1000,
         Level = LogLevel.Information,
         Message = "Request {Method} {Path} started | TraceId: {TraceId}")]
     public static partial void LogRequestStarted(
@@ -15,7 +19,7 @@ public static partial class LoggerExtensions
         string traceId);
 
     [LoggerMessage(
-        EventId = 2,
+        EventId = 1001,
         Level = LogLevel.Information,
         Message = "Request {Method} {Path} finished with status {StatusCode} in {ElapsedMilliseconds}ms | TraceId: {TraceId}")]
     public static partial void LogRequestFinished(
@@ -27,7 +31,7 @@ public static partial class LoggerExtensions
         string traceId);
 
     [LoggerMessage(
-        EventId = 3,
+        EventId = 5000,
         Level = LogLevel.Error,
         Message = "Unhandled exception occurred while processing {Method} {Path}. TraceId: {TraceId}")]
     public static partial void LogCriticalException(
