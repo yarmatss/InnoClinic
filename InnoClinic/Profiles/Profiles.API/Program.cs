@@ -1,4 +1,5 @@
 using Profiles.API.Endpoints;
+using Profiles.API.Middlewares;
 using Profiles.BLL;
 using Profiles.DAL;
 using Scalar.AspNetCore;
@@ -24,6 +25,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseAuthorization();
 
