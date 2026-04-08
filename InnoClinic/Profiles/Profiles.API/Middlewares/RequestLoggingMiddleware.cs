@@ -3,12 +3,21 @@ using System.Diagnostics;
 
 namespace Profiles.API.Middlewares;
 
-public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
+internal sealed class RequestLoggingMiddleware(
+    RequestDelegate next,
+    ILogger<RequestLoggingMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        logger.LogRequestStarted(context.Request.Method, context.Request.Path);
+        var traceId = Activity.Current?.Id ?? context.TraceIdentifier;
+
+        logger.LogRequestStarted(
+            context.Request.Method,
+            context.Request.Path,
+            traceId);
+
         long startTimestamp = Stopwatch.GetTimestamp();
+
         await next(context);
 
         TimeSpan elapsed = Stopwatch.GetElapsedTime(startTimestamp);
@@ -17,6 +26,7 @@ public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggi
             context.Request.Method,
             context.Request.Path,
             context.Response.StatusCode,
-            elapsed.TotalMilliseconds);
+            elapsed.TotalMilliseconds,
+            traceId);
     }
 }
