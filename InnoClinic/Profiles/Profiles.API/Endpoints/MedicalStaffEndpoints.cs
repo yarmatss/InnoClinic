@@ -15,8 +15,8 @@ public static class MedicalStaffEndpoints
         public RouteGroupBuilder MapMedicalStaffEndpoints()
         {
             var group = routes.MapGroup(ApiRoutes.MedicalStaff)
-                              .WithTags("Medical Staff")
-                              .AddEndpointFilter<ResultFilter>();
+                .WithTags("Medical Staff")
+                .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/{id:guid}", GetStaffByIdAsync).WithName("GetStaffById");
             group.MapGet("/active", GetAllActiveStaffAsync);

@@ -15,8 +15,8 @@ public static class SpecializationEndpoints
         public RouteGroupBuilder MapSpecializationEndpoints()
         {
             var group = routes.MapGroup(ApiRoutes.Specializations)
-                              .WithTags("Specializations")
-                              .AddEndpointFilter<ResultFilter>();
+                .WithTags("Specializations")
+                .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/", GetAllSpecializationsAsync);
 

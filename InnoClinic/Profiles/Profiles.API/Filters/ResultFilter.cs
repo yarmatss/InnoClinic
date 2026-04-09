@@ -14,7 +14,11 @@ public class ResultFilter : IEndpointFilter
         {
             if (result.IsFailure)
             {
-                return Results.BadRequest(result.Error);
+                return result.Error.Type switch
+                {
+                    ErrorType.NotFound => Results.NotFound(result.Error),
+                    _ => Results.BadRequest(result.Error)
+                };
             }
 
             if (result is IValueResult valueResult)
