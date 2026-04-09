@@ -1,8 +1,10 @@
 ﻿using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
+using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
+using Profiles.Domain.Common;
 
 namespace Profiles.API.Endpoints;
 
@@ -12,7 +14,9 @@ public static class MedicalStaffEndpoints
     {
         public RouteGroupBuilder MapMedicalStaffEndpoints()
         {
-            var group = routes.MapGroup(ApiRoutes.MedicalStaff).WithTags("Medical Staff");
+            var group = routes.MapGroup(ApiRoutes.MedicalStaff)
+                              .WithTags("Medical Staff")
+                              .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/{id:guid}", GetStaffByIdAsync).WithName("GetStaffById");
             group.MapGet("/active", GetAllActiveStaffAsync);
@@ -43,33 +47,26 @@ public static class MedicalStaffEndpoints
         return TypedResults.CreatedAtRoute(responseDto, "GetStaffById", new { id = responseDto.Id });
     }
 
-    private static async Task<IResult> GetStaffByIdAsync(
+    private static async Task<Result<MedicalStaffResponseDto>> GetStaffByIdAsync(
         Guid id,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
         var result = await staffService.GetByIdAsync(id, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.Ok(result.Value.Adapt<MedicalStaffResponseDto>());
+        return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 
-    private static async Task<IResult> GetAllActiveStaffAsync(
+    private static async Task<Result<IReadOnlyList<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
         var result = await staffService.GetAllActiveAsync(ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        var responseDtos = result.Value.Adapt<IReadOnlyList<MedicalStaffResponseDto>>();
-        return TypedResults.Ok(responseDtos);
+        return result.Map(list => list.Adapt<IReadOnlyList<MedicalStaffResponseDto>>());
     }
 
-    private static async Task<IResult> UpdateStaffAsync(
+    private static async Task<Result<MedicalStaffResponseDto>> UpdateStaffAsync(
         Guid id,
         UpdateMedicalStaffDto dto,
         IMedicalStaffService staffService,
@@ -78,26 +75,20 @@ public static class MedicalStaffEndpoints
         var model = dto.Adapt<MedicalStaffModel>();
         var result = await staffService.UpdateAsync(id, model, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.Ok(result.Value.Adapt<MedicalStaffResponseDto>());
+        return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 
-    private static async Task<IResult> DeactivateStaffAsync(
+    private static async Task<Result> DeactivateStaffAsync(
         Guid id,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
         var result = await staffService.DeactivateAsync(id, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.NoContent();
+        return result;
     }
 
-    private static async Task<IResult> AssignSpecializationsAsync(
+    private static async Task<Result> AssignSpecializationsAsync(
         Guid id,
         IReadOnlyList<StaffSpecializationDto> dtos,
         IMedicalStaffService staffService,
@@ -108,9 +99,6 @@ public static class MedicalStaffEndpoints
 
         var result = await staffService.AssignSpecializationsAsync(id, assignments, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.NoContent();
+        return result;
     }
 }

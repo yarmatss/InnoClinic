@@ -1,8 +1,10 @@
 ﻿using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
+using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
+using Profiles.Domain.Common;
 
 namespace Profiles.API.Endpoints;
 
@@ -12,7 +14,9 @@ public static class PatientEndpoints
     {
         public RouteGroupBuilder MapPatientEndpoints()
         {
-            var group = routes.MapGroup(ApiRoutes.Patients).WithTags("Patients");
+            var group = routes.MapGroup(ApiRoutes.Patients)
+                              .WithTags("Patients")
+                              .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/", GetAllPatientsAsync);
             group.MapGet("/{id:guid}", GetPatientByIdAsync);
@@ -40,33 +44,26 @@ public static class PatientEndpoints
         return TypedResults.Created($"{ApiRoutes.Patients}/{responseDto.Id}", responseDto);
     }
 
-    private static async Task<IResult> GetAllPatientsAsync(
+    private static async Task<Result<IReadOnlyList<PatientResponseDto>>> GetAllPatientsAsync(
         IPatientService patientService,
         CancellationToken ct = default)
     {
         var result = await patientService.GetAllAsync(ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        var responseDtos = result.Value.Adapt<IReadOnlyList<PatientResponseDto>>();
-        return TypedResults.Ok(responseDtos);
+        return result.Map(list => list.Adapt<IReadOnlyList<PatientResponseDto>>());
     }
 
-    private static async Task<IResult> GetPatientByIdAsync(
+    private static async Task<Result<PatientResponseDto>> GetPatientByIdAsync(
         Guid id,
         IPatientService patientService,
         CancellationToken ct = default)
     {
         var result = await patientService.GetByIdAsync(id, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.Ok(result.Value.Adapt<PatientResponseDto>());
+        return result.Map(p => p.Adapt<PatientResponseDto>());
     }
 
-    private static async Task<IResult> UpdatePatientAsync(
+    private static async Task<Result<PatientResponseDto>> UpdatePatientAsync(
         Guid id,
         UpdatePatientDto dto,
         IPatientService patientService,
@@ -75,9 +72,6 @@ public static class PatientEndpoints
         var model = dto.Adapt<PatientModel>();
         var result = await patientService.UpdateAsync(id, model, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.Ok(result.Value.Adapt<PatientResponseDto>());
+        return result.Map(p => p.Adapt<PatientResponseDto>());
     }
 }
