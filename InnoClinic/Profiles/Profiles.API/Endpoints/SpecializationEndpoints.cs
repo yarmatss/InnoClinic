@@ -1,8 +1,10 @@
 ﻿using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Specialization;
+using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
+using Profiles.Domain.Common;
 
 namespace Profiles.API.Endpoints;
 
@@ -12,7 +14,9 @@ public static class SpecializationEndpoints
     {
         public RouteGroupBuilder MapSpecializationEndpoints()
         {
-            var group = routes.MapGroup(ApiRoutes.Specializations).WithTags("Specializations");
+            var group = routes.MapGroup(ApiRoutes.Specializations)
+                .WithTags("Specializations")
+                .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/", GetAllSpecializationsAsync);
 
@@ -39,20 +43,16 @@ public static class SpecializationEndpoints
         return TypedResults.Created($"{ApiRoutes.Specializations}/{responseDto.Id}", responseDto);
     }
 
-    private static async Task<IResult> GetAllSpecializationsAsync(
+    private static async Task<Result<IReadOnlyList<SpecializationResponseDto>>> GetAllSpecializationsAsync(
         ISpecializationService specializationService,
         CancellationToken ct = default)
     {
         var result = await specializationService.GetAllAsync(ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        var responseDtos = result.Value.Adapt<IReadOnlyList<SpecializationResponseDto>>();
-        return TypedResults.Ok(responseDtos);
+        return result.Map(list => list.Adapt<IReadOnlyList<SpecializationResponseDto>>());
     }
 
-    private static async Task<IResult> UpdateSpecializationAsync(
+    private static async Task<Result<SpecializationResponseDto>> UpdateSpecializationAsync(
         Guid id,
         UpdateSpecializationDto dto,
         ISpecializationService specializationService,
@@ -61,9 +61,6 @@ public static class SpecializationEndpoints
         var model = dto.Adapt<SpecializationModel>();
         var result = await specializationService.UpdateAsync(id, model, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        return TypedResults.Ok(result.Value.Adapt<SpecializationResponseDto>());
+        return result.Map(m => m.Adapt<SpecializationResponseDto>());
     }
 }

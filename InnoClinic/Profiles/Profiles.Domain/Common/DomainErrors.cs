@@ -4,5 +4,6 @@ public abstract class DomainErrors
 {
     protected static Error CreateNotFound(string entityName) => new(
         $"{entityName}.NotFound",
-        $"The requested {entityName.ToLower()} was not found.");
+        $"The requested {entityName.ToLower()} was not found.",
+        ErrorType.NotFound);
 }

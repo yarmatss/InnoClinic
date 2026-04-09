@@ -1,5 +1,10 @@
 ﻿namespace Profiles.Domain.Common;
 
+public interface IValueResult
+{
+    object? Value { get; }
+}
+
 public class Result
 {
     protected internal Result(bool isSuccess, Error error)
@@ -25,7 +30,7 @@ public class Result
     public static Result<T> Failure<T>(Error error) => new(default, false, error);
 }
 
-public class Result<T> : Result
+public class Result<T> : Result, IValueResult
 {
     private readonly T? _value;
 
@@ -38,6 +43,13 @@ public class Result<T> : Result
     public T Value => IsSuccess
         ? _value!
         : throw new InvalidOperationException("The value of a failure result cannot be accessed.");
+
+    object? IValueResult.Value => Value;
+
+    public Result<TOut> Map<TOut>(Func<T, TOut> mapper)
+    {
+        return IsSuccess ? mapper(Value) : Error;
+    }
 
     public static implicit operator Result<T>(T value) => Success(value);
     public static implicit operator Result<T>(Error error) => Failure<T>(error);
