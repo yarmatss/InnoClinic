@@ -1,4 +1,5 @@
 ﻿using Profiles.Domain.Common;
+using Profiles.Domain.Constants;
 
 namespace Profiles.API.Filters;
 
@@ -10,25 +11,65 @@ public class ResultFilter : IEndpointFilter
     {
         var response = await next(context);
 
-        if (response is Result result)
+        if (response is not Result result)
         {
-            if (result.IsFailure)
-            {
-                return result.Error.Type switch
+            return response;
+        }
+
+        if (result.IsFailure)
+        {
+            return HandleFailure(context, result);
+        }
+
+        return HandleSuccess(context, result);
+    }
+
+    private static IResult HandleFailure(EndpointFilterInvocationContext context, Result result)
+    {
+        var statusCode = result.Error.Type switch
+        {
+            ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Validation => StatusCodes.Status400BadRequest,
+            _ => StatusCodes.Status400BadRequest
+        };
+
+        if (result.Error is ValidationError validationError)
+        {
+            return Results.Problem(
+                statusCode: statusCode,
+                title: ValidationConstants.ValidationFailedTitle,
+                type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                instance: context.HttpContext.Request.Path,
+                extensions: new Dictionary<string, object?>
                 {
-                    ErrorType.NotFound => Results.NotFound(result.Error),
-                    _ => Results.BadRequest(result.Error)
-                };
-            }
+                    { "errors", validationError.Errors },
+                    { "code", result.Error.Code }
+                }
+            );
+        }
 
-            if (result is IValueResult valueResult)
-            {
-                return Results.Ok(valueResult.Value);
-            }
+        return Results.Problem(
+            statusCode: statusCode,
+            title: "An error occurred while processing the request.",
+            detail: result.Error.Description,
+            extensions: new Dictionary<string, object?> { { "code", result.Error.Code } }
+        );
+    }
 
+    private static IResult HandleSuccess(EndpointFilterInvocationContext context, Result result)
+    {
+        if (result is not IValueResult valueResult)
+        {
             return Results.NoContent();
         }
 
-        return response;
+        if (result.IsCreated)
+        {
+            return !string.IsNullOrEmpty(result.Location)
+                ? Results.Created(result.Location, valueResult.Value)
+                : Results.Created(context.HttpContext.Request.Path, valueResult.Value);
+        }
+
+        return Results.Ok(valueResult.Value);
     }
 }

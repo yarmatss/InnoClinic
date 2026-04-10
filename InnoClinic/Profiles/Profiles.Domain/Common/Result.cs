@@ -28,6 +28,15 @@ public class Result
 
     public static Result<T> Success<T>(T value) => new(value, true, Error.None);
     public static Result<T> Failure<T>(Error error) => new(default, false, error);
+
+    public static Result<T> Created<T>(T value, string location) => new(value, true, Error.None)
+    {
+        IsCreated = true,
+        Location = location
+    };
+
+    public bool IsCreated { get; protected set; }
+    public string? Location { get; protected set; }
 }
 
 public class Result<T> : Result, IValueResult
@@ -47,6 +56,11 @@ public class Result<T> : Result, IValueResult
     object? IValueResult.Value => Value;
 
     public Result<TOut> Map<TOut>(Func<T, TOut> mapper)
+    {
+        return IsSuccess ? mapper(Value) : Error;
+    }
+
+    public Result<TOut> Map<TOut>(Func<T, Result<TOut>> mapper)
     {
         return IsSuccess ? mapper(Value) : Error;
     }

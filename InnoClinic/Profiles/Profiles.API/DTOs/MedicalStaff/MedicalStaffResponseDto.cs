@@ -8,7 +8,7 @@ public record MedicalStaffResponseDto(
     string LastName,
     string? MiddleName,
     DateOnly BirthDate,
-    string Gender,
+    Gender Gender,
     string NationalId,
     string? ContactPhone,
     StaffType StaffType,

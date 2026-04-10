@@ -1,4 +1,6 @@
-﻿namespace Profiles.DAL.Entities;
+﻿using Profiles.Domain.Enums;
+
+namespace Profiles.DAL.Entities;
 
 public abstract class Person : BaseEntity
 {
@@ -6,7 +8,7 @@ public abstract class Person : BaseEntity
     public string LastName { get; set; } = null!;
     public string? MiddleName { get; set; }
     public DateOnly BirthDate { get; set; }
-    public string Gender { get; set; } = null!;
-    public string NationalId { get; set; } = null!; // Passport / PESEL
+    public Gender Gender { get; set; }
+    public string NationalId { get; set; } = null!;
     public string? ContactPhone { get; set; }
 }
