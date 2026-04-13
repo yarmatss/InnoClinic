@@ -8,12 +8,18 @@ using Profiles.Domain.Common;
 
 namespace Profiles.BLL.Services;
 
-internal class PatientService(IPatientRepository patientRepository) : IPatientService
+internal class PatientService(
+    IPatientRepository patientRepository,
+    IMedicalStaffRepository staffRepository) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
         CancellationToken cancellationToken)
     {
+        var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
+        if (validationError is not null)
+            return validationError;
+
         var entity = model.Adapt<Patient>();
 
         patientRepository.MarkAdd(entity);
@@ -53,6 +59,10 @@ internal class PatientService(IPatientRepository patientRepository) : IPatientSe
         if (existingEntity is null)
             return PatientErrors.NotFound;
 
+        var validationError = await ValidateUniquenessAsync(model, id, cancellationToken);
+        if (validationError is not null)
+            return validationError;
+
         model.Id = id;
         model.Adapt(existingEntity);
 
@@ -60,5 +70,34 @@ internal class PatientService(IPatientRepository patientRepository) : IPatientSe
         await patientRepository.SaveChangesAsync(cancellationToken);
 
         return existingEntity.Adapt<PatientModel>();
+    }
+
+    private async Task<Error?> ValidateUniquenessAsync(
+        PatientModel model,
+        Guid? currentId,
+        CancellationToken cancellationToken)
+    {
+        var existingInsurance = await patientRepository.GetByConditionAsync(
+            p => p.InsuranceNumber == model.InsuranceNumber && (!currentId.HasValue || p.Id != currentId.Value), 
+            cancellationToken);
+
+        if (existingInsurance.Any())
+            return PatientErrors.DuplicateInsuranceNumber;
+
+        var existingNationalId = await patientRepository.GetByConditionAsync(
+            p => p.NationalId == model.NationalId && (!currentId.HasValue || p.Id != currentId.Value), 
+            cancellationToken);
+
+        if (existingNationalId.Any())
+            return PatientErrors.DuplicateNationalId;
+
+        if (model.PrimaryDoctorId.HasValue)
+        {
+            var doctor = await staffRepository.GetByIdAsync(model.PrimaryDoctorId.Value, cancellationToken);
+            if (doctor is null || !doctor.IsActive)
+                return PatientErrors.PrimaryDoctorNotFound;
+        }
+
+        return null;
     }
 }
