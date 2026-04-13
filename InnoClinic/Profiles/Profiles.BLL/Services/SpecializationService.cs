@@ -14,6 +14,10 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         SpecializationModel model,
         CancellationToken cancellationToken)
     {
+        var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
+        if (validationError is not null)
+            return validationError;
+
         var entity = model.Adapt<Specialization>();
 
         specializationRepository.MarkAdd(entity);
@@ -45,6 +49,10 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         if (existingEntity is null)
             return SpecializationErrors.NotFound;
 
+        var validationError = await ValidateUniquenessAsync(model, id, cancellationToken);
+        if (validationError is not null)
+            return validationError;
+
         model.Id = id;
         model.Adapt(existingEntity);
 
@@ -52,5 +60,20 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         await specializationRepository.SaveChangesAsync(cancellationToken);
 
         return existingEntity.Adapt<SpecializationModel>();
+    }
+
+    private async Task<Error?> ValidateUniquenessAsync(
+        SpecializationModel model,
+        Guid? currentId,
+        CancellationToken cancellationToken)
+    {
+        var existingName = await specializationRepository.GetByConditionAsync(
+            s => s.Name == model.Name && (!currentId.HasValue || s.Id != currentId.Value), 
+            cancellationToken);
+
+        if (existingName.Any())
+            return SpecializationErrors.DuplicateName;
+
+        return null;
     }
 }
