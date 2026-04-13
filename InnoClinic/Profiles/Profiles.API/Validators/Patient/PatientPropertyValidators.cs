@@ -17,7 +17,6 @@ internal class EmergencyContactValidator : AbstractValidator<string?>
     public EmergencyContactValidator()
     {
         RuleFor(x => x)
-            .MaximumLength(100).WithMessage("Emergency contact cannot exceed 100 characters.")
-            .When(x => !string.IsNullOrWhiteSpace(x));
+            .MaximumLength(100).WithMessage("Emergency contact cannot exceed 100 characters.");
     }
 }

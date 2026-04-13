@@ -17,8 +17,7 @@ internal class SpecializationCodeValidator : AbstractValidator<string?>
     public SpecializationCodeValidator()
     {
         RuleFor(code => code)
-            .MaximumLength(50).WithMessage("Specialization code cannot exceed 50 characters.")
-            .When(code => !string.IsNullOrWhiteSpace(code));
+            .MaximumLength(50).WithMessage("Specialization code cannot exceed 50 characters.");
     }
 }
 

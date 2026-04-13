@@ -33,8 +33,7 @@ internal sealed class BadRequestExceptionHandler(
         {
             Status = StatusCodes.Status400BadRequest,
             Title = ValidationConstants.ValidationFailedTitle,
-            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-            Instance = httpContext.Request.Path
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
         };
 
         var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);

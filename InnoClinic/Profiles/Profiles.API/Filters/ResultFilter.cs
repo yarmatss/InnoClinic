@@ -39,7 +39,6 @@ public class ResultFilter : IEndpointFilter
                 statusCode: statusCode,
                 title: ValidationConstants.ValidationFailedTitle,
                 type: "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                instance: context.HttpContext.Request.Path,
                 extensions: new Dictionary<string, object?>
                 {
                     { "errors", validationError.Errors },

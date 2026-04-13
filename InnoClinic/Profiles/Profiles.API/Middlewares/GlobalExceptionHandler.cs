@@ -31,8 +31,7 @@ internal sealed class GlobalExceptionHandler(
             Status = statusCode,
             Title = "Internal Server Error",
             Detail = "An unexpected system fault occurred. Please try again later.",
-            Type = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1",
-            Instance = httpContext.Request.Path
+            Type = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1"
         };
 
         problemDetails.Extensions.Add("traceId", traceId);

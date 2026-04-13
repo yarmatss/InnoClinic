@@ -1,10 +1,10 @@
 using FluentValidation;
 using Profiles.API.Endpoints;
 using Profiles.API.Middlewares;
+using Profiles.API.Validators;
 using Profiles.BLL;
 using Profiles.DAL;
 using Scalar.AspNetCore;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,12 +16,7 @@ builder.Services.AddAuthorization();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-ValidatorOptions.Global.PropertyNameResolver = (type, member, expression) =>
-    member != null
-        ? JsonNamingPolicy.CamelCase.ConvertName(member.Name)
-        : null;
-
-ValidatorOptions.Global.DisplayNameResolver = ValidatorOptions.Global.PropertyNameResolver;
+builder.Services.ConfigureFluentValidation();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
