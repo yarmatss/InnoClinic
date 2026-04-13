@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// 1000-1999: Request logging;
+/// 4000-4999: Warning and handled exceptions;
 /// 5000-5999: Critical exceptions
 /// </summary>
 public static partial class LoggerExtensions
@@ -29,6 +30,16 @@ public static partial class LoggerExtensions
         int statusCode,
         double elapsedMilliseconds,
         string traceId);
+
+    [LoggerMessage(
+        EventId = 4000,
+        Level = LogLevel.Warning,
+        Message = "Bad request payload received at {Path}. TraceId: {TraceId}. Exception: {Message}")]
+    public static partial void LogBadRequestPayload(
+        this ILogger logger,
+        string path,
+        string traceId,
+        string message);
 
     [LoggerMessage(
         EventId = 5000,

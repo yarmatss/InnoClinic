@@ -1,4 +1,6 @@
-﻿namespace Profiles.API.DTOs.Patient;
+﻿using Profiles.Domain.Enums;
+
+namespace Profiles.API.DTOs.Patient;
 
 public record PatientResponseDto(
     Guid Id,
@@ -6,7 +8,7 @@ public record PatientResponseDto(
     string LastName,
     string? MiddleName,
     DateOnly BirthDate,
-    string Gender,
+    Gender Gender,
     string NationalId,
     string? ContactPhone,
     string InsuranceNumber,

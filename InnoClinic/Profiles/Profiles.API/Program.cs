@@ -1,5 +1,7 @@
+using FluentValidation;
 using Profiles.API.Endpoints;
 using Profiles.API.Middlewares;
+using Profiles.API.Validators;
 using Profiles.BLL;
 using Profiles.DAL;
 using Scalar.AspNetCore;
@@ -14,7 +16,12 @@ builder.Services.AddAuthorization();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.ConfigureFluentValidation();
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();

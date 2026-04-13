@@ -1,13 +1,16 @@
-﻿namespace Profiles.API.DTOs.Patient;
+﻿using Profiles.API.DTOs.Common;
+using Profiles.Domain.Enums;
+
+namespace Profiles.API.DTOs.Patient;
 
 public record UpdatePatientDto(
     string FirstName,
     string LastName,
     string? MiddleName,
     DateOnly BirthDate,
-    string Gender,
+    Gender Gender,
     string NationalId,
     string? ContactPhone,
     string InsuranceNumber,
     string? EmergencyContact,
-    Guid? PrimaryDoctorId);
+    Guid? PrimaryDoctorId) : IPersonDto;

@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using FluentValidation;
+using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
 using Profiles.API.Filters;
@@ -32,19 +33,26 @@ public static class MedicalStaffEndpoints
         }
     }
 
-    private static async Task<IResult> CreateStaffAsync(
+    private static async Task<Result<MedicalStaffResponseDto>> CreateStaffAsync(
         CreateMedicalStaffDto dto,
+        IValidator<CreateMedicalStaffDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
+        var validationResult = await validator.ValidateAsync(dto, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
+
         var model = dto.Adapt<MedicalStaffModel>();
         var result = await staffService.CreateAsync(model, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        var responseDto = result.Value.Adapt<MedicalStaffResponseDto>();
-        return TypedResults.CreatedAtRoute(responseDto, "GetStaffById", new { id = responseDto.Id });
+        return result.Map(s => 
+        {
+            var responseDto = s.Adapt<MedicalStaffResponseDto>();
+            return Result.Created(responseDto, $"{ApiRoutes.MedicalStaff}/{responseDto.Id}");
+        });
     }
 
     private static async Task<Result<MedicalStaffResponseDto>> GetStaffByIdAsync(
@@ -69,9 +77,16 @@ public static class MedicalStaffEndpoints
     private static async Task<Result<MedicalStaffResponseDto>> UpdateStaffAsync(
         Guid id,
         UpdateMedicalStaffDto dto,
+        IValidator<UpdateMedicalStaffDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
+        var validationResult = await validator.ValidateAsync(dto, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
+
         var model = dto.Adapt<MedicalStaffModel>();
         var result = await staffService.UpdateAsync(id, model, ct);
 
@@ -90,15 +105,18 @@ public static class MedicalStaffEndpoints
 
     private static async Task<Result> AssignSpecializationsAsync(
         Guid id,
-        IReadOnlyList<StaffSpecializationDto> dtos,
+        AssignSpecializationsDto request,
+        IValidator<AssignSpecializationsDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        var assignments = dtos.Adapt<List<StaffSpecializationModel>>();
+        var validationResult = await validator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
+            return new ValidationError(validationResult.ToDictionary());
+
+        var assignments = request.Specializations.Adapt<List<StaffSpecializationModel>>();
         assignments.ForEach(a => a.StaffId = id);
 
-        var result = await staffService.AssignSpecializationsAsync(id, assignments, ct);
-
-        return result;
+        return await staffService.AssignSpecializationsAsync(id, assignments, ct);
     }
 }

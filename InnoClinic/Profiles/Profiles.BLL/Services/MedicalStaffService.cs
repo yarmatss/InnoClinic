@@ -8,12 +8,18 @@ using Profiles.Domain.Common;
 
 namespace Profiles.BLL.Services;
 
-internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IMedicalStaffService
+internal class MedicalStaffService(
+    IMedicalStaffRepository staffRepository,
+    ISpecializationRepository specializationRepository) : IMedicalStaffService
 {
     public async Task<Result<MedicalStaffModel>> CreateAsync(
         MedicalStaffModel model, 
         CancellationToken cancellationToken)
     {
+        var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
+        if (validationError is not null)
+            return validationError;
+
         var entity = model.Adapt<MedicalStaff>();
         entity.IsActive = true;
 
@@ -61,6 +67,10 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
+        var validationError = await ValidateUniquenessAsync(model, id, cancellationToken);
+        if (validationError is not null)
+            return validationError;
+
         model.Id = id;
         model.Adapt(existingEntity);
 
@@ -101,6 +111,16 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
+        if (assignments.Any())
+        {
+            var requestedIds = assignments.Select(a => a.SpecializationId).ToList();
+            var existingSpecs = await specializationRepository.GetByConditionAsync(
+                s => requestedIds.Contains(s.Id), cancellationToken);
+
+            if (existingSpecs.Count != requestedIds.Count)
+                return MedicalStaffErrors.InvalidSpecialization;
+        }
+
         existingEntity.StaffSpecializations.Clear();
         await staffRepository.SaveChangesAsync(cancellationToken);
 
@@ -113,5 +133,34 @@ internal class MedicalStaffService(IMedicalStaffRepository staffRepository) : IM
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private async Task<Error?> ValidateUniquenessAsync(
+        MedicalStaffModel model,
+        Guid? currentId,
+        CancellationToken cancellationToken)
+    {
+        var existingLicense = await staffRepository.GetByConditionAsync(
+            s => s.LicenseNumber == model.LicenseNumber && (!currentId.HasValue || s.Id != currentId.Value), 
+            cancellationToken);
+
+        if (existingLicense.Any())
+            return MedicalStaffErrors.DuplicateLicenseNumber;
+
+        var existingNationalId = await staffRepository.GetByConditionAsync(
+            s => s.NationalId == model.NationalId && (!currentId.HasValue || s.Id != currentId.Value), 
+            cancellationToken);
+
+        if (existingNationalId.Any())
+            return MedicalStaffErrors.DuplicateNationalId;
+
+        if (model.SupervisorId.HasValue)
+        {
+            var supervisor = await staffRepository.GetByIdAsync(model.SupervisorId.Value, cancellationToken);
+            if (supervisor is null || !supervisor.IsActive)
+                return MedicalStaffErrors.SupervisorNotFound;
+        }
+
+        return null;
     }
 }

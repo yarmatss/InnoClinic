@@ -1,4 +1,6 @@
-﻿namespace Profiles.BLL.Models;
+﻿using Profiles.Domain.Enums;
+
+namespace Profiles.BLL.Models;
 
 public abstract class PersonModel : BaseModel
 {
@@ -6,7 +8,7 @@ public abstract class PersonModel : BaseModel
     public required string LastName { get; set; }
     public string? MiddleName { get; set; }
     public DateOnly BirthDate { get; set; }
-    public required string Gender { get; set; }
+    public Gender Gender { get; set; }
     public required string NationalId { get; set; }
     public string? ContactPhone { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using FluentValidation;
+using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
 using Profiles.API.Filters;
@@ -29,19 +30,26 @@ public static class PatientEndpoints
         }
     }
 
-    private static async Task<IResult> CreatePatientAsync(
+    private static async Task<Result<PatientResponseDto>> CreatePatientAsync(
         CreatePatientDto dto,
+        IValidator<CreatePatientDto> validator,
         IPatientService patientService,
         CancellationToken ct = default)
     {
+        var validationResult = await validator.ValidateAsync(dto, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
+
         var model = dto.Adapt<PatientModel>();
         var result = await patientService.CreateAsync(model, ct);
 
-        if (result.IsFailure)
-            return TypedResults.BadRequest(result.Error);
-
-        var responseDto = result.Value.Adapt<PatientResponseDto>();
-        return TypedResults.Created($"{ApiRoutes.Patients}/{responseDto.Id}", responseDto);
+        return result.Map(p => 
+        {
+            var responseDto = p.Adapt<PatientResponseDto>();
+            return Result.Created(responseDto, $"{ApiRoutes.Patients}/{responseDto.Id}");
+        });
     }
 
     private static async Task<Result<IReadOnlyList<PatientResponseDto>>> GetAllPatientsAsync(
@@ -66,9 +74,16 @@ public static class PatientEndpoints
     private static async Task<Result<PatientResponseDto>> UpdatePatientAsync(
         Guid id,
         UpdatePatientDto dto,
+        IValidator<UpdatePatientDto> validator,
         IPatientService patientService,
         CancellationToken ct = default)
     {
+        var validationResult = await validator.ValidateAsync(dto, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
+
         var model = dto.Adapt<PatientModel>();
         var result = await patientService.UpdateAsync(id, model, ct);
 
