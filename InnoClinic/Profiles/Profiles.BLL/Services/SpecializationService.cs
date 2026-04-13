@@ -26,14 +26,29 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         return entity.Adapt<SpecializationModel>();
     }
 
-    public async Task<Result<IReadOnlyList<SpecializationModel>>> GetAllAsync(
-        CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<SpecializationModel>>> GetPagedAsync(
+        SpecializationQueryModel query,
+        CancellationToken ct)
     {
-        var entities = await specializationRepository.GetAllAsync(cancellationToken);
+        var isDescending = query.SortOrder?.Equals("desc", StringComparison.OrdinalIgnoreCase) == true;
 
-        var models = entities.Adapt<IReadOnlyList<SpecializationModel>>();
+        var (entities, totalCount) = await specializationRepository.GetPagedAsync(
+            query.Name,
+            query.SortBy,
+            isDescending,
+            query.PageNumber,
+            query.PageSize,
+            ct);
 
-        return Result.Success(models);
+        var pagedResult = new PagedResponse<SpecializationModel>
+        {
+            Items = entities.Adapt<IReadOnlyList<SpecializationModel>>(),
+            TotalCount = totalCount,
+            PageNumber = query.PageNumber,
+            PageSize = query.PageSize
+        };
+
+        return pagedResult;
     }
 
     public async Task<Result<SpecializationModel>> UpdateAsync(

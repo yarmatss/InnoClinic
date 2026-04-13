@@ -13,5 +13,4 @@ public record UpdateMedicalStaffDto(
     string? ContactPhone,
     StaffType StaffType,
     string LicenseNumber,
-    bool IsActive,
     Guid? SupervisorId) : IPersonDto;

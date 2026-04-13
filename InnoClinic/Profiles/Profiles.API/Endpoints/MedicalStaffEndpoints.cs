@@ -65,13 +65,28 @@ public static class MedicalStaffEndpoints
         return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 
-    private static async Task<Result<IReadOnlyList<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
-        IMedicalStaffService staffService,
+    private static async Task<Result<PagedResponse<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
+        [AsParameters] MedicalStaffQueryParametersDto query,
+        IValidator<MedicalStaffQueryParametersDto> validator,
+        IMedicalStaffService medicalStaffService,
         CancellationToken ct = default)
     {
-        var result = await staffService.GetAllActiveAsync(ct);
+        var validationResult = await validator.ValidateAsync(query, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
 
-        return result.Map(list => list.Adapt<IReadOnlyList<MedicalStaffResponseDto>>());
+        var queryModel = query.Adapt<MedicalStaffQueryModel>();
+        var result = await medicalStaffService.GetPagedAsync(queryModel, ct);
+
+        return result.Map(pagedModel => new PagedResponse<MedicalStaffResponseDto>
+        {
+            Items = pagedModel.Items.Adapt<IReadOnlyList<MedicalStaffResponseDto>>(),
+            TotalCount = pagedModel.TotalCount,
+            PageNumber = pagedModel.PageNumber,
+            PageSize = pagedModel.PageSize
+        });
     }
 
     private static async Task<Result<MedicalStaffResponseDto>> UpdateStaffAsync(

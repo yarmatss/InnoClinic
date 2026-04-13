@@ -1,5 +1,6 @@
 using FluentValidation;
 using Profiles.API.Endpoints;
+using Profiles.API.Mapping;
 using Profiles.API.Middlewares;
 using Profiles.API.Validators;
 using Profiles.BLL;
@@ -7,6 +8,8 @@ using Profiles.DAL;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+MapsterConfig.Configure();
 
 builder.Services.AddBusinessLogicLayer(builder.Configuration);
 

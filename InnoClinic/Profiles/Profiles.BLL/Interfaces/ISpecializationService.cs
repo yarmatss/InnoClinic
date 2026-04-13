@@ -9,8 +9,9 @@ public interface ISpecializationService
         SpecializationModel model, 
         CancellationToken cancellationToken);
 
-    Task<Result<IReadOnlyList<SpecializationModel>>> GetAllAsync(
-        CancellationToken cancellationToken);
+    Task<Result<PagedResponse<SpecializationModel>>> GetPagedAsync(
+        SpecializationQueryModel query,
+        CancellationToken ct);
 
     Task<Result<SpecializationModel>> UpdateAsync(
         Guid id,

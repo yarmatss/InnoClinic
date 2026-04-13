@@ -9,16 +9,22 @@ public interface IMedicalStaffService
         MedicalStaffModel model, 
         CancellationToken cancellationToken);
 
-    Task<Result<MedicalStaffModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Result<MedicalStaffModel>> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken);
 
-    Task<Result<IReadOnlyList<MedicalStaffModel>>> GetAllActiveAsync(CancellationToken cancellationToken);
-    
+    Task<Result<PagedResponse<MedicalStaffModel>>> GetPagedAsync(
+        MedicalStaffQueryModel query,
+        CancellationToken cancellationToken);
+
     Task<Result<MedicalStaffModel>> UpdateAsync(
         Guid id,
         MedicalStaffModel model,
         CancellationToken cancellationToken);
     
-    Task<Result> DeactivateAsync(Guid id, CancellationToken cancellationToken);
+    Task<Result> DeactivateAsync(
+        Guid id,
+        CancellationToken cancellationToken);
     
     Task<Result> AssignSpecializationsAsync(
         Guid staffId,

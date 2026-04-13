@@ -52,13 +52,28 @@ public static class PatientEndpoints
         });
     }
 
-    private static async Task<Result<IReadOnlyList<PatientResponseDto>>> GetAllPatientsAsync(
+    private static async Task<Result<PagedResponse<PatientResponseDto>>> GetAllPatientsAsync(
+        [AsParameters] PatientQueryParametersDto query,
+        IValidator<PatientQueryParametersDto> validator,
         IPatientService patientService,
         CancellationToken ct = default)
     {
-        var result = await patientService.GetAllAsync(ct);
+        var validationResult = await validator.ValidateAsync(query, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
 
-        return result.Map(list => list.Adapt<IReadOnlyList<PatientResponseDto>>());
+        var model = query.Adapt<PatientQueryModel>();
+        var result = await patientService.GetAllAsync(model, ct);
+
+        return result.Map(pagedModel => new PagedResponse<PatientResponseDto>
+        {
+            Items = pagedModel.Items.Adapt<IReadOnlyList<PatientResponseDto>>(),
+            TotalCount = pagedModel.TotalCount,
+            PageNumber = pagedModel.PageNumber,
+            PageSize = pagedModel.PageSize
+        });
     }
 
     private static async Task<Result<PatientResponseDto>> GetPatientByIdAsync(

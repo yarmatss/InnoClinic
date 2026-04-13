@@ -44,14 +44,32 @@ internal class MedicalStaffService(
         return existingEntity.Adapt<MedicalStaffModel>();
     }
 
-    public async Task<Result<IReadOnlyList<MedicalStaffModel>>> GetAllActiveAsync(
-        CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<MedicalStaffModel>>> GetPagedAsync(
+        MedicalStaffQueryModel query,
+        CancellationToken ct)
     {
-        var activeEntities = await staffRepository.GetByConditionAsync(
-            s => s.IsActive,
-            cancellationToken);
-        
-        return Result.Success(activeEntities.Adapt<IReadOnlyList<MedicalStaffModel>>());
+        var isDescending = query.SortOrder?.Equals("desc", StringComparison.OrdinalIgnoreCase) == true;
+
+        var (entities, totalCount) = await staffRepository.GetPagedAsync(
+            query.FirstName,
+            query.LastName,
+            query.StaffType,
+            query.SpecializationId,
+            query.SortBy,
+            isDescending,
+            query.PageNumber,
+            query.PageSize,
+            ct);
+
+        var pagedResult = new PagedResponse<MedicalStaffModel>
+        {
+            Items = entities.Adapt<IReadOnlyList<MedicalStaffModel>>(),
+            TotalCount = totalCount,
+            PageNumber = query.PageNumber,
+            PageSize = query.PageSize
+        };
+
+        return pagedResult;
     }
 
     public async Task<Result<MedicalStaffModel>> UpdateAsync(

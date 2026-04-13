@@ -51,13 +51,28 @@ public static class SpecializationEndpoints
         });
     }
 
-    private static async Task<Result<IReadOnlyList<SpecializationResponseDto>>> GetAllSpecializationsAsync(
+    private static async Task<Result<PagedResponse<SpecializationResponseDto>>> GetAllSpecializationsAsync(
+        [AsParameters] SpecializationQueryParametersDto query,
+        IValidator<SpecializationQueryParametersDto> validator,
         ISpecializationService specializationService,
         CancellationToken ct = default)
     {
-        var result = await specializationService.GetAllAsync(ct);
+        var validationResult = await validator.ValidateAsync(query, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
 
-        return result.Map(list => list.Adapt<IReadOnlyList<SpecializationResponseDto>>());
+        var queryModel = query.Adapt<SpecializationQueryModel>();
+        var result = await specializationService.GetPagedAsync(queryModel, ct);
+
+        return result.Map(pagedModel => new PagedResponse<SpecializationResponseDto>
+        {
+            Items = pagedModel.Items.Adapt<IReadOnlyList<SpecializationResponseDto>>(),
+            TotalCount = pagedModel.TotalCount,
+            PageNumber = pagedModel.PageNumber,
+            PageSize = pagedModel.PageSize
+        });
     }
 
     private static async Task<Result<SpecializationResponseDto>> UpdateSpecializationAsync(

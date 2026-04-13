@@ -28,14 +28,31 @@ internal class PatientService(
         return entity.Adapt<PatientModel>();
     }
 
-    public async Task<Result<IReadOnlyList<PatientModel>>> GetAllAsync(
+    public async Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
+        PatientQueryModel query,
         CancellationToken cancellationToken)
     {
-        var entities = await patientRepository.GetAllAsync(cancellationToken);
+        var isDescending = query.SortOrder?.Equals("desc", StringComparison.OrdinalIgnoreCase) == true;
 
-        var models = entities.Adapt<IReadOnlyList<PatientModel>>();
+        var (entities, totalCount) = await patientRepository.GetPagedAsync(
+            query.FirstName,
+            query.LastName,
+            query.BirthDate,
+            query.SortBy,
+            isDescending,
+            query.PageNumber,
+            query.PageSize,
+            cancellationToken);
 
-        return Result.Success(models);
+        var pagedResult = new PagedResponse<PatientModel>
+        {
+            Items = entities.Adapt<IReadOnlyList<PatientModel>>(),
+            TotalCount = totalCount,
+            PageNumber = query.PageNumber,
+            PageSize = query.PageSize
+        };
+
+        return pagedResult;
     }
 
     public async Task<Result<PatientModel>> GetByIdAsync(

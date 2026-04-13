@@ -11,5 +11,5 @@ public class MedicalStaffModel : PersonModel
 
     public Guid? SupervisorId { get; set; }
 
-    public required IReadOnlyList<StaffSpecializationModel> StaffSpecializations { get; set; }
+    public IReadOnlyList<StaffSpecializationModel> StaffSpecializations { get; set; } = [];
 }

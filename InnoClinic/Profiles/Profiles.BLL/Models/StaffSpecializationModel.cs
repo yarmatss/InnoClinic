@@ -7,4 +7,6 @@ public class StaffSpecializationModel
 
     public bool IsPrimary { get; set; }
     public DateOnly CertificationDate { get; set; }
+
+    public SpecializationModel? Specialization { get; set; }
 }

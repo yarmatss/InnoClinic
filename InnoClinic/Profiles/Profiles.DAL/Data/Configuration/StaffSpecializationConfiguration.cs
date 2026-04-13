@@ -24,5 +24,7 @@ public sealed class StaffSpecializationConfiguration : IEntityTypeConfiguration<
             .HasIndex(ss => new { ss.StaffId, ss.IsPrimary })
             .IsUnique()
             .HasFilter("\"IsPrimary\" = true");
+
+        builder.HasQueryFilter(ss => ss.MedicalStaff.IsActive);
     }
 }
