@@ -6,6 +6,7 @@ using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
 
@@ -66,8 +67,8 @@ public static class MedicalStaffEndpoints
     }
 
     private static async Task<Result<PagedResponse<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
-        [AsParameters] MedicalStaffQueryParametersDto query,
-        IValidator<MedicalStaffQueryParametersDto> validator,
+        [AsParameters] MedicalStaffQueryParameters query,
+        IValidator<MedicalStaffQueryParameters> validator,
         IMedicalStaffService medicalStaffService,
         CancellationToken ct = default)
     {
@@ -77,8 +78,7 @@ public static class MedicalStaffEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var queryModel = query.Adapt<MedicalStaffQueryModel>();
-        var result = await medicalStaffService.GetPagedAsync(queryModel, ct);
+        var result = await medicalStaffService.GetPagedAsync(query, ct);
 
         return result.Map(pagedModel => new PagedResponse<MedicalStaffResponseDto>
         {

@@ -1,6 +1,6 @@
-﻿namespace Profiles.BLL.Models;
+namespace Profiles.Domain.Models;
 
-public class PatientQueryModel : BaseQueryModel
+public class PatientQueryParameters : PaginationParameters
 {
     public string? FirstName { get; set; }
     public string? LastName { get; set; }

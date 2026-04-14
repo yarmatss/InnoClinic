@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-using Profiles.API.DTOs.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Validators.Common;
 
-public class PaginationQueryParametersValidator<T> : AbstractValidator<T> where T : PaginationQueryParametersDto
+public class PaginationQueryParametersValidator<T> : AbstractValidator<T> where T : PaginationParameters
 {
     public PaginationQueryParametersValidator()
     {

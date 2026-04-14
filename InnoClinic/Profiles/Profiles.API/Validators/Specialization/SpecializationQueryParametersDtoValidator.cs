@@ -1,14 +1,14 @@
 ﻿using FluentValidation;
-using Profiles.API.DTOs.Specialization;
+using Profiles.Domain.Models;
 using Profiles.API.Validators.Common;
 
 namespace Profiles.API.Validators.Specialization;
 
-public class SpecializationQueryParametersDtoValidator : AbstractValidator<SpecializationQueryParametersDto>
+public class SpecializationQueryParametersValidator : AbstractValidator<SpecializationQueryParameters>
 {
-    public SpecializationQueryParametersDtoValidator()
+    public SpecializationQueryParametersValidator()
     {
-        Include(new PaginationQueryParametersValidator<SpecializationQueryParametersDto>());
+        Include(new PaginationQueryParametersValidator<SpecializationQueryParameters>());
 
         RuleFor(x => x.SortBy)
             .Must(x => string.IsNullOrEmpty(x) || x.Equals("Name", StringComparison.OrdinalIgnoreCase))

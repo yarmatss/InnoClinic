@@ -1,6 +1,6 @@
-﻿namespace Profiles.API.DTOs.Common;
+namespace Profiles.Domain.Models;
 
-public abstract class PaginationQueryParametersDto
+public class PaginationParameters
 {
     public int? PageNumber
     {
@@ -13,6 +13,10 @@ public abstract class PaginationQueryParametersDto
         get => field ?? 10;
         set => field = value;
     }
+
     public string? SortBy { get; set; }
+
     public string? SortOrder { get; set; }
+
+    public bool IsDescending => SortOrder?.Equals("desc", StringComparison.OrdinalIgnoreCase) == true;
 }

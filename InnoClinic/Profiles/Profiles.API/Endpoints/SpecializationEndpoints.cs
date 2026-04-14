@@ -6,6 +6,7 @@ using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
 
@@ -52,8 +53,8 @@ public static class SpecializationEndpoints
     }
 
     private static async Task<Result<PagedResponse<SpecializationResponseDto>>> GetAllSpecializationsAsync(
-        [AsParameters] SpecializationQueryParametersDto query,
-        IValidator<SpecializationQueryParametersDto> validator,
+        [AsParameters] SpecializationQueryParameters query,
+        IValidator<SpecializationQueryParameters> validator,
         ISpecializationService specializationService,
         CancellationToken ct = default)
     {
@@ -63,8 +64,7 @@ public static class SpecializationEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var queryModel = query.Adapt<SpecializationQueryModel>();
-        var result = await specializationService.GetPagedAsync(queryModel, ct);
+        var result = await specializationService.GetPagedAsync(query, ct);
 
         return result.Map(pagedModel => new PagedResponse<SpecializationResponseDto>
         {

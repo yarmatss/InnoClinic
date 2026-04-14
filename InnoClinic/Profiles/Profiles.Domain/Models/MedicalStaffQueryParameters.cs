@@ -1,9 +1,8 @@
-﻿using Profiles.API.DTOs.Common;
 using Profiles.Domain.Enums;
 
-namespace Profiles.API.DTOs.MedicalStaff;
+namespace Profiles.Domain.Models;
 
-public class MedicalStaffQueryParametersDto : PaginationQueryParametersDto
+public class MedicalStaffQueryParameters : PaginationParameters
 {
     public string? FirstName { get; set; }
     public string? LastName { get; set; }

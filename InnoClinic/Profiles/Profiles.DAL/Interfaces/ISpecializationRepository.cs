@@ -1,14 +1,11 @@
 ﻿using Profiles.DAL.Entities;
+using Profiles.Domain.Models;
 
 namespace Profiles.DAL.Interfaces;
 
 public interface ISpecializationRepository : IBaseRepository<Specialization>
 {
     Task<(IReadOnlyList<Specialization> Items, int TotalCount)> GetPagedAsync(
-        string? name,
-        string? sortBy,
-        bool isDescending,
-        int pageNumber,
-        int pageSize,
+        SpecializationQueryParameters parameters,
         CancellationToken ct);
 }

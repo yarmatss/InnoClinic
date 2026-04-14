@@ -1,16 +1,11 @@
 ﻿using Profiles.DAL.Entities;
+using Profiles.Domain.Models;
 
 namespace Profiles.DAL.Interfaces;
 
 public interface IPatientRepository : IBaseRepository<Patient>
 {
     Task<(IReadOnlyList<Patient> Items, int TotalCount)> GetPagedAsync(
-        string? firstName,
-        string? lastName,
-        DateOnly? birthDate,
-        string? sortBy,
-        bool isDescending,
-        int pageNumber,
-        int pageSize,
+        PatientQueryParameters parameters,
         CancellationToken ct);
 }

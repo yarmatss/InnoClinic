@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
-using Profiles.API.DTOs.MedicalStaff;
+using Profiles.Domain.Models;
 using Profiles.API.Validators.Common;
 
 namespace Profiles.API.Validators.MedicalStaff;
 
-public class MedicalStaffQueryParametersDtoValidator : AbstractValidator<MedicalStaffQueryParametersDto>
+public class MedicalStaffQueryParametersValidator : AbstractValidator<MedicalStaffQueryParameters>
 {
     private static readonly HashSet<string> AllowedSortFields = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -13,9 +13,9 @@ public class MedicalStaffQueryParametersDtoValidator : AbstractValidator<Medical
         "StaffType"
     };
 
-    public MedicalStaffQueryParametersDtoValidator()
+    public MedicalStaffQueryParametersValidator()
     {
-        Include(new PaginationQueryParametersValidator<MedicalStaffQueryParametersDto>());
+        Include(new PaginationQueryParametersValidator<MedicalStaffQueryParameters>());
 
         RuleFor(x => x.SortBy)
             .Must(x => string.IsNullOrEmpty(x) || AllowedSortFields.Contains(x))

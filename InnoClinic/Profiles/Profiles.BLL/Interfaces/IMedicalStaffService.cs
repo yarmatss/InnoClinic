@@ -1,5 +1,6 @@
 ﻿using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Interfaces;
 
@@ -14,7 +15,7 @@ public interface IMedicalStaffService
         CancellationToken cancellationToken);
 
     Task<Result<PagedResponse<MedicalStaffModel>>> GetPagedAsync(
-        MedicalStaffQueryModel query,
+        MedicalStaffQueryParameters query,
         CancellationToken cancellationToken);
 
     Task<Result<MedicalStaffModel>> UpdateAsync(

@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Profiles.DAL.Builders;
 using Profiles.DAL.Data;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Extensions;
 using Profiles.DAL.Interfaces;
-using Profiles.Domain.Enums;
+using Profiles.Domain.Models;
 using System.Linq.Expressions;
 
 namespace Profiles.DAL.Repositories;
@@ -35,44 +36,23 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
     }
 
     public async Task<(IReadOnlyList<MedicalStaff> Items, int TotalCount)> GetPagedAsync(
-        string? firstName,
-        string? lastName,
-        StaffType? staffType,
-        Guid? specializationId,
-        string? sortBy,
-        bool isDescending,
-        int pageNumber,
-        int pageSize,
+        MedicalStaffQueryParameters parameters,
         CancellationToken ct)
     {
-        var query = GetQuery(trackChanges: false);
+        var builder = new MedicalStaffQueryBuilder(GetQuery(trackChanges: false))
+            .FilterByFirstName(parameters.FirstName)
+            .FilterByLastName(parameters.LastName)
+            .FilterByStaffType(parameters.StaffType)
+            .FilterBySpecializationId(parameters.SpecializationId);
 
-        if (!string.IsNullOrWhiteSpace(firstName))
-            query = query.Where(m => EF.Functions.ILike(m.FirstName, $"%{firstName}%"));
-
-        if (!string.IsNullOrWhiteSpace(lastName))
-            query = query.Where(m => EF.Functions.ILike(m.LastName, $"%{lastName}%"));
-
-        if (staffType.HasValue)
-            query = query.Where(m => m.StaffType == staffType.Value);
-
-        if (specializationId.HasValue)
-            query = query.Where(m => m.StaffSpecializations.Any(ss => ss.SpecializationId == specializationId.Value));
-
+        var query = builder.Build();
         var totalCount = await query.CountAsync(ct);
 
-        query = sortBy?.ToLower() switch
-        {
-            "firstname" => isDescending ? query.OrderByDescending(m => m.FirstName) : query.OrderBy(m => m.FirstName),
-            "lastname" => isDescending ? query.OrderByDescending(m => m.LastName) : query.OrderBy(m => m.LastName),
-            "stafftype" => isDescending ? query.OrderByDescending(m => m.StaffType) : query.OrderBy(m => m.StaffType),
-            _ => query.OrderBy(m => m.Id)
-        };
-
-        var items = await query
-            .Include(x => x.StaffSpecializations)
-                .ThenInclude(ss => ss.Specialization)
-            .ApplyPagination(pageNumber, pageSize)
+        var items = await builder
+            .SortBy(parameters.SortBy, parameters.IsDescending)
+            .IncludeSpecializations()
+            .Build()
+            .ApplyPagination(parameters.PageNumber!.Value, parameters.PageSize!.Value)
             .ToListAsync(ct);
 
         return (items, totalCount);

@@ -6,6 +6,7 @@ using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
 
@@ -53,8 +54,8 @@ public static class PatientEndpoints
     }
 
     private static async Task<Result<PagedResponse<PatientResponseDto>>> GetAllPatientsAsync(
-        [AsParameters] PatientQueryParametersDto query,
-        IValidator<PatientQueryParametersDto> validator,
+        [AsParameters] PatientQueryParameters query,
+        IValidator<PatientQueryParameters> validator,
         IPatientService patientService,
         CancellationToken ct = default)
     {
@@ -64,8 +65,7 @@ public static class PatientEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var model = query.Adapt<PatientQueryModel>();
-        var result = await patientService.GetAllAsync(model, ct);
+        var result = await patientService.GetAllAsync(query, ct);
 
         return result.Map(pagedModel => new PagedResponse<PatientResponseDto>
         {

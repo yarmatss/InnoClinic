@@ -4,6 +4,7 @@ using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
+using Profiles.Domain.Models;
 using Profiles.Domain.Common;
 
 namespace Profiles.BLL.Services;
@@ -29,27 +30,19 @@ internal class PatientService(
     }
 
     public async Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
-        PatientQueryModel query,
+        PatientQueryParameters queryModel,
         CancellationToken cancellationToken)
     {
-        var isDescending = query.SortOrder?.Equals("desc", StringComparison.OrdinalIgnoreCase) == true;
-
         var (entities, totalCount) = await patientRepository.GetPagedAsync(
-            query.FirstName,
-            query.LastName,
-            query.BirthDate,
-            query.SortBy,
-            isDescending,
-            query.PageNumber,
-            query.PageSize,
+            queryModel,
             cancellationToken);
 
         var pagedResult = new PagedResponse<PatientModel>
         {
             Items = entities.Adapt<IReadOnlyList<PatientModel>>(),
             TotalCount = totalCount,
-            PageNumber = query.PageNumber,
-            PageSize = query.PageSize
+            PageNumber = queryModel.PageNumber!.Value,
+            PageSize = queryModel.PageSize!.Value
         };
 
         return pagedResult;

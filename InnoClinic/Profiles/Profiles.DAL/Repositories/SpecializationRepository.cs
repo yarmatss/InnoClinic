@@ -3,6 +3,8 @@ using Profiles.DAL.Data;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Extensions;
 using Profiles.DAL.Interfaces;
+using Profiles.DAL.Builders;
+using Profiles.Domain.Models;
 
 namespace Profiles.DAL.Repositories;
 
@@ -10,29 +12,20 @@ public class SpecializationRepository(ProfilesDbContext context) :
     BaseRepository<Specialization>(context), ISpecializationRepository
 {
     public async Task<(IReadOnlyList<Specialization> Items, int TotalCount)> GetPagedAsync(
-        string? name,
-        string? sortBy,
-        bool isDescending,
-        int pageNumber,
-        int pageSize,
+        SpecializationQueryParameters parameters,
         CancellationToken ct)
     {
-        var query = GetQuery(trackChanges: false);
+        var builder = new SpecializationQueryBuilder(GetQuery(trackChanges: false))
+            .FilterByName(parameters.Name);
 
-        if (!string.IsNullOrWhiteSpace(name))
-            query = query.Where(s => EF.Functions.ILike(s.Name, $"%{name}%"));
-
+        var query = builder.Build();
         var totalCount = await query.CountAsync(ct);
 
-        query = sortBy?.ToLower() switch
-        {
-            "name" => isDescending ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name),
-            _ => query.OrderBy(s => s.Name)
-        };
-
-        var items = await query.ApplyPagination(
-            pageNumber,
-            pageSize).ToListAsync(ct);
+        var items = await builder
+            .SortBy(parameters.SortBy, parameters.IsDescending)
+            .Build()
+            .ApplyPagination(parameters.PageNumber!.Value, parameters.PageSize!.Value)
+            .ToListAsync(ct);
 
         return (items, totalCount);
     }
