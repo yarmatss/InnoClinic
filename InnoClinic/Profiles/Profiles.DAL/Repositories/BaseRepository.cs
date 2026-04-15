@@ -10,16 +10,9 @@ public abstract class BaseRepository<T>(ProfilesDbContext context) : IBaseReposi
 {
     protected readonly DbSet<T> _dbSet = context.Set<T>();
 
-    protected IQueryable<T> GetQuery(bool trackChanges, bool ignoreQueryFilters = false)
+    protected IQueryable<T> GetQuery(bool trackChanges)
     {
-        var query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
-
-        if (ignoreQueryFilters)
-        {
-            query = query.IgnoreQueryFilters();
-        }
-
-        return query;
+        return trackChanges ? _dbSet : _dbSet.AsNoTracking();
     }
 
     public virtual async Task<IReadOnlyList<T>> GetAllAsync(
