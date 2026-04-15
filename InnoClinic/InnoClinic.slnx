@@ -4,8 +4,10 @@
     <Project Path="Profiles/Profiles.BLL/Profiles.BLL.csproj" Id="2f6b1986-6794-4b3a-a0af-7be9623f4a6e" />
     <Project Path="Profiles/Profiles.DAL/Profiles.DAL.csproj" Id="71e33e93-cbb9-4db7-b155-10e566dafa65" />
     <Project Path="Profiles/Profiles.Domain/Profiles.Domain.csproj" Id="2908cdc1-5c8b-417b-8be3-fac418e5aab9" />
+    <Project Path="Profiles/Profiles.UnitTests/Profiles.UnitTests.csproj" Id="2e72be10-ec1c-4afa-9bbf-3fb6da76f9f6" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="coverage.runsettings" />
   </Folder>
 </Solution>
