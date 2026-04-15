@@ -4,6 +4,7 @@ using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
+using Profiles.Domain.Models;
 using Profiles.Domain.Common;
 
 namespace Profiles.BLL.Services;
@@ -44,14 +45,23 @@ internal class MedicalStaffService(
         return existingEntity.Adapt<MedicalStaffModel>();
     }
 
-    public async Task<Result<IReadOnlyList<MedicalStaffModel>>> GetAllActiveAsync(
-        CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<MedicalStaffModel>>> GetPagedAsync(
+        MedicalStaffQueryParameters query,
+        CancellationToken ct)
     {
-        var activeEntities = await staffRepository.GetByConditionAsync(
-            s => s.IsActive,
-            cancellationToken);
-        
-        return Result.Success(activeEntities.Adapt<IReadOnlyList<MedicalStaffModel>>());
+        var (entities, totalCount) = await staffRepository.GetPagedAsync(
+            query,
+            ct);
+
+        var pagedResult = new PagedResponse<MedicalStaffModel>
+        {
+            Items = entities.Adapt<IReadOnlyList<MedicalStaffModel>>(),
+            TotalCount = totalCount,
+            PageNumber = query.PageNumber!.Value,
+            PageSize = query.PageSize!.Value
+        };
+
+        return pagedResult;
     }
 
     public async Task<Result<MedicalStaffModel>> UpdateAsync(

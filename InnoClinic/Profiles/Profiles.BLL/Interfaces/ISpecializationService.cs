@@ -1,5 +1,6 @@
 ﻿using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Interfaces;
 
@@ -9,8 +10,9 @@ public interface ISpecializationService
         SpecializationModel model, 
         CancellationToken cancellationToken);
 
-    Task<Result<IReadOnlyList<SpecializationModel>>> GetAllAsync(
-        CancellationToken cancellationToken);
+    Task<Result<PagedResponse<SpecializationModel>>> GetPagedAsync(
+        SpecializationQueryParameters query,
+        CancellationToken ct);
 
     Task<Result<SpecializationModel>> UpdateAsync(
         Guid id,

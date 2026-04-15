@@ -6,6 +6,7 @@ using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
 
@@ -65,13 +66,27 @@ public static class MedicalStaffEndpoints
         return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 
-    private static async Task<Result<IReadOnlyList<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
-        IMedicalStaffService staffService,
+    private static async Task<Result<PagedResponse<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
+        [AsParameters] MedicalStaffQueryParameters query,
+        IValidator<MedicalStaffQueryParameters> validator,
+        IMedicalStaffService medicalStaffService,
         CancellationToken ct = default)
     {
-        var result = await staffService.GetAllActiveAsync(ct);
+        var validationResult = await validator.ValidateAsync(query, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
 
-        return result.Map(list => list.Adapt<IReadOnlyList<MedicalStaffResponseDto>>());
+        var result = await medicalStaffService.GetPagedAsync(query, ct);
+
+        return result.Map(pagedModel => new PagedResponse<MedicalStaffResponseDto>
+        {
+            Items = pagedModel.Items.Adapt<IReadOnlyList<MedicalStaffResponseDto>>(),
+            TotalCount = pagedModel.TotalCount,
+            PageNumber = pagedModel.PageNumber,
+            PageSize = pagedModel.PageSize
+        });
     }
 
     private static async Task<Result<MedicalStaffResponseDto>> UpdateStaffAsync(

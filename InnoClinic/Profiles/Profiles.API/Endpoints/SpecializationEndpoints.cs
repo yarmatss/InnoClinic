@@ -6,6 +6,7 @@ using Profiles.API.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
 
@@ -51,13 +52,27 @@ public static class SpecializationEndpoints
         });
     }
 
-    private static async Task<Result<IReadOnlyList<SpecializationResponseDto>>> GetAllSpecializationsAsync(
+    private static async Task<Result<PagedResponse<SpecializationResponseDto>>> GetAllSpecializationsAsync(
+        [AsParameters] SpecializationQueryParameters query,
+        IValidator<SpecializationQueryParameters> validator,
         ISpecializationService specializationService,
         CancellationToken ct = default)
     {
-        var result = await specializationService.GetAllAsync(ct);
+        var validationResult = await validator.ValidateAsync(query, ct);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult.ToDictionary());
+        }
 
-        return result.Map(list => list.Adapt<IReadOnlyList<SpecializationResponseDto>>());
+        var result = await specializationService.GetPagedAsync(query, ct);
+
+        return result.Map(pagedModel => new PagedResponse<SpecializationResponseDto>
+        {
+            Items = pagedModel.Items.Adapt<IReadOnlyList<SpecializationResponseDto>>(),
+            TotalCount = pagedModel.TotalCount,
+            PageNumber = pagedModel.PageNumber,
+            PageSize = pagedModel.PageSize
+        });
     }
 
     private static async Task<Result<SpecializationResponseDto>> UpdateSpecializationAsync(

@@ -13,5 +13,7 @@ public sealed class MedicalStaffConfiguration : IEntityTypeConfiguration<Medical
             .WithMany()
             .HasForeignKey(ms => ms.SupervisorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(ms => ms.IsActive);
     }
 }

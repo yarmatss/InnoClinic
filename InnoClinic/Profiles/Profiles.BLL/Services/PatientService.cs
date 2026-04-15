@@ -4,6 +4,7 @@ using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
+using Profiles.Domain.Models;
 using Profiles.Domain.Common;
 
 namespace Profiles.BLL.Services;
@@ -28,14 +29,23 @@ internal class PatientService(
         return entity.Adapt<PatientModel>();
     }
 
-    public async Task<Result<IReadOnlyList<PatientModel>>> GetAllAsync(
+    public async Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
+        PatientQueryParameters queryModel,
         CancellationToken cancellationToken)
     {
-        var entities = await patientRepository.GetAllAsync(cancellationToken);
+        var (entities, totalCount) = await patientRepository.GetPagedAsync(
+            queryModel,
+            cancellationToken);
 
-        var models = entities.Adapt<IReadOnlyList<PatientModel>>();
+        var pagedResult = new PagedResponse<PatientModel>
+        {
+            Items = entities.Adapt<IReadOnlyList<PatientModel>>(),
+            TotalCount = totalCount,
+            PageNumber = queryModel.PageNumber!.Value,
+            PageSize = queryModel.PageSize!.Value
+        };
 
-        return Result.Success(models);
+        return pagedResult;
     }
 
     public async Task<Result<PatientModel>> GetByIdAsync(

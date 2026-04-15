@@ -16,4 +16,4 @@ public record MedicalStaffResponseDto(
     DateOnly HireDate,
     bool IsActive,
     Guid? SupervisorId,
-    IReadOnlyList<StaffSpecializationDto>? StaffSpecializations);
+    IReadOnlyList<string>? Specializations);

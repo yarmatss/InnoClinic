@@ -1,5 +1,6 @@
 ﻿using Profiles.BLL.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Interfaces;
 
@@ -9,7 +10,8 @@ public interface IPatientService
         PatientModel model, 
         CancellationToken cancellationToken);
 
-    Task<Result<IReadOnlyList<PatientModel>>> GetAllAsync(
+    Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
+        PatientQueryParameters queryModel,
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> GetByIdAsync(

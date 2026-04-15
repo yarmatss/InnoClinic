@@ -5,6 +5,7 @@ using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Services;
 
@@ -26,14 +27,23 @@ internal class SpecializationService(ISpecializationRepository specializationRep
         return entity.Adapt<SpecializationModel>();
     }
 
-    public async Task<Result<IReadOnlyList<SpecializationModel>>> GetAllAsync(
-        CancellationToken cancellationToken)
+    public async Task<Result<PagedResponse<SpecializationModel>>> GetPagedAsync(
+        SpecializationQueryParameters query,
+        CancellationToken ct)
     {
-        var entities = await specializationRepository.GetAllAsync(cancellationToken);
+        var (entities, totalCount) = await specializationRepository.GetPagedAsync(
+            query,
+            ct);
 
-        var models = entities.Adapt<IReadOnlyList<SpecializationModel>>();
+        var pagedResult = new PagedResponse<SpecializationModel>
+        {
+            Items = entities.Adapt<IReadOnlyList<SpecializationModel>>(),
+            TotalCount = totalCount,
+            PageNumber = query.PageNumber!.Value,
+            PageSize = query.PageSize!.Value
+        };
 
-        return Result.Success(models);
+        return pagedResult;
     }
 
     public async Task<Result<SpecializationModel>> UpdateAsync(
