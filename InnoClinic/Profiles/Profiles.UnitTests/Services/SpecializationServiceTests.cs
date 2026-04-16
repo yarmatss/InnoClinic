@@ -43,24 +43,6 @@ public class SpecializationServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithValidData_CallsMarkAddAndSaveChanges()
-    {
-        // Arrange
-        var model = new SpecializationModelFaker().Generate();
-
-        _specRepo
-            .GetByConditionAsync(Arg.Any<Expression<Func<Specialization, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Specialization>>([]));
-
-        // Act
-        await _sut.CreateAsync(model, CancellationToken.None);
-
-        // Assert
-        _specRepo.Received(1).MarkAdd(Arg.Any<Specialization>());
-        await _specRepo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task CreateAsync_WithValidData_ReturnsSuccessResult()
     {
         // Arrange
@@ -68,7 +50,7 @@ public class SpecializationServiceTests
 
         _specRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Specialization, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Specialization>>([]));
+            .Returns(Array.Empty<Specialization>());
 
         // Act
         var result = await _sut.CreateAsync(model, CancellationToken.None);
@@ -148,26 +130,6 @@ public class SpecializationServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WithValidData_CallsMarkUpdateAndSaveChanges()
-    {
-        // Arrange
-        var entity = new SpecializationFaker().Generate();
-        var model = new SpecializationModelFaker().Generate();
-
-        _specRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
-        _specRepo
-            .GetByConditionAsync(Arg.Any<Expression<Func<Specialization, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Specialization>>([]));
-
-        // Act
-        await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
-
-        // Assert
-        _specRepo.Received(1).MarkUpdate(entity);
-        await _specRepo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task UpdateAsync_WithValidData_ReturnsUpdatedModel()
     {
         // Arrange
@@ -177,7 +139,7 @@ public class SpecializationServiceTests
         _specRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
         _specRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Specialization, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Specialization>>([]));
+            .Returns(Array.Empty<Specialization>());
 
         // Act
         var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);

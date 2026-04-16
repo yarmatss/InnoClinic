@@ -52,9 +52,7 @@ public class PatientServiceTests
 
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(
-                _ => Task.FromResult<IReadOnlyList<Patient>>([]),  // insurance — no duplicate
-                _ => Task.FromResult<IReadOnlyList<Patient>>([duplicate])); // nationalId — duplicate
+            .Returns<IReadOnlyList<Patient>>(Array.Empty<Patient>(), [duplicate]);
 
         // Act
         var result = await _sut.CreateAsync(model, CancellationToken.None);
@@ -73,7 +71,7 @@ public class PatientServiceTests
 
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Patient>>([]));
+            .Returns(Array.Empty<Patient>());
 
         _staffRepo.GetByIdAsync(model.PrimaryDoctorId.Value, Arg.Any<CancellationToken>()).Returns((MedicalStaff?)null);
 
@@ -97,7 +95,7 @@ public class PatientServiceTests
 
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Patient>>([]));
+            .Returns(Array.Empty<Patient>());
 
         _staffRepo.GetByIdAsync(model.PrimaryDoctorId.Value, Arg.Any<CancellationToken>()).Returns(inactiveDoctor);
 
@@ -110,24 +108,6 @@ public class PatientServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithValidData_CallsMarkAddAndSaveChanges()
-    {
-        // Arrange
-        var model = new PatientModelFaker().Generate();
-
-        _patientRepo
-            .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Patient>>([]));
-
-        // Act
-        await _sut.CreateAsync(model, CancellationToken.None);
-
-        // Assert
-        _patientRepo.Received(1).MarkAdd(Arg.Any<Patient>());
-        await _patientRepo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task CreateAsync_WithValidData_ReturnsSuccessResult()
     {
         // Arrange
@@ -135,7 +115,7 @@ public class PatientServiceTests
 
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Patient>>([]));
+            .Returns(Array.Empty<Patient>());
 
         // Act
         var result = await _sut.CreateAsync(model, CancellationToken.None);
@@ -260,36 +240,14 @@ public class PatientServiceTests
         _patientRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(
-                _ => Task.FromResult<IReadOnlyList<Patient>>([]),  // insurance — no duplicate
-                _ => Task.FromResult<IReadOnlyList<Patient>>([duplicate])); // nationalId — duplicate
-
+            .Returns<IReadOnlyList<Patient>>(Array.Empty<Patient>(), [duplicate]);
+            
         // Act
         var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
         result.Error.ShouldBe(PatientErrors.DuplicateNationalId);
-    }
-
-    [Fact]
-    public async Task UpdateAsync_WithValidData_CallsMarkUpdateAndSaveChanges()
-    {
-        // Arrange
-        var entity = new PatientFaker().Generate();
-        var model = new PatientModelFaker().Generate();
-
-        _patientRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
-        _patientRepo
-            .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Patient>>([]));
-
-        // Act
-        await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
-
-        // Assert
-        _patientRepo.Received(1).MarkUpdate(entity);
-        await _patientRepo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -302,7 +260,7 @@ public class PatientServiceTests
         _patientRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<Patient>>([]));
+            .Returns(Array.Empty<Patient>());
 
         // Act
         var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);

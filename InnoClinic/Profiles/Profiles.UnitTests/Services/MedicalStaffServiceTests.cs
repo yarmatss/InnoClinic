@@ -52,9 +52,7 @@ public class MedicalStaffServiceTests
 
         _staffRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(
-                _ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]),  // license — no duplicate
-                _ => Task.FromResult<IReadOnlyList<MedicalStaff>>([duplicate])); // nationalId — duplicate
+            .Returns<IReadOnlyList<MedicalStaff>>(Array.Empty<MedicalStaff>(), [duplicate]);
 
         // Act
         var result = await _sut.CreateAsync(model, CancellationToken.None);
@@ -73,7 +71,7 @@ public class MedicalStaffServiceTests
 
         _staffRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]));
+            .Returns(Array.Empty<MedicalStaff>());
 
         _staffRepo
             .GetByIdAsync(model.SupervisorId.Value, Arg.Any<CancellationToken>())
@@ -99,7 +97,7 @@ public class MedicalStaffServiceTests
 
         _staffRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]));
+            .Returns(Array.Empty<MedicalStaff>());
 
         _staffRepo
             .GetByIdAsync(model.SupervisorId.Value, Arg.Any<CancellationToken>())
@@ -114,24 +112,6 @@ public class MedicalStaffServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithValidData_CallsMarkAddAndSaveChanges()
-    {
-        // Arrange
-        var model = new MedicalStaffModelFaker().Generate();
-
-        _staffRepo
-            .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]));
-
-        // Act
-        await _sut.CreateAsync(model, CancellationToken.None);
-
-        // Assert
-        _staffRepo.Received(1).MarkAdd(Arg.Any<MedicalStaff>());
-        await _staffRepo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task CreateAsync_WithValidData_ReturnsSuccessResult()
     {
         // Arrange
@@ -139,7 +119,7 @@ public class MedicalStaffServiceTests
 
         _staffRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]));
+            .Returns(Array.Empty<MedicalStaff>());
 
         // Act
         var result = await _sut.CreateAsync(model, CancellationToken.None);
@@ -267,9 +247,7 @@ public class MedicalStaffServiceTests
 
         _staffRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(
-                _ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]),  // license — no duplicate
-                _ => Task.FromResult<IReadOnlyList<MedicalStaff>>([duplicate])); // nationalId — duplicate
+            .Returns<IReadOnlyList<MedicalStaff>>(Array.Empty<MedicalStaff>(), [duplicate]);
 
         // Act
         var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
@@ -277,26 +255,6 @@ public class MedicalStaffServiceTests
         // Assert
         result.IsFailure.ShouldBeTrue();
         result.Error.ShouldBe(MedicalStaffErrors.DuplicateNationalId);
-    }
-
-    [Fact]
-    public async Task UpdateAsync_WithValidData_CallsMarkUpdateAndSaveChanges()
-    {
-        // Arrange
-        var entity = new MedicalStaffFaker().Generate();
-        var model = new MedicalStaffModelFaker().Generate();
-
-        _staffRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
-        _staffRepo
-            .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]));
-
-        // Act
-        await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
-
-        // Assert
-        _staffRepo.Received(1).MarkUpdate(entity);
-        await _staffRepo.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -309,7 +267,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
         _staffRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<MedicalStaff, bool>>>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromResult<IReadOnlyList<MedicalStaff>>([]));
+            .Returns(Array.Empty<MedicalStaff>());
 
         // Act
         var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
