@@ -19,15 +19,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
-    <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="Bogus" Version="35.6.5" />
-    <PackageReference Include="Shouldly" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.6.2" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Profiles.BLL\Profiles.BLL.csproj" />
+    <ProjectReference Include="..\Profiles.Tests.Common\Profiles.Tests.Common.csproj" />
   </ItemGroup>
 
 </Project>
