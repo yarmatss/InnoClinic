@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Profiles.IntegrationTests</RootNamespace>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Respawn" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.XunitV3" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Profiles.API\Profiles.API.csproj" />
+    <ProjectReference Include="..\Profiles.DAL\Profiles.DAL.csproj" />
+    <ProjectReference Include="..\Profiles.Tests.Common\Profiles.Tests.Common.csproj" />
+  </ItemGroup>
+
+</Project>

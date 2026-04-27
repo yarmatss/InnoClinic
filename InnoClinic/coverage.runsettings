@@ -4,16 +4,31 @@
     <DataCollectors>
       <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=18.6.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
         <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Exclude>
-                 <ModulePath>.*profiles\.dal\.dll</ModulePath>
-                 <ModulePath>.*profiles\.unittests\.dll</ModulePath>
-                 <ModulePath>.*profiles\.domain\.dll</ModulePath>
-				 <ModulePath>.*profiles\.api\.dll</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
+			<CodeCoverage>
+
+				<ModulePaths>
+					<Include>
+						<ModulePath>.*profiles\.api\.dll$</ModulePath>
+						<ModulePath>.*profiles\.bll\.dll$</ModulePath>
+						<ModulePath>.*profiles\.dal\.dll$</ModulePath>
+					</Include>
+				</ModulePaths>
+
+				<SourcePaths>
+					<Exclude>
+						<SourcePath>.*\\Migrations\\.*</SourcePath>
+					</Exclude>
+				</SourcePaths>
+
+				<Attributes>
+					<Exclude>
+						<Attribute>^System\.Diagnostics\.CodeAnalysis\.ExcludeFromCodeCoverageAttribute$</Attribute>
+						<Attribute>^System\.Runtime\.CompilerServices\.CompilerGeneratedAttribute$</Attribute>
+						<Attribute>^System\.CodeDom\.Compiler\.GeneratedCodeAttribute$</Attribute>
+					</Exclude>
+				</Attributes>
+
+			</CodeCoverage>
         </Configuration>
       </DataCollector>
     </DataCollectors>

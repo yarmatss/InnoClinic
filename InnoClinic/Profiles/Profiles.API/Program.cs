@@ -49,3 +49,5 @@ app.MapMedicalStaffEndpoints();
 app.MapSpecializationEndpoints();
 
 app.Run();
+
+public partial class Program { }

@@ -2,7 +2,7 @@ using Bogus;
 using Profiles.DAL.Entities;
 using Profiles.Domain.Enums;
 
-namespace Profiles.UnitTests.Fakes.Entities;
+namespace Profiles.Tests.Common.Fakes.Entities;
 
 public sealed class MedicalStaffFaker : Faker<MedicalStaff>
 {
