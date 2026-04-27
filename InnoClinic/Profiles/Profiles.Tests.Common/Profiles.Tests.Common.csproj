@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Bogus" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Profiles.DAL\Profiles.DAL.csproj" />
     <ProjectReference Include="..\Profiles.Domain\Profiles.Domain.csproj" />
   </ItemGroup>
 

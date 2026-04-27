@@ -1,7 +1,7 @@
 using Bogus;
 using Profiles.DAL.Entities;
 
-namespace Profiles.UnitTests.Fakes.Entities;
+namespace Profiles.Tests.Common.Fakes.Entities;
 
 public sealed class SpecializationFaker : Faker<Specialization>
 {

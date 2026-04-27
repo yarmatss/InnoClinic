@@ -4,7 +4,7 @@ using Profiles.BLL.Services;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
-using Profiles.UnitTests.Fakes.Entities;
+using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
