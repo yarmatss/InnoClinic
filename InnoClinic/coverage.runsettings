@@ -10,15 +10,8 @@
 					<Include>
 						<ModulePath>.*profiles\.api\.dll$</ModulePath>
 						<ModulePath>.*profiles\.bll\.dll$</ModulePath>
-						<ModulePath>.*profiles\.dal\.dll$</ModulePath>
 					</Include>
 				</ModulePaths>
-
-				<SourcePaths>
-					<Exclude>
-						<SourcePath>.*\\Migrations\\.*</SourcePath>
-					</Exclude>
-				</SourcePaths>
 
 				<Attributes>
 					<Exclude>
