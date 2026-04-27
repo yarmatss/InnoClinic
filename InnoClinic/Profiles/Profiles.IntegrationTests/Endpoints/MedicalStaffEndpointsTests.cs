@@ -98,7 +98,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
             dto, 
             cancellationToken: TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBeOneOf(HttpStatusCode.Conflict, HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
     }
 
     [Theory]
@@ -106,7 +106,9 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     [InlineData("Gregory", "", "11223344556")] // Empty LastName
     [InlineData("Gregory", "House", "")] // Empty NationalId
     public async Task CreateStaff_WithInvalidPersonField_Returns400(
-        string firstName, string lastName, string nationalId)
+        string firstName,
+        string lastName,
+        string nationalId)
     {
         var dto = GetValidCreateDto() with
         {
@@ -129,7 +131,10 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     [InlineData(40, -1000, (StaffType)99, "MD12345")] // Bad StaffType
     [InlineData(40, -1000, StaffType.Doctor, "")] // Empty License
     public async Task CreateStaff_WithInvalidStaffField_Returns400(
-        int ageYears, int hireDateOffsetDays, StaffType staffType, string license)
+        int ageYears,
+        int hireDateOffsetDays,
+        StaffType staffType,
+        string license)
     {
         var dto = GetValidCreateDto() with
         {
@@ -292,7 +297,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     }
 
     [Fact]
-    public async Task AssignSpecializations_WithUnknownSpecId_Returns404Or400()
+    public async Task AssignSpecializations_WithUnknownSpecId_Returns409()
     {
         var (staffId, _) = await SeedDataWithSpecAsync();
         var dto = new AssignSpecializationsDto(
@@ -312,7 +317,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     }
 
     [Fact]
-    public async Task AssignSpecializations_WithEmptyList_ClearsAll_Returns200()
+    public async Task AssignSpecializations_WithEmptyList_ClearsAll_Returns204()
     {
         var (staffId, _) = await SeedDataWithSpecAsync();
         var dto = new AssignSpecializationsDto([]);
@@ -336,14 +341,14 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = new AssignSpecializationsDto(
         [
             new StaffSpecializationDto(
-                specId, 
-                true, 
+                specId,
+                true,
                 DateOnly.FromDateTime(DateTime.UtcNow.AddDays(certDateOffsetDays)))
         ]);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}/specializations", 
-            dto, 
+            $"/api/staff/{staffId}/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -354,20 +359,19 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     #region DeactivateStaff
 
     [Fact]
-    public async Task DeactivateStaff_WhenExists_SetsIsActiveFalseAndReturns200()
+    public async Task DeactivateStaff_WhenExists_SetsIsActiveFalseAndReturns204()
     {
         var staffId = await SeedStaffAsync();
 
-        var response = await Client.DeleteAsync(
+        var deleteResponse = await Client.DeleteAsync(
             $"/api/staff/{staffId}", 
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-        
         var getResponse = await Client.GetAsync(
             $"/api/staff/{staffId}", 
             TestContext.Current.CancellationToken);
-            
+
+        deleteResponse.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         getResponse.StatusCode.ShouldBe(HttpStatusCode.NotFound); 
     }
 

@@ -59,12 +59,11 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
             dto, 
             cancellationToken: TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Created);
-        response.Headers.Location.ShouldNotBeNull();
-
         var body = await response.Content.ReadFromJsonAsync<PatientResponseDto>(
             TestContext.Current.CancellationToken);
 
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        response.Headers.Location.ShouldNotBeNull();
         body.ShouldNotBeNull();
         body.FirstName.ShouldBe(dto.FirstName);
         body.LastName.ShouldBe(dto.LastName);
@@ -134,11 +133,10 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
             $"/api/patients/{patientId}", 
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
         var body = await response.Content.ReadFromJsonAsync<PatientResponseDto>(
             TestContext.Current.CancellationToken);
 
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         body.ShouldNotBeNull();
         body.Id.ShouldBe(patientId);
     }
@@ -163,11 +161,10 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
             "/api/patients?PageNumber=1&PageSize=10", 
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
         var body = await response.Content.ReadFromJsonAsync<PagedResponse<PatientResponseDto>>(
             TestContext.Current.CancellationToken);
 
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         body.ShouldNotBeNull();
         body.TotalCount.ShouldBeGreaterThanOrEqualTo(2);
         body.Items.ShouldNotBeEmpty();
@@ -202,11 +199,10 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
             dto, 
             cancellationToken: TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
         var body = await response.Content.ReadFromJsonAsync<PatientResponseDto>(
             TestContext.Current.CancellationToken);
 
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         body.ShouldNotBeNull();
         body.FirstName.ShouldBe(dto.FirstName);
         body.LastName.ShouldBe(dto.LastName);

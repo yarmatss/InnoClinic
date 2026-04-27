@@ -46,17 +46,16 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         response.Headers.Location.ShouldNotBeNull();
     }
 
+    public static TheoryData<string> InvalidNameData =>
+    [
+        "", // Empty Name
+        new string('x', 101) // Very long Name, assuming 101+ characters is invalid
+    ];
+
     [Theory]
-    [InlineData("")] // Empty Name
-    [InlineData("x101chars...")] // Very long Name, we will assume 101+ characters is invalid
+    [MemberData(nameof(InvalidNameData))]
     public async Task CreateSpecialization_WithInvalidName_Returns400(string name)
     {
-        // For the long name test to work, it must be longer than 100
-        if (name.StartsWith("x101"))
-        {
-            name = new string('x', 101);
-        }
-
         var dto = GetValidCreateDto() with { Name = name };
 
         var response = await Client.PostAsJsonAsync(
@@ -80,11 +79,10 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
             "/api/specializations?PageNumber=1&PageSize=10", 
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
         var body = await response.Content.ReadFromJsonAsync<PagedResponse<SpecializationResponseDto>>(
             TestContext.Current.CancellationToken);
 
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         body.ShouldNotBeNull();
         body.TotalCount.ShouldBeGreaterThanOrEqualTo(1);
     }
