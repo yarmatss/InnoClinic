@@ -1,5 +1,6 @@
 using FluentValidation;
 using Profiles.API.Authorization;
+using Profiles.API.Constants;
 using Profiles.API.Endpoints;
 using Profiles.API.Extensions;
 using Profiles.API.Mapping;
@@ -20,8 +21,10 @@ builder.Services.AddScopePolicies();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Frontend", policy =>
-        policy.WithOrigins("http://localhost:5500")
+    var frontendUrl = builder.Configuration["Cors:Frontend"] ?? string.Empty;
+
+    options.AddPolicy(CorsPolicies.Frontend, policy =>
+        policy.WithOrigins(frontendUrl)
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
@@ -52,10 +55,10 @@ app.UseHttpsRedirection();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
 
+app.UseCors(CorsPolicies.Frontend);
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("Frontend");
 
 app.MapPatientEndpoints();
 app.MapMedicalStaffEndpoints();
