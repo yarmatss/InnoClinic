@@ -1,3 +1,4 @@
+using Profiles.API.Authorization;
 using Profiles.API.DTOs.Specialization;
 using Profiles.Domain.Common;
 using Profiles.IntegrationTests.Infrastructure;
@@ -130,6 +131,55 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    #endregion
+
+    #region Authorization
+
+    [Fact]
+    public async Task CreateSpecialization_WithoutWriteScope_Returns403Forbidden()
+    {
+        var dto = GetValidCreateDto();
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+
+        var response = await Client.PostAsJsonAsync(
+            "/api/specializations", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task UpdateSpecialization_WithoutWriteScope_Returns403Forbidden()
+    {
+        var specId = await SeedSpecializationAsync();
+        var dto = GetValidUpdateDto();
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+
+        var response = await Client.PutAsJsonAsync(
+            $"/api/specializations/{specId}", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAllSpecializations_WhenUnauthenticated_Returns200_BecauseAllowAnonymous()
+    {
+        // Arrange: Explicitly mark request as anonymous
+        Client.DefaultRequestHeaders.Add("X-Test-Anonymous", "true");
+        await SeedSpecializationAsync();
+
+        var response = await Client.GetAsync(
+            "/api/specializations?PageNumber=1&PageSize=10", 
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     #endregion

@@ -1,3 +1,4 @@
+using Profiles.API.Authorization;
 using Profiles.API.DTOs.MedicalStaff;
 using Profiles.Domain.Common;
 using Profiles.Domain.Enums;
@@ -383,6 +384,91 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    #endregion
+
+    #region Authorization
+
+    [Fact]
+    public async Task CreateStaff_WithoutWriteScope_Returns403Forbidden()
+    {
+        var dto = GetValidCreateDto();
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+
+        var response = await Client.PostAsJsonAsync(
+            "/api/staff", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task UpdateStaff_WithoutWriteScope_Returns403Forbidden()
+    {
+        var staffId = await SeedStaffAsync();
+        var dto = GetValidUpdateDto();
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+
+        var response = await Client.PutAsJsonAsync(
+            $"/api/staff/{staffId}", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task AssignSpecializations_WithoutWriteScope_Returns403Forbidden()
+    {
+        var (staffId, specId) = await SeedDataWithSpecAsync();
+        var dto = new AssignSpecializationsDto(
+        [
+            new StaffSpecializationDto(
+                specId, 
+                true, 
+                DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)))
+        ]);
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+
+        var response = await Client.PutAsJsonAsync(
+            $"/api/staff/{staffId}/specializations", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DeactivateStaff_WithoutWriteScope_Returns403Forbidden()
+    {
+        var staffId = await SeedStaffAsync();
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+
+        var response = await Client.DeleteAsync(
+            $"/api/staff/{staffId}", 
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetStaffById_WithoutReadScope_Returns403Forbidden()
+    {
+        var staffId = await SeedStaffAsync();
+
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeWriteStaff);
+
+        var response = await Client.GetAsync(
+            $"/api/staff/{staffId}", 
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
     #endregion
