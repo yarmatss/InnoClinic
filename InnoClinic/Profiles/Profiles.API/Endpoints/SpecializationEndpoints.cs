@@ -1,5 +1,6 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Mapster;
+using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Specialization;
 using Profiles.API.Filters;
@@ -20,11 +21,14 @@ public static class SpecializationEndpoints
                 .WithTags("Specializations")
                 .AddEndpointFilter<ResultFilter>();
 
-            group.MapGet("/", GetAllSpecializationsAsync);
+            group.MapGet("/", GetAllSpecializationsAsync)
+                .AllowAnonymous();
 
-            group.MapPost("/", CreateSpecializationAsync);
+            group.MapPost("/", CreateSpecializationAsync)
+                .RequireAuthorization(Policies.WriteSpecializations);
             
-            group.MapPut("/{id:guid}", UpdateSpecializationAsync);
+            group.MapPut("/{id:guid}", UpdateSpecializationAsync)
+                .RequireAuthorization(Policies.WriteSpecializations);
 
             return group;
         }

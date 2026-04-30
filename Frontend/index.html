@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InnoClinic Auth Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1rem; margin-bottom: 0.5rem; color: #94a3b8; }
+    .container { max-width: 760px; margin: 0 auto; display: grid; gap: 1rem; }
+    .panel {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      background: #3b82f6;
+      color: #fff;
+    }
+    button.secondary { background: #ef4444; }
+    select {
+      background: #0f1117;
+      color: #e2e8f0;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.9rem;
+    }
+    .muted { color: #94a3b8; font-size: 0.9rem; }
+    .status { font-size: 0.85rem; margin-left: 0.5rem; }
+    .status.ok { color: #22c55e; }
+    .status.error { color: #ef4444; }
+    pre {
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 260px;
+      overflow: auto;
+    }
+    #section-authenticated,
+    #section-api { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel">
+      <h1>InnoClinic Auth Demo</h1>
+      <div class="muted">Authorization Code Flow + PKCE via Auth0</div>
+    </div>
+
+    <div id="section-unauthenticated" class="panel">
+      <h2>Not signed in</h2>
+      <div class="muted">Click login to start the Auth0 flow.</div>
+      <div class="row" style="margin-top:0.75rem;">
+        <button id="btn-login">Login</button>
+      </div>
+    </div>
+
+    <div id="section-authenticated" class="panel">
+      <h2>Signed in</h2>
+      <div class="row muted" style="gap:1.25rem;">
+        <div>Name: <span id="user-name">—</span></div>
+        <div>Email: <span id="user-email">—</span></div>
+        <div>Sub: <span id="user-sub">—</span></div>
+      </div>
+      <div style="margin-top:0.75rem;">
+        <details>
+          <summary class="muted">Access token</summary>
+          <div class="row" style="margin:0.5rem 0 0.25rem 0;">
+            <button id="btn-copy-token">Copy token</button>
+            <span id="copy-status" class="status"></span>
+          </div>
+          <pre id="access-token"></pre>
+        </details>
+        <details>
+          <summary class="muted">Access token payload</summary>
+          <pre id="token-payload"></pre>
+        </details>
+      </div>
+      <div class="row" style="margin-top:0.75rem;">
+        <button id="btn-logout" class="secondary">Logout</button>
+      </div>
+    </div>
+
+    <div id="section-api" class="panel">
+      <h2>Protected API call</h2>
+      <div class="row">
+        <select id="endpoint-select">
+          <option value="/api/patients">GET /api/patients</option>
+          <option value="/api/staff/active">GET /api/staff/active</option>
+          <option value="/api/specializations">GET /api/specializations</option>
+        </select>
+        <button id="btn-call">Call API</button>
+        <span id="api-status" class="status"></span>
+      </div>
+      <pre id="api-response">Response will appear here.</pre>
+    </div>
+  </div>
+
+  <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.4/auth0-spa-js.production.js"></script>
+  <script defer src="auth_config.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>
