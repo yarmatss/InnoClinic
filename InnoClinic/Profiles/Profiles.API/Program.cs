@@ -1,5 +1,8 @@
 using FluentValidation;
+using Profiles.API.Authorization;
+using Profiles.API.Constants;
 using Profiles.API.Endpoints;
+using Profiles.API.Extensions;
 using Profiles.API.Mapping;
 using Profiles.API.Middlewares;
 using Profiles.API.Validators;
@@ -13,8 +16,18 @@ MapsterConfig.Configure();
 
 builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
-// Add services to the container.
-builder.Services.AddAuthorization();
+builder.Services.AddAuth0Authentication(builder.Configuration);
+builder.Services.AddScopePolicies();
+
+builder.Services.AddCors(options =>
+{
+    var frontendUrl = builder.Configuration["Cors:Frontend"] ?? string.Empty;
+
+    options.AddPolicy(CorsPolicies.Frontend, policy =>
+        policy.WithOrigins(frontendUrl)
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -42,6 +55,9 @@ app.UseHttpsRedirection();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
 
+app.UseCors(CorsPolicies.Frontend);
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapPatientEndpoints();

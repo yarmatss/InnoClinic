@@ -1,5 +1,6 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Mapster;
+using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
 using Profiles.API.Filters;
@@ -20,15 +21,22 @@ public static class MedicalStaffEndpoints
                 .WithTags("Medical Staff")
                 .AddEndpointFilter<ResultFilter>();
 
-            group.MapGet("/{id:guid}", GetStaffByIdAsync).WithName("GetStaffById");
-            group.MapGet("/active", GetAllActiveStaffAsync);
+            group.MapGet("/{id:guid}", GetStaffByIdAsync)
+                .WithName("GetStaffById")
+                .RequireAuthorization(Policies.ReadStaff);
+            group.MapGet("/active", GetAllActiveStaffAsync)
+                .RequireAuthorization(Policies.ReadStaff);
 
-            group.MapPost("/", CreateStaffAsync);
+            group.MapPost("/", CreateStaffAsync)
+                .RequireAuthorization(Policies.WriteStaff);
 
-            group.MapPut("/{id:guid}", UpdateStaffAsync);
-            group.MapPut("/{id:guid}/specializations", AssignSpecializationsAsync);
+            group.MapPut("/{id:guid}", UpdateStaffAsync)
+                .RequireAuthorization(Policies.WriteStaff);
+            group.MapPut("/{id:guid}/specializations", AssignSpecializationsAsync)
+                .RequireAuthorization(Policies.WriteStaff);
 
-            group.MapDelete("/{id:guid}", DeactivateStaffAsync);
+            group.MapDelete("/{id:guid}", DeactivateStaffAsync)
+                .RequireAuthorization(Policies.WriteStaff);
             
             return group;
         }

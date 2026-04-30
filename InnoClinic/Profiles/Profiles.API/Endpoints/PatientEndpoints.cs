@@ -1,5 +1,6 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Mapster;
+using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
 using Profiles.API.Filters;
@@ -20,12 +21,16 @@ public static class PatientEndpoints
                 .WithTags("Patients")
                 .AddEndpointFilter<ResultFilter>();
 
-            group.MapGet("/", GetAllPatientsAsync);
-            group.MapGet("/{id:guid}", GetPatientByIdAsync);
+            group.MapGet("/", GetAllPatientsAsync)
+                .RequireAuthorization(Policies.ReadPatients);
+            group.MapGet("/{id:guid}", GetPatientByIdAsync)
+                .RequireAuthorization(Policies.ReadPatients);
 
-            group.MapPost("/", CreatePatientAsync);
+            group.MapPost("/", CreatePatientAsync)
+                .RequireAuthorization(Policies.WritePatients);
             
-            group.MapPut("/{id:guid}", UpdatePatientAsync);
+            group.MapPut("/{id:guid}", UpdatePatientAsync)
+                .RequireAuthorization(Policies.WritePatients);
 
             return group;
         }
