@@ -43,7 +43,7 @@ jobs:
         dotnet sonarscanner begin \
           /k:"yarmatss" \
           /o:"yarmatss" \
-          /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.token="$SONAR_TOKEN" \
           /d:sonar.host.url="https://sonarcloud.io" \
           /d:sonar.coverage.exclusions="**/*"
 
@@ -59,4 +59,4 @@ jobs:
     - name: End SonarCloud Analysis
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
