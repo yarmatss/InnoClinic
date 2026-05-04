@@ -10,11 +10,11 @@ public static class Policies
     public const string WriteStaff = nameof(WriteStaff);
     public const string WriteSpecializations = nameof(WriteSpecializations);
 
-    private const string ScopeReadPatients = "read:patients";
-    private const string ScopeWritePatients = "write:patients";
-    private const string ScopeReadStaff = "read:staff";
-    private const string ScopeWriteStaff = "write:staff";
-    private const string ScopeWriteSpecializations = "write:specializations";
+    public const string ScopeReadPatients = "read:patients";
+    public const string ScopeWritePatients = "write:patients";
+    public const string ScopeReadStaff = "read:staff";
+    public const string ScopeWriteStaff = "write:staff";
+    public const string ScopeWriteSpecializations = "write:specializations";
 
     extension(IServiceCollection services)
     {

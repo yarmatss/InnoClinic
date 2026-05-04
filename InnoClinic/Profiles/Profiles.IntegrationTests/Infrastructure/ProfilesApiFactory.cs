@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Profiles.DAL.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Profiles.IntegrationTests.Infrastructure;
 
@@ -17,6 +19,15 @@ public sealed class ProfilesApiFactory(PostgresContainerFixture db)
         
         builder.ConfigureTestServices(services =>
         {
+            services.AddAuthentication(defaultScheme: TestAuthHandler.AuthenticationScheme)
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                    TestAuthHandler.AuthenticationScheme, options => { });
+
+            services.AddAuthorizationBuilder()
+                .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build());
+
             services.RemoveAll<DbContextOptions<ProfilesDbContext>>();
             services.RemoveAll<ProfilesDbContext>();
             

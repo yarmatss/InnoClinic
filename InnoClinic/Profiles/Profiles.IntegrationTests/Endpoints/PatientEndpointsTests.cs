@@ -1,3 +1,4 @@
+using Profiles.API.Authorization;
 using Profiles.API.DTOs.Patient;
 using Profiles.Domain.Common;
 using Profiles.Domain.Enums;
@@ -239,6 +240,71 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    #endregion
+
+    #region Authorization
+
+    [Fact]
+    public async Task CreatePatient_WithoutWriteScope_Returns403Forbidden()
+    {
+        var dto = GetValidCreateDto();
+
+        // Arrange: Missing "write:patients" scope
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+
+        var response = await Client.PostAsJsonAsync(
+            "/api/patients", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task UpdatePatient_WithoutWriteScope_Returns403Forbidden()
+    {
+        var patientId = await SeedPatientAsync();
+        var dto = GetValidUpdateDto();
+
+        // Arrange: Missing "write:patients" scope
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+
+        var response = await Client.PutAsJsonAsync(
+            $"/api/patients/{patientId}", 
+            dto, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetPatientById_WithoutReadScope_Returns403Forbidden()
+    {
+        var patientId = await SeedPatientAsync();
+
+        // Arrange: Missing "read:patients" scope
+        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeWritePatients);
+
+        var response = await Client.GetAsync(
+            $"/api/patients/{patientId}", 
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Unauthenticated_Returns401Unauthorized()
+    {
+        // Arrange: Explicitly mark request as anonymous
+        Client.DefaultRequestHeaders.Add("X-Test-Anonymous", "true");
+
+        var response = await Client.GetAsync(
+            "/api/patients?PageNumber=1&PageSize=10", 
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     #endregion

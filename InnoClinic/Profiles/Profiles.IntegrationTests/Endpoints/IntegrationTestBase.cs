@@ -1,4 +1,5 @@
 using Profiles.IntegrationTests.Infrastructure;
+using System.Net.Http.Headers;
 
 namespace Profiles.IntegrationTests.Endpoints;
 
@@ -15,6 +16,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         Resetter = new DatabaseResetter(dbFixture.ConnectionString);
         Factory = new ProfilesApiFactory(dbFixture);
         Client = Factory.CreateClient();
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.AuthenticationScheme);
     }
 
     public async ValueTask InitializeAsync()
