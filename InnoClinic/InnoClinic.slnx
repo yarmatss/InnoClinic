@@ -9,6 +9,7 @@
     <Project Path="Profiles/Profiles.UnitTests/Profiles.UnitTests.csproj" Id="2e72be10-ec1c-4afa-9bbf-3fb6da76f9f6" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path="../.github/workflows/build-and-test.yml" />
     <File Path=".editorconfig" />
     <File Path="coverage.runsettings" />
     <File Path="Directory.Packages.props" />
