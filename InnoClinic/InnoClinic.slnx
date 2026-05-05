@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Appointments/">
+    <Project Path="Appointments/Appointments.API/Appointments.API.csproj" Id="2fa0c4b1-fc2b-412d-8bf0-6d2313058797" />
+    <Project Path="Appointments/Appointments.Domain/Appointments.Domain.csproj" Id="bd1833e9-ea15-4b32-8a88-7064d1ff0351" />
+    <Project Path="Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj" Id="685fc8b8-0ad6-4568-a93f-9919528030d1" />
+  </Folder>
   <Folder Name="/Profiles/">
     <Project Path="Profiles/Profiles.API/Profiles.API.csproj" Id="82eb973d-f53e-4846-b912-ba9c90d8f68c" />
     <Project Path="Profiles/Profiles.BLL/Profiles.BLL.csproj" Id="2f6b1986-6794-4b3a-a0af-7be9623f4a6e" />
