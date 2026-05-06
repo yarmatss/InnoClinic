@@ -39,7 +39,7 @@ public static class MedicalStaffEndpoints
             group.MapPut("/{id:guid}/schedule-overrides", SetScheduleOverridesAsync)
                 .RequireAuthorization(Policies.WriteStaff);
 
-            group.MapDelete("/{id:guid}/schedule-overrides/{date:datetime}", DeleteScheduleOverrideAsync)
+            group.MapDelete("/{id:guid}/schedule-overrides/{date}", DeleteScheduleOverrideAsync)
                 .RequireAuthorization(Policies.WriteStaff);
             group.MapDelete("/{id:guid}", DeactivateStaffAsync)
                 .RequireAuthorization(Policies.WriteStaff);
@@ -183,10 +183,10 @@ public static class MedicalStaffEndpoints
 
     private static async Task<Result> DeleteScheduleOverrideAsync(
         Guid id,
-        DateTime date,
+        DateOnly date,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        return await staffService.DeleteScheduleOverrideAsync(id, DateOnly.FromDateTime(date), ct);
+        return await staffService.DeleteScheduleOverrideAsync(id, date, ct);
     }
 }
