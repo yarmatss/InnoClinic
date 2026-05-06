@@ -10,19 +10,13 @@ public class AppointmentResultConfiguration : IEntityTypeConfiguration<Appointme
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.AppointmentId)
-            .IsRequired();
-
         builder.Property(x => x.Complaints)
-            .IsRequired()
             .HasMaxLength(1000);
 
         builder.Property(x => x.Conclusion)
-            .IsRequired()
             .HasMaxLength(1000);
 
         builder.Property(x => x.Recommendations)
-            .IsRequired()
             .HasMaxLength(1000);
     }
 }

@@ -49,7 +49,7 @@ namespace Appointments.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("Appointments.Domain.Entities.AppointmentResult", b =>
@@ -78,7 +78,7 @@ namespace Appointments.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppointmentResults");
+                    b.ToTable("AppointmentResults", (string)null);
                 });
 
             modelBuilder.Entity("Appointments.Domain.Entities.TimeSlot", b =>
@@ -101,7 +101,7 @@ namespace Appointments.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TimeSlots");
+                    b.ToTable("TimeSlots", (string)null);
                 });
 #pragma warning restore 612, 618
         }

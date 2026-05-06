@@ -10,21 +10,6 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.PatientId)
-            .IsRequired();
-
-        builder.Property(x => x.DoctorId)
-            .IsRequired();
-
-        builder.Property(x => x.StartTime)
-            .IsRequired();
-
-        builder.Property(x => x.EndTime)
-            .IsRequired();
-
-        builder.Property(x => x.Status)
-            .IsRequired();
-
         builder.Property(x => x.Comments)
             .HasMaxLength(500);
     }
