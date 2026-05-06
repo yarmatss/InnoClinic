@@ -13,4 +13,6 @@ public class MedicalStaff : Person
     public MedicalStaff? Supervisor { get; set; }
 
     public ICollection<StaffSpecialization> StaffSpecializations { get; set; } = [];
+    public ICollection<WorkingHours> WorkingHours { get; set; } = [];
+    public ICollection<ScheduleOverride> ScheduleOverrides { get; set; } = [];
 }

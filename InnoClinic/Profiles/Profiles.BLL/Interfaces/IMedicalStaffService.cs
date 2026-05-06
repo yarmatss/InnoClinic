@@ -31,4 +31,19 @@ public interface IMedicalStaffService
         Guid staffId,
         IReadOnlyList<StaffSpecializationModel> assignments,
         CancellationToken cancellationToken);
+
+    Task<Result> SetWorkingHoursAsync(
+        Guid staffId,
+        IReadOnlyList<WorkingHoursModel> workingHoursModels,
+        CancellationToken cancellationToken);
+
+    Task<Result> SetScheduleOverridesAsync(
+        Guid staffId,
+        IReadOnlyList<ScheduleOverrideModel> overrideModels,
+        CancellationToken cancellationToken);
+
+    Task<Result> DeleteScheduleOverrideAsync(
+        Guid staffId,
+        DateOnly date,
+        CancellationToken cancellationToken);
 }

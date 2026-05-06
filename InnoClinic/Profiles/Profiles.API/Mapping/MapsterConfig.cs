@@ -18,6 +18,8 @@ public static class MapsterConfig
 
         TypeAdapterConfig<MedicalStaffModel, MedicalStaff>.NewConfig()
             .Ignore(dest => dest.StaffSpecializations)
+            .Ignore(dest => dest.WorkingHours)
+            .Ignore(dest => dest.ScheduleOverrides)
             .Ignore(dest => dest.IsActive);
     }
 }
