@@ -34,7 +34,13 @@ public static class MedicalStaffEndpoints
                 .RequireAuthorization(Policies.WriteStaff);
             group.MapPut("/{id:guid}/specializations", AssignSpecializationsAsync)
                 .RequireAuthorization(Policies.WriteStaff);
+            group.MapPut("/{id:guid}/working-hours", SetWorkingHoursAsync)
+                .RequireAuthorization(Policies.WriteStaff);
+            group.MapPut("/{id:guid}/schedule-overrides", SetScheduleOverridesAsync)
+                .RequireAuthorization(Policies.WriteStaff);
 
+            group.MapDelete("/{id:guid}/schedule-overrides/{date}", DeleteScheduleOverrideAsync)
+                .RequireAuthorization(Policies.WriteStaff);
             group.MapDelete("/{id:guid}", DeactivateStaffAsync)
                 .RequireAuthorization(Policies.WriteStaff);
             
@@ -141,5 +147,46 @@ public static class MedicalStaffEndpoints
         assignments.ForEach(a => a.StaffId = id);
 
         return await staffService.AssignSpecializationsAsync(id, assignments, ct);
+    }
+
+    private static async Task<Result> SetWorkingHoursAsync(
+        Guid id,
+        SetWorkingHoursDto request,
+        IValidator<SetWorkingHoursDto> validator,
+        IMedicalStaffService staffService,
+        CancellationToken ct = default)
+    {
+        var validationResult = await validator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
+            return new ValidationError(validationResult.ToDictionary());
+
+        var workingHours = request.WorkingHours.Adapt<List<WorkingHoursModel>>();
+
+        return await staffService.SetWorkingHoursAsync(id, workingHours, ct);
+    }
+
+    private static async Task<Result> SetScheduleOverridesAsync(
+        Guid id,
+        SetScheduleOverridesDto request,
+        IValidator<SetScheduleOverridesDto> validator,
+        IMedicalStaffService staffService,
+        CancellationToken ct = default)
+    {
+        var validationResult = await validator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
+            return new ValidationError(validationResult.ToDictionary());
+
+        var overrides = request.Overrides.Adapt<List<ScheduleOverrideModel>>();
+
+        return await staffService.SetScheduleOverridesAsync(id, overrides, ct);
+    }
+
+    private static async Task<Result> DeleteScheduleOverrideAsync(
+        Guid id,
+        DateOnly date,
+        IMedicalStaffService staffService,
+        CancellationToken ct = default)
+    {
+        return await staffService.DeleteScheduleOverrideAsync(id, date, ct);
     }
 }

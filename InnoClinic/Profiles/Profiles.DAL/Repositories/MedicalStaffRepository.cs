@@ -32,6 +32,8 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
         return await GetQuery(trackChanges)
             .Include(x => x.StaffSpecializations)
                 .ThenInclude(ss => ss.Specialization)
+            .Include(x => x.WorkingHours)
+            .Include(x => x.ScheduleOverrides)
             .FirstOrDefaultAsync(e => e.Id == id, ct);
     }
 

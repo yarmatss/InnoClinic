@@ -16,4 +16,6 @@ public record MedicalStaffResponseDto(
     DateOnly HireDate,
     bool IsActive,
     Guid? SupervisorId,
-    IReadOnlyList<string>? Specializations);
+    IReadOnlyList<string>? Specializations,
+    IReadOnlyList<WorkingHoursDto>? WorkingHours,
+    IReadOnlyList<ScheduleOverrideDto>? ScheduleOverrides);

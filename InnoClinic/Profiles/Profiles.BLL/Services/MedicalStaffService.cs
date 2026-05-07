@@ -145,6 +145,136 @@ internal class MedicalStaffService(
         return Result.Success();
     }
 
+    public async Task<Result> SetWorkingHoursAsync(
+        Guid staffId,
+        IReadOnlyList<WorkingHoursModel> workingHoursModels,
+        CancellationToken cancellationToken)
+    {
+        var existingEntity = await staffRepository.GetByIdAsync(
+            staffId,
+            cancellationToken,
+            trackChanges: true);
+
+        if (existingEntity is null)
+            return MedicalStaffErrors.NotFound;
+
+        foreach (var workingHours in workingHoursModels)
+        {
+            if (workingHours.StartTime >= workingHours.EndTime && !workingHours.IsDayOff)
+                return MedicalStaffErrors.InvalidWorkingHours;
+        }
+
+        var existingWorkingHoursDict = existingEntity.WorkingHours
+            .ToDictionary(wh => wh.DayOfWeek);
+
+        var newWorkingHours = workingHoursModels.Select(wh => new WorkingHours
+        {
+            MedicalStaffId = staffId,
+            DayOfWeek = wh.DayOfWeek,
+            StartTime = wh.StartTime,
+            EndTime = wh.EndTime,
+            IsDayOff = wh.IsDayOff
+        }).ToList();
+
+        foreach (var newWh in newWorkingHours)
+        {
+            if (existingWorkingHoursDict.TryGetValue(newWh.DayOfWeek, out var existingWh))
+            {
+                existingWh.StartTime = newWh.StartTime;
+                existingWh.EndTime = newWh.EndTime;
+                existingWh.IsDayOff = newWh.IsDayOff;
+
+                existingWorkingHoursDict.Remove(newWh.DayOfWeek);
+            }
+            else
+            {
+                existingEntity.WorkingHours.Add(newWh);
+            }
+        }
+
+        foreach (var leftOver in existingWorkingHoursDict.Values)
+        {
+            existingEntity.WorkingHours.Remove(leftOver);
+        }
+
+        await staffRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> SetScheduleOverridesAsync(
+        Guid staffId,
+        IReadOnlyList<ScheduleOverrideModel> overrideModels,
+        CancellationToken cancellationToken)
+    {
+        var existingEntity = await staffRepository.GetByIdAsync(
+            staffId,
+            cancellationToken,
+            trackChanges: true);
+
+        if (existingEntity is null)
+            return MedicalStaffErrors.NotFound;
+
+        foreach (var over in overrideModels)
+        {
+            if (!over.IsDayOff && (over.StartTime >= over.EndTime || !over.StartTime.HasValue || !over.EndTime.HasValue))
+                return MedicalStaffErrors.InvalidWorkingHours;
+        }
+
+        var newOverrides = overrideModels.Select(o => new ScheduleOverride
+        {
+            MedicalStaffId = staffId,
+            Date = o.Date,
+            StartTime = o.StartTime,
+            EndTime = o.EndTime,
+            IsDayOff = o.IsDayOff
+        }).ToList();
+
+        var existingOverridesDict = existingEntity.ScheduleOverrides
+            .ToDictionary(o => o.Date);
+
+        foreach (var newOver in newOverrides)
+        {
+            if (existingOverridesDict.TryGetValue(newOver.Date, out var existingOverride))
+            {
+                existingOverride.StartTime = newOver.StartTime;
+                existingOverride.EndTime = newOver.EndTime;
+                existingOverride.IsDayOff = newOver.IsDayOff;
+            }
+            else
+            {
+                existingEntity.ScheduleOverrides.Add(newOver);
+            }
+        }
+
+        await staffRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> DeleteScheduleOverrideAsync(
+        Guid staffId,
+        DateOnly date,
+        CancellationToken cancellationToken)
+    {
+        var existingEntity = await staffRepository.GetByIdAsync(
+            staffId,
+            cancellationToken,
+            trackChanges: true);
+
+        if (existingEntity is null)
+            return MedicalStaffErrors.NotFound;
+
+        var existingOverride = existingEntity.ScheduleOverrides.FirstOrDefault(o => o.Date == date);
+        if (existingOverride is null)
+            return MedicalStaffErrors.OverrideNotFound;
+
+        existingEntity.ScheduleOverrides.Remove(existingOverride);
+        await staffRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
     private async Task<Error?> ValidateUniquenessAsync(
         MedicalStaffModel model,
         Guid? currentId,

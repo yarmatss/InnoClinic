@@ -20,4 +20,10 @@ public class MedicalStaffErrors : DomainErrors
     public static readonly Error InvalidSpecialization = CreateConflict(
         "MedicalStaff.InvalidSpecialization", 
         "One or more assigned specializations do not exist.");
+
+    public static readonly Error InvalidWorkingHours = CreateConflict(
+        "WorkingHours.InvalidTimes", 
+        "StartTime must be before EndTime.");
+
+    public static readonly Error OverrideNotFound = CreateNotFound("ScheduleOverride");
 }

@@ -9,6 +9,8 @@ public class ProfilesDbContext(DbContextOptions<ProfilesDbContext> options) : Db
     public DbSet<Patient> Patients => Set<Patient>();
     public DbSet<MedicalStaff> Staff => Set<MedicalStaff>();
     public DbSet<Specialization> Specializations => Set<Specialization>();
+    public DbSet<WorkingHours> WorkingHours => Set<WorkingHours>();
+    public DbSet<ScheduleOverride> ScheduleOverrides => Set<ScheduleOverride>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

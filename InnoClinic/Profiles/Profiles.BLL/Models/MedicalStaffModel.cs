@@ -12,4 +12,6 @@ public class MedicalStaffModel : PersonModel
     public Guid? SupervisorId { get; set; }
 
     public IReadOnlyList<StaffSpecializationModel> StaffSpecializations { get; set; } = [];
+    public IReadOnlyList<WorkingHoursModel> WorkingHours { get; set; } = [];
+    public IReadOnlyList<ScheduleOverrideModel> ScheduleOverrides { get; set; } = [];
 }
