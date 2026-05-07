@@ -24,4 +24,6 @@ public class MedicalStaffErrors : DomainErrors
     public static readonly Error InvalidWorkingHours = CreateConflict(
         "WorkingHours.InvalidTimes", 
         "StartTime must be before EndTime.");
+
+    public static readonly Error OverrideNotFound = CreateNotFound("ScheduleOverride");
 }

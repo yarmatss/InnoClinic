@@ -158,13 +158,14 @@ internal class MedicalStaffService(
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
-        foreach (var wh in workingHoursModels)
+        foreach (var workingHours in workingHoursModels)
         {
-            if (wh.StartTime >= wh.EndTime && !wh.IsDayOff)
+            if (workingHours.StartTime >= workingHours.EndTime && !workingHours.IsDayOff)
                 return MedicalStaffErrors.InvalidWorkingHours;
         }
 
-        existingEntity.WorkingHours.Clear();
+        var existingWorkingHoursDict = existingEntity.WorkingHours
+            .ToDictionary(wh => wh.DayOfWeek);
 
         var newWorkingHours = workingHoursModels.Select(wh => new WorkingHours
         {
@@ -175,9 +176,25 @@ internal class MedicalStaffService(
             IsDayOff = wh.IsDayOff
         }).ToList();
 
-        foreach (var wh in newWorkingHours)
+        foreach (var newWh in newWorkingHours)
         {
-            existingEntity.WorkingHours.Add(wh);
+            if (existingWorkingHoursDict.TryGetValue(newWh.DayOfWeek, out var existingWh))
+            {
+                existingWh.StartTime = newWh.StartTime;
+                existingWh.EndTime = newWh.EndTime;
+                existingWh.IsDayOff = newWh.IsDayOff;
+
+                existingWorkingHoursDict.Remove(newWh.DayOfWeek);
+            }
+            else
+            {
+                existingEntity.WorkingHours.Add(newWh);
+            }
+        }
+
+        foreach (var leftOver in existingWorkingHoursDict.Values)
+        {
+            existingEntity.WorkingHours.Remove(leftOver);
         }
 
         await staffRepository.SaveChangesAsync(cancellationToken);
@@ -204,7 +221,6 @@ internal class MedicalStaffService(
                 return MedicalStaffErrors.InvalidWorkingHours;
         }
 
-        // We only replace the submitted dates. Existing dates are kept untouched.
         var newOverrides = overrideModels.Select(o => new ScheduleOverride
         {
             MedicalStaffId = staffId,
@@ -214,14 +230,21 @@ internal class MedicalStaffService(
             IsDayOff = o.IsDayOff
         }).ToList();
 
+        var existingOverridesDict = existingEntity.ScheduleOverrides
+            .ToDictionary(o => o.Date);
+
         foreach (var newOver in newOverrides)
         {
-            var existingOverride = existingEntity.ScheduleOverrides.FirstOrDefault(o => o.Date == newOver.Date);
-            if (existingOverride is not null)
+            if (existingOverridesDict.TryGetValue(newOver.Date, out var existingOverride))
             {
-                existingEntity.ScheduleOverrides.Remove(existingOverride);
+                existingOverride.StartTime = newOver.StartTime;
+                existingOverride.EndTime = newOver.EndTime;
+                existingOverride.IsDayOff = newOver.IsDayOff;
             }
-            existingEntity.ScheduleOverrides.Add(newOver);
+            else
+            {
+                existingEntity.ScheduleOverrides.Add(newOver);
+            }
         }
 
         await staffRepository.SaveChangesAsync(cancellationToken);
@@ -244,7 +267,7 @@ internal class MedicalStaffService(
 
         var existingOverride = existingEntity.ScheduleOverrides.FirstOrDefault(o => o.Date == date);
         if (existingOverride is null)
-            return Result.Success();
+            return MedicalStaffErrors.OverrideNotFound;
 
         existingEntity.ScheduleOverrides.Remove(existingOverride);
         await staffRepository.SaveChangesAsync(cancellationToken);
