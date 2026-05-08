@@ -15,11 +15,12 @@ public class MedicalStaffServiceTests
 {
     private readonly IMedicalStaffRepository _staffRepo = Substitute.For<IMedicalStaffRepository>();
     private readonly ISpecializationRepository _specRepo = Substitute.For<ISpecializationRepository>();
+    private readonly IOutboxRepository _outboxRepo = Substitute.For<IOutboxRepository>();
     private readonly MedicalStaffService _sut;
 
     public MedicalStaffServiceTests()
     {
-        _sut = new MedicalStaffService(_staffRepo, _specRepo);
+        _sut = new MedicalStaffService(_staffRepo, _specRepo, _outboxRepo);
     }
 
     #region CreateAsync

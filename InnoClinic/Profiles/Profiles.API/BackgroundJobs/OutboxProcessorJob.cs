@@ -60,7 +60,7 @@ public class OutboxProcessorJob(
             }
             catch (RpcException rpcEx)
             {
-                logger.LogWarning("gRPC network error for Outbox Message {Id}. Retrying later.", message.Id);
+                logger.LogWarning(rpcEx, "gRPC network error for Outbox Message {Id}. Retrying later.", message.Id);
                 message.Error = $"gRPC Error: {rpcEx.StatusCode}";
             }
             catch (Exception ex)

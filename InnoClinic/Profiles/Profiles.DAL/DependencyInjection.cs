@@ -7,6 +7,7 @@ using Profiles.DAL.Data;
 using Profiles.DAL.Interfaces;
 using Profiles.DAL.Repositories;
 using Profiles.Domain.Constants;
+using System.Net.Security;
 
 namespace Profiles.DAL;
 
@@ -30,7 +31,7 @@ public static class DependencyInjection
             services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
             {
                 var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl] 
-                    ?? throw new ArgumentNullException($"{ConnectionConstants.AppointmentsApiUrl} not found in configuration.");
+                    ?? throw new ArgumentNullException(ConnectionConstants.AppointmentsApiUrl, "AppointmentsApiUrl not found in configuration.");
 
                 options.Address = new Uri(appointmentsApiUrl);
             })
@@ -42,9 +43,15 @@ public static class DependencyInjection
                     PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
                     KeepAlivePingDelay = TimeSpan.FromSeconds(60),
                     KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                    SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+                    SslOptions = new SslClientAuthenticationOptions
                     {
-                        RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                        RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => 
+                        {
+                            if (sslPolicyErrors == SslPolicyErrors.None)
+                                return true;
+
+                            return configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
+                        }
                     }
                 };
                 return handler;

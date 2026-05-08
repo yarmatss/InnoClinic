@@ -52,11 +52,11 @@ internal class MedicalStaffService(
 
     public async Task<Result<PagedResponse<MedicalStaffModel>>> GetPagedAsync(
         MedicalStaffQueryParameters query,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var (entities, totalCount) = await staffRepository.GetPagedAsync(
             query,
-            ct);
+            cancellationToken);
 
         var pagedResult = new PagedResponse<MedicalStaffModel>
         {
