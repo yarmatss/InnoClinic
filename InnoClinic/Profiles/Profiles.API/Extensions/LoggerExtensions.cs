@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// 1000-1999: Request logging;
+/// 2000-2999: Background jobs;
 /// 4000-4999: Warning and handled exceptions;
 /// 5000-5999: Critical exceptions
 /// </summary>
@@ -32,6 +33,20 @@ public static partial class LoggerExtensions
         string traceId);
 
     [LoggerMessage(
+        EventId = 2000,
+        Level = LogLevel.Information,
+        Message = "Outbox Processor Background Service is starting.")]
+    public static partial void LogOutboxProcessorStarting(this ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2001,
+        Level = LogLevel.Information,
+        Message = "Successfully synced Staff ID: {StaffId}")]
+    public static partial void LogOutboxSyncSuccess(
+        this ILogger logger,
+        string staffId);
+
+    [LoggerMessage(
         EventId = 4000,
         Level = LogLevel.Warning,
         Message = "Bad request payload received at {Path}. TraceId: {TraceId}. Exception: {Message}")]
@@ -40,6 +55,15 @@ public static partial class LoggerExtensions
         string path,
         string traceId,
         string message);
+
+    [LoggerMessage(
+        EventId = 4001,
+        Level = LogLevel.Warning,
+        Message = "gRPC network error for Outbox Message {Id}. Retrying later.")]
+    public static partial void LogOutboxGrpcError(
+        this ILogger logger,
+        Exception exception,
+        Guid id);
 
     [LoggerMessage(
         EventId = 5000,
@@ -51,4 +75,21 @@ public static partial class LoggerExtensions
         string method,
         string path,
         string traceId);
+
+    [LoggerMessage(
+        EventId = 5001,
+        Level = LogLevel.Error,
+        Message = "Failed to process Outbox Message {Id}")]
+    public static partial void LogOutboxProcessingError(
+        this ILogger logger,
+        Exception exception,
+        Guid id);
+
+    [LoggerMessage(
+        EventId = 5002,
+        Level = LogLevel.Error,
+        Message = "A fatal error occurred while processing the outbox.")]
+    public static partial void LogOutboxFatalError(
+        this ILogger logger,
+        Exception exception);
 }

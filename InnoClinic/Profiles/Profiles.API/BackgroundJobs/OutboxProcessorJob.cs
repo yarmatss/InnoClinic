@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
 using InnoClinic.Shared.Protos;
+using Profiles.API.Extensions;
 using Profiles.DAL.Interfaces;
 
 namespace Profiles.API.BackgroundJobs;
@@ -15,7 +16,7 @@ public class OutboxProcessorJob(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Outbox Processor Background Service is starting.");
+        logger.LogOutboxProcessorStarting();
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -25,7 +26,7 @@ public class OutboxProcessorJob(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "A fatal error occurred while processing the outbox.");
+                logger.LogOutboxFatalError(ex);
             }
 
             await Task.Delay(TimeSpan.FromSeconds(_intervalInSeconds), stoppingToken);
@@ -55,17 +56,17 @@ public class OutboxProcessorJob(
                 if (response.Success)
                 {
                     message.ProcessedOnUtc = DateTime.UtcNow;
-                    logger.LogInformation("Successfully synced Staff ID: {StaffId}", request.MedicalStaffId);
+                    logger.LogOutboxSyncSuccess(request.MedicalStaffId);
                 }
             }
             catch (RpcException rpcEx)
             {
-                logger.LogWarning(rpcEx, "gRPC network error for Outbox Message {Id}. Retrying later.", message.Id);
+                logger.LogOutboxGrpcError(rpcEx, message.Id);
                 message.Error = $"gRPC Error: {rpcEx.StatusCode}";
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to process Outbox Message {Id}", message.Id);
+                logger.LogOutboxProcessingError(ex, message.Id);
                 message.Error = ex.Message;
             }
 
