@@ -31,7 +31,7 @@ public static class DependencyInjection
             services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
             {
                 var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl] 
-                    ?? throw new ArgumentNullException(ConnectionConstants.AppointmentsApiUrl, "AppointmentsApiUrl not found in configuration.");
+                    ?? throw new InvalidOperationException($"{ConnectionConstants.AppointmentsApiUrl} not found in configuration.");
 
                 options.Address = new Uri(appointmentsApiUrl);
             })

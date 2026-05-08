@@ -54,7 +54,7 @@ jobs:
       run: dotnet build InnoClinic.slnx --no-restore --configuration Release
 
     - name: Run Tests
-      run: dotnet test InnoClinic.slnx --no-build --configuration Release --verbosity normal
+      run: dotnet test --solution InnoClinic.slnx --no-build --configuration Release --verbosity normal
 
     - name: End SonarCloud Analysis
       env:
