@@ -1,17 +1,20 @@
-﻿using Mapster;
+﻿using Google.Protobuf;
+using InnoClinic.Shared.Protos;
+using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
-using Profiles.Domain.Models;
 using Profiles.Domain.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Services;
 
 internal class MedicalStaffService(
     IMedicalStaffRepository staffRepository,
-    ISpecializationRepository specializationRepository) : IMedicalStaffService
+    ISpecializationRepository specializationRepository,
+    IOutboxRepository outboxRepository) : IMedicalStaffService
 {
     public async Task<Result<MedicalStaffModel>> CreateAsync(
         MedicalStaffModel model, 
@@ -22,9 +25,11 @@ internal class MedicalStaffService(
             return validationError;
 
         var entity = model.Adapt<MedicalStaff>();
+        entity.Id = Guid.NewGuid();
         entity.IsActive = true;
 
         staffRepository.MarkAdd(entity);
+        QueueProfileSyncEvent(entity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return entity.Adapt<MedicalStaffModel>();
@@ -85,6 +90,7 @@ internal class MedicalStaffService(
         model.Adapt(existingEntity);
 
         staffRepository.MarkUpdate(existingEntity);
+        QueueProfileSyncEvent(existingEntity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return existingEntity.Adapt<MedicalStaffModel>();
@@ -103,6 +109,7 @@ internal class MedicalStaffService(
         existingEntity.IsActive = false;
 
         staffRepository.MarkUpdate(existingEntity);
+        QueueProfileSyncEvent(existingEntity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
@@ -140,6 +147,7 @@ internal class MedicalStaffService(
             existingEntity.StaffSpecializations.Add(spec);
         }
 
+        QueueProfileSyncEvent(existingEntity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
@@ -160,7 +168,7 @@ internal class MedicalStaffService(
 
         foreach (var workingHours in workingHoursModels)
         {
-            if (workingHours.StartTime >= workingHours.EndTime && !workingHours.IsDayOff)
+            if (!workingHours.IsDayOff && workingHours.StartTime >= workingHours.EndTime)
                 return MedicalStaffErrors.InvalidWorkingHours;
         }
 
@@ -197,6 +205,7 @@ internal class MedicalStaffService(
             existingEntity.WorkingHours.Remove(leftOver);
         }
 
+        QueueProfileSyncEvent(existingEntity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
@@ -247,6 +256,7 @@ internal class MedicalStaffService(
             }
         }
 
+        QueueProfileSyncEvent(existingEntity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
@@ -270,6 +280,8 @@ internal class MedicalStaffService(
             return MedicalStaffErrors.OverrideNotFound;
 
         existingEntity.ScheduleOverrides.Remove(existingOverride);
+
+        QueueProfileSyncEvent(existingEntity);
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
@@ -302,5 +314,21 @@ internal class MedicalStaffService(
         }
 
         return null;
+    }
+
+    private void QueueProfileSyncEvent(MedicalStaff staffEntity)
+    {
+        var syncRequest = staffEntity.Adapt<SyncStaffProfileRequest>();
+
+        string jsonPayload = JsonFormatter.Default.Format(syncRequest);
+
+        var outboxMessage = new OutboxMessage
+        {
+            Type = nameof(SyncStaffProfileRequest),
+            Content = jsonPayload,
+            OccurredOnUtc = DateTime.UtcNow
+        };
+
+        outboxRepository.MarkAdd(outboxMessage);
     }
 }

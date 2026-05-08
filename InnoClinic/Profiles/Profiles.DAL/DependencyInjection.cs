@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using InnoClinic.Shared.Protos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +25,30 @@ public static class DependencyInjection
             services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IMedicalStaffRepository, MedicalStaffRepository>();
             services.AddScoped<ISpecializationRepository, SpecializationRepository>();
+            services.AddScoped<IOutboxRepository, OutboxRepository>();
+
+            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
+            {
+                var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl] 
+                    ?? throw new ArgumentNullException($"{ConnectionConstants.AppointmentsApiUrl} not found in configuration.");
+
+                options.Address = new Uri(appointmentsApiUrl);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var handler = new SocketsHttpHandler
+                {
+                    EnableMultipleHttp2Connections = true,
+                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                    KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+                    SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+                    {
+                        RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                    }
+                };
+                return handler;
+            });
 
             return services;
         }

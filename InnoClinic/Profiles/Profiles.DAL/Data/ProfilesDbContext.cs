@@ -11,6 +11,7 @@ public class ProfilesDbContext(DbContextOptions<ProfilesDbContext> options) : Db
     public DbSet<Specialization> Specializations => Set<Specialization>();
     public DbSet<WorkingHours> WorkingHours => Set<WorkingHours>();
     public DbSet<ScheduleOverride> ScheduleOverrides => Set<ScheduleOverride>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

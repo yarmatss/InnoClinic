@@ -1,0 +1,34 @@
+syntax = "proto3";
+option csharp_namespace = "InnoClinic.Shared.Protos";
+package inno_clinic.shared;
+
+service StaffScheduleSyncService {
+  rpc SyncStaffProfile (SyncStaffProfileRequest) returns (SyncStaffProfileResponse);
+}
+
+message SyncStaffProfileRequest {
+  string medical_staff_id = 1;
+  bool is_active = 2;
+
+  repeated string specialization_ids = 3;
+  repeated WorkingHoursMessage working_hours = 4;
+  repeated ScheduleOverrideMessage schedule_overrides = 5;
+}
+
+message SyncStaffProfileResponse {
+  bool success = 1;
+}
+
+message WorkingHoursMessage {
+  int32 day_of_week = 1;   // 0 = Sunday, 1 = Monday...
+  string start_time = 2;   // Format: "HH:mm:ss"
+  string end_time = 3;     // Format: "HH:mm:ss"
+  bool is_day_off = 4;
+}
+
+message ScheduleOverrideMessage {
+  string date = 1;         // Format: "yyyy-MM-dd"
+  string start_time = 2;   // Format: "HH:mm:ss" (can be empty string if day off)
+  string end_time = 3;     // Format: "HH:mm:ss" (can be empty string if day off)
+  bool is_day_off = 4;
+}

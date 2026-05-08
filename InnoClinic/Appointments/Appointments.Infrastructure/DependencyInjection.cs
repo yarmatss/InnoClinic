@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 
 namespace Appointments.Infrastructure;
 
@@ -22,6 +23,12 @@ public static class DependencyInjection
 
             services.AddSingleton<ISqlConnectionFactory>(_ =>
                 new SqlConnectionFactory(connectionString));
+
+            var redisConnectionString = configuration.GetConnectionString(ConnectionConstants.RedisConnection)
+                ?? throw new InvalidOperationException("Redis connection string not found.");
+
+            services.AddSingleton<IConnectionMultiplexer>(_ =>
+                ConnectionMultiplexer.Connect(redisConnectionString));
 
             return services;
         }

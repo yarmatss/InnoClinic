@@ -1,0 +1,99 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: innoclinic_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 
+    restart: unless-stopped
+
+  redis:
+    image: redis:8-alpine
+    container_name: innoclinic_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 
+    restart: unless-stopped
+
+  profiles.api:
+    image: ${DOCKER_REGISTRY-}profilesapi
+    container_name: profiles_api
+    build:
+      context: .
+      dockerfile: Profiles/Profiles.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:8080"
+      - "5001:8081" 
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx 
+      - ConnectionStrings__DefaultConnection=${Profiles__DbConnection}
+      - AppointmentsApiUrl=https://appointments.api:8083
+      - DataProtection__Path=/app/keys
+    volumes:
+      - ${HOST_CERT_PATH}:/https:ro
+      - ./keys/profiles:/app/keys
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  appointments.api:
+    image: ${DOCKER_REGISTRY-}appointmentsapi
+    container_name: appointments_api
+    build:
+      context: .
+      dockerfile: Appointments/Appointments.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "6000:8082"
+      - "6001:8083" 
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=
+      - ASPNETCORE_HTTP_PORTS=8082
+      - ASPNETCORE_HTTPS_PORTS=8083
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx 
+      - ConnectionStrings__DefaultConnection=${Appointments__DbConnection}
+      - ConnectionStrings__Redis=${Appointments__RedisConnection}
+    volumes:
+      - ${HOST_CERT_PATH}:/https:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s 
+
+volumes:
+  postgres_data:
+  redis_data:
