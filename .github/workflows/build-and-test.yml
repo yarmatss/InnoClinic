@@ -48,13 +48,13 @@ jobs:
           /d:sonar.coverage.exclusions="**/*"
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore InnoClinic.slnx
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build InnoClinic.slnx --no-restore --configuration Release
 
     - name: Run Tests
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      run: dotnet test InnoClinic.slnx --no-build --configuration Release --verbosity normal
 
     - name: End SonarCloud Analysis
       env:
