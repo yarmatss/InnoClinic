@@ -19,7 +19,8 @@ COPY ["Shared/Shared/Shared.csproj", "Shared/Shared/"]
 COPY ["Profiles/Profiles.DAL/Profiles.DAL.csproj", "Profiles/Profiles.DAL/"]
 COPY ["Profiles/Profiles.Domain/Profiles.Domain.csproj", "Profiles/Profiles.Domain/"]
 RUN dotnet restore "./Profiles/Profiles.API/Profiles.API.csproj"
-COPY . .
+COPY Profiles/ Profiles/
+COPY Shared/ Shared/
 WORKDIR "/src/Profiles/Profiles.API"
 RUN dotnet build "./Profiles.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -30,6 +31,7 @@ RUN dotnet publish "./Profiles.API.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
+USER $APP_UID
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Profiles.API.dll"]

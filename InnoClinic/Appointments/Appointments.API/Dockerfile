@@ -19,7 +19,8 @@ COPY ["Appointments/Appointments.Infrastructure/Appointments.Infrastructure.cspr
 COPY ["Shared/Shared/Shared.csproj", "Shared/Shared/"]
 
 RUN dotnet restore "./Appointments/Appointments.API/Appointments.API.csproj"
-COPY . .
+COPY Appointments/ Appointments/
+COPY Shared/ Shared/
 WORKDIR "/src/Appointments/Appointments.API"
 RUN dotnet build "./Appointments.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -30,6 +31,7 @@ RUN dotnet publish "./Appointments.API.csproj" -c $BUILD_CONFIGURATION -o /app/p
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
+USER $APP_UID
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Appointments.API.dll"]
