@@ -1,18 +1,21 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
 using InnoClinic.Shared.Protos;
+using Microsoft.Extensions.Options;
 using Profiles.API.Extensions;
+using Profiles.API.Options;
 using Profiles.DAL.Interfaces;
 
 namespace Profiles.API.BackgroundJobs;
 
 public class OutboxProcessorJob(
     IServiceScopeFactory scopeFactory,
-    IConfiguration configuration,
+    IOptionsMonitor<OutboxOptions> optionsMonitor,
+    TimeProvider timeProvider,
     ILogger<OutboxProcessorJob> logger) : BackgroundService
 {
-    private readonly int _intervalInSeconds = configuration.GetValue("Outbox:IntervalInSeconds", 5);
-    private readonly int _batchSize = configuration.GetValue("Outbox:BatchSize", 20);
+    private int IntervalInSeconds => optionsMonitor.CurrentValue.IntervalInSeconds;
+    private int BatchSize => optionsMonitor.CurrentValue.BatchSize;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -29,7 +32,7 @@ public class OutboxProcessorJob(
                 logger.LogOutboxFatalError(ex);
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(_intervalInSeconds), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(IntervalInSeconds), timeProvider, stoppingToken);
         }
     }
 
@@ -40,7 +43,7 @@ public class OutboxProcessorJob(
         var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
         var grpcClient = scope.ServiceProvider.GetRequiredService<StaffScheduleSyncService.StaffScheduleSyncServiceClient>();
 
-        var messages = await outboxRepository.GetUnprocessedMessagesAsync(_batchSize, stoppingToken);
+        var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, stoppingToken);
 
         if (messages.Count == 0) 
             return;
@@ -55,7 +58,7 @@ public class OutboxProcessorJob(
 
                 if (response.Success)
                 {
-                    message.ProcessedOnUtc = DateTime.UtcNow;
+                    message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
                     logger.LogOutboxSyncSuccess(request.MedicalStaffId);
                 }
             }

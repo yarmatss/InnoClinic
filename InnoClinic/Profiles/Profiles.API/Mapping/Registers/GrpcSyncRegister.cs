@@ -8,12 +8,6 @@ public class GrpcSyncRegister : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.ForType<TimeSpan, string>()
-            .MapWith(src => src.ToString(@"hh\:mm\:ss"));
-
-        config.ForType<TimeSpan?, string>()
-            .MapWith(src => src.HasValue ? src.Value.ToString(@"hh\:mm\:ss") : string.Empty);
-
         config.NewConfig<MedicalStaff, SyncStaffProfileRequest>()
             .Map(dest => dest.MedicalStaffId, src => src.Id.ToString())
             .Map(dest => dest.IsActive, src => src.IsActive)

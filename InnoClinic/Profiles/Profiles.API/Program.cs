@@ -7,6 +7,7 @@ using Profiles.API.Constants;
 using Profiles.API.Endpoints;
 using Profiles.API.Extensions;
 using Profiles.API.Middlewares;
+using Profiles.API.Options;
 using Profiles.API.Validators;
 using Profiles.BLL;
 using Profiles.DAL;
@@ -46,6 +47,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.Configure<OutboxOptions>(builder.Configuration.GetSection("Outbox"));
 
 builder.Services.AddHostedService<OutboxProcessorJob>();
 
