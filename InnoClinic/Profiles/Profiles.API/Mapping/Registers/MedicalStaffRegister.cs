@@ -1,22 +1,22 @@
-﻿using Mapster;
+using Mapster;
 using Profiles.API.DTOs.MedicalStaff;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 
-namespace Profiles.API.Mapping;
+namespace Profiles.API.Mapping.Registers;
 
-public static class MapsterConfig
+public class MedicalStaffRegister : IRegister
 {
-    public static void Configure()
+    public void Register(TypeAdapterConfig config)
     {
-        TypeAdapterConfig<MedicalStaffModel, MedicalStaffResponseDto>.NewConfig()
+        config.NewConfig<MedicalStaffModel, MedicalStaffResponseDto>()
             .Map(dest => dest.Specializations, src => src.StaffSpecializations == null
                 ? Array.Empty<string>()
                 : src.StaffSpecializations
                     .Where(ss => ss.Specialization != null)
                     .Select(ss => ss.Specialization!.Name));
 
-        TypeAdapterConfig<MedicalStaffModel, MedicalStaff>.NewConfig()
+        config.NewConfig<MedicalStaffModel, MedicalStaff>()
             .Ignore(dest => dest.StaffSpecializations)
             .Ignore(dest => dest.WorkingHours)
             .Ignore(dest => dest.ScheduleOverrides)

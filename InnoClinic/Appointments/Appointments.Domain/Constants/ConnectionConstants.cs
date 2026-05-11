@@ -3,4 +3,5 @@
 public static class ConnectionConstants
 {
     public const string DefaultConnection = "DefaultConnection";
+    public const string RedisConnection = "Redis";
 }

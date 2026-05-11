@@ -13,10 +13,16 @@
     <Project Path="Profiles/Profiles.Tests.Common/Profiles.Tests.Common.csproj" Id="d855a691-8015-4bcd-b625-fc99f0c37ce5" />
     <Project Path="Profiles/Profiles.UnitTests/Profiles.UnitTests.csproj" Id="2e72be10-ec1c-4afa-9bbf-3fb6da76f9f6" />
   </Folder>
+  <Folder Name="/Shared/">
+    <Project Path="Shared/Shared/Shared.csproj" Id="3a7abf8f-fe70-465c-bff0-6647e9733ad6" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path="../.github/workflows/build-and-test.yml" />
     <File Path=".editorconfig" />
     <File Path="coverage.runsettings" />
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>

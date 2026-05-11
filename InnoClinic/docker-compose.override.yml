@@ -1,0 +1,14 @@
+services:
+  profiles.api:
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    volumes:
+      - ${HOST_CERT_PATH}:/https:ro
+
+  appointments.api:
+    ports:
+      - "6000:8082"
+      - "6001:8083"
+    volumes:
+      - ${HOST_CERT_PATH}:/https:ro
