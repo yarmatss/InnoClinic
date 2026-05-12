@@ -1,20 +1,22 @@
-name: .NET CI
+name: Appointments Microservice CI
 
 on:
   push:
     branches: ["main"]
+    paths: ["Backend/Appointments/**", "Backend/Shared/**", ".github/workflows/appointments-ci.yml"]
   pull_request:
     branches: ["main"]
+    paths: ["Backend/Appointments/**", "Backend/Shared/**"]
 
 defaults:
   run:
-    working-directory: ./InnoClinic
+    working-directory: ./Backend
 
 jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -32,7 +34,7 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install SonarScanner for .NET
+    - name: Install SonarScanner
       run: dotnet tool install --global dotnet-sonarscanner
 
     - name: Begin SonarCloud Analysis
@@ -41,20 +43,17 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
         dotnet sonarscanner begin \
-          /k:"yarmatss_InnoClinic" \
+          /k:"yarmatss_InnoClinic_Appointments" \
           /o:"yarmatss" \
           /d:sonar.token="$SONAR_TOKEN" \
           /d:sonar.host.url="https://sonarcloud.io" \
           /d:sonar.coverage.exclusions="**/*"
 
     - name: Restore dependencies
-      run: dotnet restore InnoClinic.slnx
+      run: dotnet restore InnoClinic.Appointments.slnx
 
     - name: Build
-      run: dotnet build InnoClinic.slnx --no-restore --configuration Release
-
-    - name: Run Tests
-      run: dotnet test --solution InnoClinic.slnx --no-build --configuration Release --verbosity normal
+      run: dotnet build InnoClinic.Appointments.slnx --no-restore --configuration Release
 
     - name: End SonarCloud Analysis
       env:

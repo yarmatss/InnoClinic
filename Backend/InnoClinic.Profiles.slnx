@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Profiles/Profiles.API/Profiles.API.csproj" />
+    <Project Path="Profiles/Profiles.BLL/Profiles.BLL.csproj" />
+    <Project Path="Profiles/Profiles.DAL/Profiles.DAL.csproj" />
+    <Project Path="Profiles/Profiles.Domain/Profiles.Domain.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="Profiles/Profiles.IntegrationTests/Profiles.IntegrationTests.csproj" />
+    <Project Path="Profiles/Profiles.Tests.Common/Profiles.Tests.Common.csproj" />
+    <Project Path="Profiles/Profiles.UnitTests/Profiles.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="Shared/Shared/Shared.csproj" />
+  </Folder>
+  <Folder Name="/solution-items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
+    <File Path="coverage.runsettings" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

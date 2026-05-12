@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Appointments/Appointments.API/Appointments.API.csproj" />
+    <Project Path="Appointments/Appointments.Domain/Appointments.Domain.csproj" />
+    <Project Path="Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="Shared/Shared/Shared.csproj" />
+  </Folder>
+  <Folder Name="/solution-items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

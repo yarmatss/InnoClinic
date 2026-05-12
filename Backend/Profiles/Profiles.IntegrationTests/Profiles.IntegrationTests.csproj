@@ -24,6 +24,7 @@
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Testcontainers.XunitV3" />
     <PackageReference Include="xunit.v3.mtp-v2" />
+	<PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>
 
   <ItemGroup>
