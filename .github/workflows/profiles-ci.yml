@@ -60,8 +60,10 @@ jobs:
         dotnet test --solution InnoClinic.Profiles.slnx 
         --no-build 
         --configuration Release 
-        --settings coverage.runsettings 
-        --collect:"XPlat Code Coverage"
+        -- 
+        --coverage 
+        --coverage-settings coverage.runsettings 
+        --coverage-output-format xml
 
     - name: End SonarCloud Analysis
       env:
