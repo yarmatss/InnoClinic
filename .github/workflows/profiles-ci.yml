@@ -41,6 +41,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        EXCLUSIONS: >-
+          **/Migrations/**,
+          **/DTOs/**,
+          **/Models/**,
+          **/Profiles.DAL/**,
+          **/Profiles.Domain/**,
+          **/*Program.cs,
+          **/Constants/**
       run: |
         dotnet sonarscanner begin \
           /k:"yarmatss_InnoClinic_Profiles" \
@@ -48,7 +56,7 @@ jobs:
           /d:sonar.token="$SONAR_TOKEN" \
           /d:sonar.host.url="https://sonarcloud.io" \
           /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/*.xml" \
-          /d:sonar.coverage.exclusions="**/Migrations/**,**/DTOs/**,**/Models/**,**/Profiles.DAL/**,**/Profiles.Domain/**"
+          /d:sonar.coverage.exclusions="$EXCLUSIONS"
 
     - name: Restore dependencies
       run: dotnet restore InnoClinic.Profiles.slnx

@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+	<SonarQubeTestProject>true</SonarQubeTestProject>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Bogus" />
   </ItemGroup>
