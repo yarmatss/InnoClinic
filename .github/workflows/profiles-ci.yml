@@ -47,7 +47,8 @@ jobs:
           /o:"yarmatss" \
           /d:sonar.token="$SONAR_TOKEN" \
           /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/*.xml"
+          /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/**/*.xml" \
+          /d:sonar.coverage.exclusions="**/Migrations/**,**/DTOs/**,**/Models/**,**/Profiles.DAL/**,**/Profiles.Domain/**"
 
     - name: Restore dependencies
       run: dotnet restore InnoClinic.Profiles.slnx
