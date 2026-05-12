@@ -46,7 +46,8 @@ jobs:
           /k:"yarmatss_InnoClinic_Appointments" \
           /o:"yarmatss" \
           /d:sonar.token="$SONAR_TOKEN" \
-          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.coverage.exclusions="**/*"
 
     - name: Restore dependencies
       run: dotnet restore InnoClinic.Appointments.slnx
