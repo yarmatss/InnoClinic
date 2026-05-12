@@ -482,5 +482,4 @@ $RECYCLE.BIN/
 *.swp
 
 # Data Protection keys
-InnoClinic/keys/
-
+Backend/keys/
