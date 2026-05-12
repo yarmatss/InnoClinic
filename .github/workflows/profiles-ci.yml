@@ -57,7 +57,7 @@ jobs:
 
     - name: Run Tests
       run: >
-        dotnet test InnoClinic.Profiles.slnx 
+        dotnet test --solution InnoClinic.Profiles.slnx 
         --no-build 
         --configuration Release 
         --settings coverage.runsettings 
