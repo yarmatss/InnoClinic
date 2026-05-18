@@ -59,6 +59,8 @@ jobs:
           /d:sonar.coverage.exclusions="$EXCLUSIONS"
 
     - name: Restore dependencies
+      env:
+        GITHUB_TOKEN: ${{ secrets.NUGET_TOKEN }}
       run: dotnet restore InnoClinic.Profiles.slnx
 
     - name: Build

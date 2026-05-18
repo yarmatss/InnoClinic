@@ -50,6 +50,8 @@ jobs:
           /d:sonar.coverage.exclusions="**/*"
 
     - name: Restore dependencies
+      env:
+        GITHUB_TOKEN: ${{ secrets.NUGET_TOKEN }}
       run: dotnet restore InnoClinic.Appointments.slnx
 
     - name: Build
