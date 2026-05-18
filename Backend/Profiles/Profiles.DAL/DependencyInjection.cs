@@ -1,4 +1,4 @@
-﻿using InnoClinic.Shared.Protos;
+﻿using InnoClinic.Contracts.Grpc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

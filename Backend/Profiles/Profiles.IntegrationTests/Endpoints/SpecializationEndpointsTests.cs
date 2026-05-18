@@ -1,6 +1,6 @@
 using Profiles.API.Authorization;
 using Profiles.API.DTOs.Specialization;
-using Profiles.Domain.Common;
+using InnoClinic.Core.Common;
 using Profiles.IntegrationTests.Infrastructure;
 using Profiles.Tests.Common.Fakes.Entities;
 using Shouldly;

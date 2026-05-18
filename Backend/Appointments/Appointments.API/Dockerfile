@@ -11,16 +11,16 @@ EXPOSE 8083
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG GITHUB_TOKEN
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
+COPY ["nuget.config", "."]
 COPY ["Appointments/Appointments.API/Appointments.API.csproj", "Appointments/Appointments.API/"]
 COPY ["Appointments/Appointments.Domain/Appointments.Domain.csproj", "Appointments/Appointments.Domain/"]
 COPY ["Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj", "Appointments/Appointments.Infrastructure/"]
-COPY ["Shared/Shared/Shared.csproj", "Shared/Shared/"]
 
 RUN dotnet restore "./Appointments/Appointments.API/Appointments.API.csproj"
 COPY Appointments/ Appointments/
-COPY Shared/ Shared/
 WORKDIR "/src/Appointments/Appointments.API"
 RUN dotnet build "./Appointments.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 

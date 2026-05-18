@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="InnoClinic.Contracts.Grpc" />
+    <PackageReference Include="InnoClinic.Core" />
     <PackageReference Include="Mapster" />
     <PackageReference Include="Mapster.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Shared\Shared\Shared.csproj" />
     <ProjectReference Include="..\Profiles.DAL\Profiles.DAL.csproj" />
   </ItemGroup>
 

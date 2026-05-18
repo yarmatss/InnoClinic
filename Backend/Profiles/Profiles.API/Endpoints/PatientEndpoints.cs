@@ -3,10 +3,10 @@ using Mapster;
 using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
-using Profiles.API.Filters;
+using InnoClinic.AspNetCore.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
-using Profiles.Domain.Common;
+using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;

@@ -1,4 +1,4 @@
-﻿namespace Profiles.Domain.Common;
+﻿namespace InnoClinic.Core.Common;
 
 public class PagedResponse<T>
 {

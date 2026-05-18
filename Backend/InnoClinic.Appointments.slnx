@@ -5,7 +5,9 @@
     <Project Path="Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/shared/">
-    <Project Path="Shared/Shared/Shared.csproj" />
+    <Project Path="Shared/InnoClinic.AspNetCore/InnoClinic.AspNetCore.csproj" />
+    <Project Path="Shared/InnoClinic.Core/InnoClinic.Core.csproj" />
+    <Project Path="Shared/InnoClinic.Contracts.Grpc/InnoClinic.Contracts.Grpc.csproj" />
   </Folder>
   <Folder Name="/solution-items/">
     <File Path=".editorconfig" />

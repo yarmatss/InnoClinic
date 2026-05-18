@@ -1,6 +1,6 @@
 syntax = "proto3";
-option csharp_namespace = "InnoClinic.Shared.Protos";
-package inno_clinic.shared;
+option csharp_namespace = "InnoClinic.Contracts.Grpc";
+package inno_clinic.contracts.grpc;
 
 service StaffScheduleSyncService {
   rpc SyncStaffProfile (SyncStaffProfileRequest) returns (SyncStaffProfileResponse);

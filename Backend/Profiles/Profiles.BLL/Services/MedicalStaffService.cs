@@ -1,12 +1,12 @@
 ﻿using Google.Protobuf;
-using InnoClinic.Shared.Protos;
+using InnoClinic.Contracts.Grpc;
+using InnoClinic.Core.Common;
 using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
-using Profiles.Domain.Common;
 using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Services;
