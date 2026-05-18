@@ -10,6 +10,8 @@
 					<Include>
 						<ModulePath>.*profiles\.api\.dll$</ModulePath>
 						<ModulePath>.*profiles\.bll\.dll$</ModulePath>
+						<ModulePath>.*InnoClinic\.Core\.dll$</ModulePath>
+						<ModulePath>.*InnoClinic\.AspNetCore\.dll$</ModulePath>
 					</Include>
 				</ModulePaths>
 
