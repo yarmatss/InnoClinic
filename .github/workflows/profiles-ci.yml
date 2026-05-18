@@ -60,7 +60,7 @@ jobs:
 
     - name: Restore dependencies
       env:
-        GITHUB_TOKEN: ${{ secrets.NUGET_TOKEN }}
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       run: dotnet restore InnoClinic.Profiles.slnx
 
     - name: Build
