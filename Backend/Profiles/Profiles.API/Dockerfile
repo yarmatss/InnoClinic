@@ -19,7 +19,9 @@ COPY ["Profiles/Profiles.API/Profiles.API.csproj", "Profiles/Profiles.API/"]
 COPY ["Profiles/Profiles.BLL/Profiles.BLL.csproj", "Profiles/Profiles.BLL/"]
 COPY ["Profiles/Profiles.DAL/Profiles.DAL.csproj", "Profiles/Profiles.DAL/"]
 COPY ["Profiles/Profiles.Domain/Profiles.Domain.csproj", "Profiles/Profiles.Domain/"]
-RUN dotnet restore "./Profiles/Profiles.API/Profiles.API.csproj"
+
+RUN --mount=type=secret,id=NUGET_TOKEN,env=NUGET_TOKEN \
+	dotnet restore "./Profiles/Profiles.API/Profiles.API.csproj"
 COPY Profiles/ Profiles/
 WORKDIR "/src/Profiles/Profiles.API"
 RUN dotnet build "./Profiles.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build

@@ -19,7 +19,8 @@ COPY ["Appointments/Appointments.API/Appointments.API.csproj", "Appointments/App
 COPY ["Appointments/Appointments.Domain/Appointments.Domain.csproj", "Appointments/Appointments.Domain/"]
 COPY ["Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj", "Appointments/Appointments.Infrastructure/"]
 
-RUN dotnet restore "./Appointments/Appointments.API/Appointments.API.csproj"
+RUN --mount=type=secret,id=NUGET_TOKEN,env=NUGET_TOKEN \
+	dotnet restore "./Appointments/Appointments.API/Appointments.API.csproj"
 COPY Appointments/ Appointments/
 WORKDIR "/src/Appointments/Appointments.API"
 RUN dotnet build "./Appointments.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
