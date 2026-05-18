@@ -36,6 +36,8 @@ services:
     build:
       context: .
       dockerfile: Profiles/Profiles.API/Dockerfile
+      secrets:
+        - NUGET_TOKEN
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,6 +69,8 @@ services:
     build:
       context: .
       dockerfile: Appointments/Appointments.API/Dockerfile
+      secrets:
+        - NUGET_TOKEN
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,3 +99,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+
+secrets:
+  NUGET_TOKEN:
+    environment: NUGET_TOKEN

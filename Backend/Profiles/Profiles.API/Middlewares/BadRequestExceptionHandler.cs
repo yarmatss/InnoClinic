@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Profiles.API.Extensions;
-using Profiles.Domain.Constants;
+using InnoClinic.Core.Constants;
 using System.Diagnostics;
 
 namespace Profiles.API.Middlewares;

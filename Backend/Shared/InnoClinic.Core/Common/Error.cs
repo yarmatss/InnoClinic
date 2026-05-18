@@ -1,4 +1,4 @@
-﻿namespace Profiles.Domain.Common;
+﻿namespace InnoClinic.Core.Common;
 
 public record Error(string Code, string Description, ErrorType Type)
 {

@@ -1,6 +1,6 @@
-﻿using Profiles.Domain.Constants;
+﻿using InnoClinic.Core.Constants;
 
-namespace Profiles.Domain.Common;
+namespace InnoClinic.Core.Common;
 
 public record ValidationError : Error
 {

@@ -1,6 +1,6 @@
 using Profiles.API.Authorization;
 using Profiles.API.DTOs.Patient;
-using Profiles.Domain.Common;
+using InnoClinic.Core.Common;
 using Profiles.Domain.Enums;
 using Profiles.IntegrationTests.Infrastructure;
 using Profiles.Tests.Common.Fakes.Entities;
