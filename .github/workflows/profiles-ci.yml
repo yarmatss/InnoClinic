@@ -52,6 +52,7 @@ jobs:
     - name: Restore dependencies
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+        NUGET_USER: ${{ secrets.NUGET_USER }}
       run: dotnet restore InnoClinic.Profiles.slnx
 
     - name: Build

@@ -1,4 +1,5 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Middlewares;
 using Mapster;
 using Microsoft.AspNetCore.DataProtection;
 using Profiles.API.Authorization;
@@ -73,6 +74,7 @@ app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseCors(CorsPolicies.Frontend);
 

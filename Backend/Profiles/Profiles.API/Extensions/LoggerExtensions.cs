@@ -55,16 +55,6 @@ public static partial class LoggerExtensions
         string medicalStaffId);
 
     [LoggerMessage(
-        EventId = 4000,
-        Level = LogLevel.Warning,
-        Message = "Bad request payload received at {Path}. TraceId: {TraceId}. Exception: {Message}")]
-    public static partial void LogBadRequestPayload(
-        this ILogger logger,
-        string path,
-        string traceId,
-        string message);
-
-    [LoggerMessage(
         EventId = 4001,
         Level = LogLevel.Warning,
         Message = "gRPC network error for Outbox Message {Id}. Retrying later.")]
@@ -72,17 +62,6 @@ public static partial class LoggerExtensions
         this ILogger logger,
         Exception exception,
         Guid id);
-
-    [LoggerMessage(
-        EventId = 5000,
-        Level = LogLevel.Error,
-        Message = "Unhandled exception occurred while processing {Method} {Path}. TraceId: {TraceId}")]
-    public static partial void LogCriticalException(
-        this ILogger logger,
-        Exception exception,
-        string method,
-        string path,
-        string traceId);
 
     [LoggerMessage(
         EventId = 5001,

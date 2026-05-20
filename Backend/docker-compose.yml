@@ -39,6 +39,7 @@ services:
       dockerfile: Profiles/Profiles.API/Dockerfile
       secrets:
         - NUGET_TOKEN
+        - NUGET_USER
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,6 +73,7 @@ services:
       dockerfile: Appointments/Appointments.API/Dockerfile
       secrets:
         - NUGET_TOKEN
+        - NUGET_USER
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,3 +107,5 @@ volumes:
 secrets:
   NUGET_TOKEN:
     environment: NUGET_TOKEN
+  NUGET_USER:
+    environment: NUGET_USER

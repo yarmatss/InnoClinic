@@ -20,47 +20,23 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             return await next(cancellationToken);
         }
 
-        ValidationContext<TRequest> context = new(request);
+        var context = new ValidationContext<TRequest>(request);
+        var failures = new List<ValidationFailure>();
 
-        ValidationResult[] validationResults = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(context, cancellationToken)));
-
-        var errorsDictionary = validationResults
-            .Where(validationResult => !validationResult.IsValid)
-            .SelectMany(validationResult => validationResult.Errors)
-            .GroupBy(
-                x => x.PropertyName,
-                x => x.ErrorMessage,
-                (propertyName, errorMessages) => new
-                {
-                    Key = propertyName,
-                    Values = errorMessages.Distinct().ToArray()
-                })
-            .ToDictionary(x => x.Key, x => x.Values);
-
-        if (errorsDictionary.Count != 0)
+        foreach (var validator in validators)
         {
-            return CreateValidationResult(errorsDictionary);
+            var result = await validator.ValidateAsync(context, cancellationToken);
+            if (!result.IsValid)
+            {
+                failures.AddRange(result.Errors);
+            }
+        }
+
+        if (failures.Count != 0)
+        {
+            throw new ValidationException(failures);
         }
 
         return await next(cancellationToken);
-    }
-
-    private static TResponse CreateValidationResult(IDictionary<string, string[]> errors)
-    {
-        var validationError = new ValidationError(errors);
-
-        if (typeof(TResponse) == typeof(Result))
-        {
-            return (Result.Failure(validationError) as TResponse)!;
-        }
-
-        object result = typeof(Result)
-            .GetMethods()
-            .First(m => m.Name == nameof(Result.Failure) && m.IsGenericMethod)
-            .MakeGenericMethod(typeof(TResponse).GetGenericArguments()[0])
-            .Invoke(null, [validationError])!;
-
-        return (TResponse)result;
     }
 }

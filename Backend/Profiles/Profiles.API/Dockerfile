@@ -20,6 +20,7 @@ COPY ["Profiles/Profiles.DAL/Profiles.DAL.csproj", "Profiles/Profiles.DAL/"]
 COPY ["Profiles/Profiles.Domain/Profiles.Domain.csproj", "Profiles/Profiles.Domain/"]
 
 RUN --mount=type=secret,id=NUGET_TOKEN,env=NUGET_TOKEN \
+    --mount=type=secret,id=NUGET_USER,env=NUGET_USER \
 	dotnet restore "./Profiles/Profiles.API/Profiles.API.csproj"
 COPY Profiles/ Profiles/
 WORKDIR "/src/Profiles/Profiles.API"

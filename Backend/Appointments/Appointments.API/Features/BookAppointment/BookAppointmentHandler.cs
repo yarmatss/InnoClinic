@@ -1,68 +1,70 @@
 using Appointments.API.Extensions;
+using Appointments.API.Options;
 using Appointments.Domain.Common;
+using Appointments.Domain.Constants;
 using Appointments.Domain.Entities;
 using Appointments.Domain.Enums;
+using Appointments.Domain.Exceptions;
+using Appointments.Domain.Interfaces;
 using Appointments.Infrastructure.Data;
 using Google.Protobuf;
-using InnoClinic.Core.Common;
-using InnoClinic.Contracts.Grpc;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
-using System.Globalization;
 using Grpc.Core;
-using Npgsql;
-using Appointments.Domain.Constants;
+using InnoClinic.Contracts.Grpc;
+using InnoClinic.Core.Common;
+using MediatR;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace Appointments.API.Features.BookAppointment;
 
 public class BookAppointmentHandler(
     AppointmentsDbContext dbContext,
-    IConnectionMultiplexer redis,
+    ICacheService cacheService,
     StaffScheduleSyncService.StaffScheduleSyncServiceClient profilesClient,
-    IConfiguration configuration,
+    IOptions<ClinicOptions> clinicOptions,
     ILogger<BookAppointmentHandler> logger)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
 {
-    private const string ClinicTimeZoneConfigKey = "ClinicOptions:TimeZone";
-    private const string PostgresExclusionViolationCode = "23P01";
-
     public async Task<Result<Guid>> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
-        var redisDb = redis.GetDatabase();
         var redisKey = CacheConstants.MedicalStaffScheduleKey(request.MedicalStaffId);
-        var scheduleJson = await redisDb.StringGetAsync(redisKey);
 
-        if (scheduleJson.IsNullOrEmpty)
+        var scheduleJson = await cacheService.GetOrSetStringAsync(
+            redisKey,
+            async (ct) =>
+            {
+                logger.LogCacheMissFallback(request.MedicalStaffId);
+
+                try
+                {
+                    var fallbackSchedule = await profilesClient.GetStaffProfileAsync(
+                        new GetStaffProfileRequest { MedicalStaffId = request.MedicalStaffId.ToString() },
+                        cancellationToken: ct);
+
+                    var json = JsonFormatter.Default.Format(fallbackSchedule);
+                    logger.LogCacheRepopulated(request.MedicalStaffId);
+                    return json;
+                }
+                catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+                {
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogFallbackError(ex, request.MedicalStaffId);
+                    throw;
+                }
+            },
+            cancellationToken: cancellationToken);
+
+        if (string.IsNullOrEmpty(scheduleJson))
         {
-            logger.LogCacheMissFallback(request.MedicalStaffId);
-            
-            try
-            {
-                var fallbackSchedule = await profilesClient.GetStaffProfileAsync(
-                    new GetStaffProfileRequest { MedicalStaffId = request.MedicalStaffId.ToString() }, 
-                    cancellationToken: cancellationToken);
-
-                scheduleJson = JsonFormatter.Default.Format(fallbackSchedule);
-                await redisDb.StringSetAsync(redisKey, scheduleJson);
-                
-                logger.LogCacheRepopulated(request.MedicalStaffId);
-            }
-            catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
-            {
-                return AppointmentErrors.MedicalStaffNotFound(request.MedicalStaffId);
-            }
-            catch (Exception ex)
-            {
-                logger.LogFallbackError(ex, request.MedicalStaffId);
-                throw;
-            }
+            return AppointmentErrors.MedicalStaffNotFound(request.MedicalStaffId);
         }
 
         var schedule = JsonParser.Default.Parse<SyncStaffProfileRequest>(scheduleJson);
 
-        var clinicTimeZoneId = configuration[ClinicTimeZoneConfigKey] ?? "UTC";
-        var clinicTimeZone = TimeZoneInfo.FindSystemTimeZoneById(clinicTimeZoneId);
+        var clinicTimeZone = TimeZoneInfo.FindSystemTimeZoneById(clinicOptions.Value.TimeZone);
 
         var validationResult = ValidateAgainstSchedule(request, schedule, clinicTimeZone);
         if (validationResult.IsFailure)
@@ -88,8 +90,7 @@ public class BookAppointmentHandler(
 
             return appointment.Id;
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && 
-            pgEx.SqlState == PostgresExclusionViolationCode)
+        catch (ScheduleConflictException)
         {
             return AppointmentErrors.ScheduleConflict;
         }

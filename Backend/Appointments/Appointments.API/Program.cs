@@ -1,8 +1,11 @@
 using Appointments.API.Behaviors;
 using Appointments.API.GrpcHandlers;
+using Appointments.API.Options;
 using Appointments.Infrastructure;
 using FluentValidation;
 using InnoClinic.AspNetCore.Extensions;
+using InnoClinic.AspNetCore.Middlewares;
+using Microsoft.AspNetCore.HttpLogging;
 using Scalar.AspNetCore;
 using System.Reflection;
 
@@ -13,7 +16,16 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddHttpLogging(o => { });
+builder.Services.Configure<ClinicOptions>(
+    builder.Configuration.GetSection(ClinicOptions.SectionName));
+
+builder.Services.AddHttpLogging(o =>
+{
+    o.LoggingFields = HttpLoggingFields.RequestMethod |
+                      HttpLoggingFields.RequestPath |
+                      HttpLoggingFields.ResponseStatusCode |
+                      HttpLoggingFields.Duration;
+});
 
 builder.Services.AddMediatR(config =>
 {
@@ -27,6 +39,11 @@ builder.Services.AddGrpc();
 
 builder.Services.AddHealthChecks();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,6 +53,9 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
     await app.ApplyMigrationsAsync();
 }
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseHttpLogging();
 

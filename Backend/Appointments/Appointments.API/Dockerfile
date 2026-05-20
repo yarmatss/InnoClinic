@@ -19,6 +19,7 @@ COPY ["Appointments/Appointments.Domain/Appointments.Domain.csproj", "Appointmen
 COPY ["Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj", "Appointments/Appointments.Infrastructure/"]
 
 RUN --mount=type=secret,id=NUGET_TOKEN,env=NUGET_TOKEN \
+    --mount=type=secret,id=NUGET_USER,env=NUGET_USER \
 	dotnet restore "./Appointments/Appointments.API/Appointments.API.csproj"
 COPY Appointments/ Appointments/
 WORKDIR "/src/Appointments/Appointments.API"

@@ -1,6 +1,9 @@
 using Appointments.Domain.Constants;
+using Appointments.Domain.Interfaces;
+using Appointments.Infrastructure.Caching;
 using Appointments.Infrastructure.Connection;
 using Appointments.Infrastructure.Data;
+using Appointments.Infrastructure.Interceptors;
 using InnoClinic.Contracts.Grpc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,8 +23,13 @@ public static class DependencyInjection
             var connectionString = configuration.GetConnectionString(ConnectionConstants.DefaultConnection)
                 ?? throw new InvalidOperationException("Connection string not found.");
 
-            services.AddDbContext<AppointmentsDbContext>(options =>
-                options.UseNpgsql(connectionString));
+            services.AddSingleton<PostgresExceptionInterceptor>();
+
+            services.AddDbContext<AppointmentsDbContext>((sp, options) =>
+            {
+                options.UseNpgsql(connectionString)
+                    .AddInterceptors(sp.GetRequiredService<PostgresExceptionInterceptor>());
+            });
 
             services.AddSingleton<ISqlConnectionFactory>(_ =>
                 new SqlConnectionFactory(connectionString));
@@ -31,6 +39,8 @@ public static class DependencyInjection
 
             services.AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(redisConnectionString));
+
+            services.AddSingleton<ICacheService, RedisCacheService>();
 
             services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
             {
