@@ -4,6 +4,11 @@ package inno_clinic.contracts.grpc;
 
 service StaffScheduleSyncService {
   rpc SyncStaffProfile (SyncStaffProfileRequest) returns (SyncStaffProfileResponse);
+  rpc GetStaffProfile (GetStaffProfileRequest) returns (SyncStaffProfileRequest);
+}
+
+message GetStaffProfileRequest {
+  string medical_staff_id = 1;
 }
 
 message SyncStaffProfileRequest {

@@ -1,3 +1,4 @@
+using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
 using InnoClinic.AspNetCore.Filters;
 using MediatR;
@@ -8,7 +9,7 @@ public class BookAppointmentEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/appointments/book", async (BookAppointmentCommand command, ISender sender) =>
+        app.MapPost($"{ApiRoutes.Appointments}/book", async (BookAppointmentCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
             return result;

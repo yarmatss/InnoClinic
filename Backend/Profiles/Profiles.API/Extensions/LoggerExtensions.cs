@@ -47,6 +47,14 @@ public static partial class LoggerExtensions
         string staffId);
 
     [LoggerMessage(
+        EventId = 2002,
+        Level = LogLevel.Information,
+        Message = "Processing GetStaffProfile request for MedicalStaffId: {MedicalStaffId}")]
+    public static partial void LogProcessingGetStaffProfile(
+        this ILogger logger,
+        string medicalStaffId);
+
+    [LoggerMessage(
         EventId = 4000,
         Level = LogLevel.Warning,
         Message = "Bad request payload received at {Path}. TraceId: {TraceId}. Exception: {Message}")]

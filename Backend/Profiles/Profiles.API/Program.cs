@@ -6,6 +6,7 @@ using Profiles.API.BackgroundJobs;
 using Profiles.API.Constants;
 using Profiles.API.Endpoints;
 using Profiles.API.Extensions;
+using Profiles.API.GrpcHandlers;
 using Profiles.API.Middlewares;
 using Profiles.API.Options;
 using Profiles.API.Validators;
@@ -44,6 +45,7 @@ builder.Services.ConfigureFluentValidation();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+builder.Services.AddGrpc();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -80,5 +82,7 @@ app.UseAuthorization();
 app.MapPatientEndpoints();
 app.MapMedicalStaffEndpoints();
 app.MapSpecializationEndpoints();
+
+app.MapGrpcService<StaffMemberQueryHandler>();
 
 app.Run();

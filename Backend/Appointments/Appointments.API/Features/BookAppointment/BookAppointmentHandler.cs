@@ -1,3 +1,4 @@
+using Appointments.API.Extensions;
 using Appointments.Domain.Common;
 using Appointments.Domain.Entities;
 using Appointments.Domain.Enums;
@@ -9,55 +10,73 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Globalization;
+using Grpc.Core;
+using Npgsql;
+using Appointments.Domain.Constants;
 
 namespace Appointments.API.Features.BookAppointment;
 
 public class BookAppointmentHandler(
     AppointmentsDbContext dbContext,
     IConnectionMultiplexer redis,
+    StaffScheduleSyncService.StaffScheduleSyncServiceClient profilesClient,
+    IConfiguration configuration,
     ILogger<BookAppointmentHandler> logger)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
 {
+    private const string ClinicTimeZoneConfigKey = "ClinicOptions:TimeZone";
+    private const string PostgresExclusionViolationCode = "23P01";
+
     public async Task<Result<Guid>> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
         var redisDb = redis.GetDatabase();
-        var redisKey = $"medicalstaff:schedule:{request.DoctorId}";
+        var redisKey = CacheConstants.MedicalStaffScheduleKey(request.MedicalStaffId);
         var scheduleJson = await redisDb.StringGetAsync(redisKey);
 
         if (scheduleJson.IsNullOrEmpty)
         {
-            return AppointmentErrors.DoctorNotFound(request.DoctorId);
+            logger.LogCacheMissFallback(request.MedicalStaffId);
+            
+            try
+            {
+                var fallbackSchedule = await profilesClient.GetStaffProfileAsync(
+                    new GetStaffProfileRequest { MedicalStaffId = request.MedicalStaffId.ToString() }, 
+                    cancellationToken: cancellationToken);
+
+                scheduleJson = JsonFormatter.Default.Format(fallbackSchedule);
+                await redisDb.StringSetAsync(redisKey, scheduleJson);
+                
+                logger.LogCacheRepopulated(request.MedicalStaffId);
+            }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+            {
+                return AppointmentErrors.MedicalStaffNotFound(request.MedicalStaffId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogFallbackError(ex, request.MedicalStaffId);
+                throw;
+            }
         }
 
         var schedule = JsonParser.Default.Parse<SyncStaffProfileRequest>(scheduleJson);
 
-        var validationResult = ValidateAgainstSchedule(request, schedule);
+        var clinicTimeZoneId = configuration[ClinicTimeZoneConfigKey] ?? "UTC";
+        var clinicTimeZone = TimeZoneInfo.FindSystemTimeZoneById(clinicTimeZoneId);
+
+        var validationResult = ValidateAgainstSchedule(request, schedule, clinicTimeZone);
         if (validationResult.IsFailure)
         {
             return validationResult.Error;
         }
 
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
         try
         {
-            var isOverlapping = await dbContext.Appointments
-                .AnyAsync(a => a.DoctorId == request.DoctorId &&
-                               a.Status != AppointmentStatus.Cancelled &&
-                               a.StartTime < request.EndTime &&
-                               request.StartTime < a.EndTime,
-                    cancellationToken);
-
-            if (isOverlapping)
-            {
-                return AppointmentErrors.ScheduleConflict;
-            }
-
             var appointment = new Appointment
             {
                 Id = Guid.NewGuid(),
                 PatientId = request.PatientId,
-                DoctorId = request.DoctorId,
+                MedicalStaffId = request.MedicalStaffId,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 Status = AppointmentStatus.Planned,
@@ -66,31 +85,40 @@ public class BookAppointmentHandler(
 
             dbContext.Appointments.Add(appointment);
             await dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
             return appointment.Id;
         }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && 
+            pgEx.SqlState == PostgresExclusionViolationCode)
+        {
+            return AppointmentErrors.ScheduleConflict;
+        }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync(cancellationToken);
-            logger.LogError(ex, "Error booking appointment for doctor {DoctorId}", request.DoctorId);
+            logger.LogBookingError(ex, request.MedicalStaffId);
             throw;
         }
     }
 
-    private static Result ValidateAgainstSchedule(BookAppointmentCommand request, SyncStaffProfileRequest schedule)
+    private static Result ValidateAgainstSchedule(
+        BookAppointmentCommand request, 
+        SyncStaffProfileRequest schedule,
+        TimeZoneInfo clinicTimeZone)
     {
-        var dateStr = request.StartTime.ToString("yyyy-MM-dd");
+        var localStart = TimeZoneInfo.ConvertTimeFromUtc(request.StartTime, clinicTimeZone);
+        var localEnd = TimeZoneInfo.ConvertTimeFromUtc(request.EndTime, clinicTimeZone);
+
+        var dateStr = localStart.ToString("yyyy-MM-dd");
         var overrideMatch = schedule.ScheduleOverrides.FirstOrDefault(o => o.Date == dateStr);
 
         if (overrideMatch != null)
         {
             if (overrideMatch.IsDayOff)
             {
-                return AppointmentErrors.DoctorOnDayOff;
+                return AppointmentErrors.MedicalStaffOnDayOff;
             }
 
-            if (!IsWithinRange(request.StartTime, request.EndTime, overrideMatch.StartTime, overrideMatch.EndTime))
+            if (!IsWithinRange(localStart, localEnd, overrideMatch.StartTime, overrideMatch.EndTime))
             {
                 return AppointmentErrors.OutsideWorkingHours;
             }
@@ -98,15 +126,15 @@ public class BookAppointmentHandler(
             return Result.Success();
         }
 
-        var dayOfWeek = (int)request.StartTime.DayOfWeek;
+        var dayOfWeek = (int)localStart.DayOfWeek;
         var workingHours = schedule.WorkingHours.FirstOrDefault(w => w.DayOfWeek == dayOfWeek);
 
         if (workingHours == null || workingHours.IsDayOff)
         {
-            return AppointmentErrors.DoctorOnDayOff;
+            return AppointmentErrors.MedicalStaffOnDayOff;
         }
 
-        if (!IsWithinRange(request.StartTime, request.EndTime, workingHours.StartTime, workingHours.EndTime))
+        if (!IsWithinRange(localStart, localEnd, workingHours.StartTime, workingHours.EndTime))
         {
             return AppointmentErrors.OutsideWorkingHours;
         }

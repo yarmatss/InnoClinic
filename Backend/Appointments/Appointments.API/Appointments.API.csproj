@@ -12,8 +12,8 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="InnoClinic.AspNetCore" />
-    <PackageReference Include="InnoClinic.Core" />
     <PackageReference Include="InnoClinic.Contracts.Grpc" />
+    <PackageReference Include="InnoClinic.Core" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">

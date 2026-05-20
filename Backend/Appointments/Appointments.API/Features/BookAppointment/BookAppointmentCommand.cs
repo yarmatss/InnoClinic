@@ -5,7 +5,7 @@ namespace Appointments.API.Features.BookAppointment;
 
 public record BookAppointmentCommand(
     Guid PatientId,
-    Guid DoctorId,
+    Guid MedicalStaffId,
     DateTime StartTime,
     DateTime EndTime,
     string? Comments) : IRequest<Result<Guid>>;
