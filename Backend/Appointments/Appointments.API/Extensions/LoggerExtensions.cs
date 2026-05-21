@@ -29,6 +29,22 @@ public static partial class LoggerExtensions
         string staffId);
 
     [LoggerMessage(
+        EventId = 2000,
+        Level = LogLevel.Information,
+        Message = "Cache miss for medical staff {MedicalStaffId}. Attempting fallback to Profiles service.")]
+    public static partial void LogCacheMissFallback(
+        this ILogger logger,
+        Guid medicalStaffId);
+
+    [LoggerMessage(
+        EventId = 2001,
+        Level = LogLevel.Information,
+        Message = "Successfully re-populated cache for medical staff {MedicalStaffId}.")]
+    public static partial void LogCacheRepopulated(
+        this ILogger logger,
+        Guid medicalStaffId);
+
+    [LoggerMessage(
         EventId = 5000,
         Level = LogLevel.Error,
         Message = "Failed to sync Staff: {StaffId} to Redis.")]
@@ -36,4 +52,22 @@ public static partial class LoggerExtensions
         this ILogger logger,
         Exception exception,
         string staffId);
+
+    [LoggerMessage(
+        EventId = 5001,
+        Level = LogLevel.Error,
+        Message = "Fallback gRPC call failed for medical staff {MedicalStaffId}.")]
+    public static partial void LogFallbackError(
+        this ILogger logger,
+        Exception exception,
+        Guid medicalStaffId);
+
+    [LoggerMessage(
+        EventId = 5002,
+        Level = LogLevel.Error,
+        Message = "Error booking appointment for medical staff {MedicalStaffId}.")]
+    public static partial void LogBookingError(
+        this ILogger logger,
+        Exception exception,
+        Guid medicalStaffId);
 }

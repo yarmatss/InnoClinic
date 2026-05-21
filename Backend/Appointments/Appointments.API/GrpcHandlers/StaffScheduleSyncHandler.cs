@@ -1,8 +1,10 @@
 using Appointments.API.Extensions;
 using Google.Protobuf;
 using Grpc.Core;
-using InnoClinic.Shared.Protos;
+using InnoClinic.Contracts.Grpc;
 using StackExchange.Redis;
+
+using Appointments.Domain.Constants;
 
 namespace Appointments.API.GrpcHandlers;
 
@@ -20,7 +22,7 @@ public class StaffScheduleSyncHandler(
         try
         {
             var db = redis.GetDatabase();
-            var redisKey = $"medicalstaff:schedule:{request.MedicalStaffId}";
+            var redisKey = CacheConstants.MedicalStaffScheduleKey(request.MedicalStaffId);
 
             if (!request.IsActive)
             {

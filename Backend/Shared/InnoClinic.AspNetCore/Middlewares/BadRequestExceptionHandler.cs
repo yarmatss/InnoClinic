@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Profiles.API.Extensions;
-using Profiles.Domain.Constants;
+using InnoClinic.AspNetCore.Extensions;
+using InnoClinic.Core.Constants;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
-namespace Profiles.API.Middlewares;
+namespace InnoClinic.AspNetCore.Middlewares;
 
-internal sealed class BadRequestExceptionHandler(
+public sealed class BadRequestExceptionHandler(
     IProblemDetailsService problemDetailsService,
     ILogger<BadRequestExceptionHandler> logger) : IExceptionHandler
 {

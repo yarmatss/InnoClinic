@@ -1,6 +1,6 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
-using InnoClinic.Shared.Protos;
+using InnoClinic.Contracts.Grpc;
 using Microsoft.Extensions.Options;
 using Profiles.API.Extensions;
 using Profiles.API.Options;

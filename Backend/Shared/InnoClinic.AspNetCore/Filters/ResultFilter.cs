@@ -1,7 +1,8 @@
-﻿using Profiles.Domain.Common;
-using Profiles.Domain.Constants;
+﻿using InnoClinic.Core.Common;
+using InnoClinic.Core.Constants;
+using Microsoft.AspNetCore.Http;
 
-namespace Profiles.API.Filters;
+namespace InnoClinic.AspNetCore.Filters;
 
 public class ResultFilter : IEndpointFilter
 {

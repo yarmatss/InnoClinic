@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Profiles.API.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using InnoClinic.AspNetCore.Extensions;
 using System.Diagnostics;
 
-namespace Profiles.API.Middlewares;
+namespace InnoClinic.AspNetCore.Middlewares;
 
-internal sealed class GlobalExceptionHandler(
+public sealed class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,
     IHostEnvironment environment,
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler

@@ -47,14 +47,12 @@ public static partial class LoggerExtensions
         string staffId);
 
     [LoggerMessage(
-        EventId = 4000,
-        Level = LogLevel.Warning,
-        Message = "Bad request payload received at {Path}. TraceId: {TraceId}. Exception: {Message}")]
-    public static partial void LogBadRequestPayload(
+        EventId = 2002,
+        Level = LogLevel.Information,
+        Message = "Processing GetStaffProfile request for MedicalStaffId: {MedicalStaffId}")]
+    public static partial void LogProcessingGetStaffProfile(
         this ILogger logger,
-        string path,
-        string traceId,
-        string message);
+        string medicalStaffId);
 
     [LoggerMessage(
         EventId = 4001,
@@ -64,17 +62,6 @@ public static partial class LoggerExtensions
         this ILogger logger,
         Exception exception,
         Guid id);
-
-    [LoggerMessage(
-        EventId = 5000,
-        Level = LogLevel.Error,
-        Message = "Unhandled exception occurred while processing {Method} {Path}. TraceId: {TraceId}")]
-    public static partial void LogCriticalException(
-        this ILogger logger,
-        Exception exception,
-        string method,
-        string path,
-        string traceId);
 
     [LoggerMessage(
         EventId = 5001,

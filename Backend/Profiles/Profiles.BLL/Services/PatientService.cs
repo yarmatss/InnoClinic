@@ -5,7 +5,7 @@ using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
-using Profiles.Domain.Common;
+using InnoClinic.Core.Common;
 
 namespace Profiles.BLL.Services;
 

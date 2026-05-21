@@ -1,4 +1,4 @@
-﻿namespace Profiles.Domain.Constants;
+﻿namespace InnoClinic.Core.Constants;
 
 public static class ValidationConstants
 {

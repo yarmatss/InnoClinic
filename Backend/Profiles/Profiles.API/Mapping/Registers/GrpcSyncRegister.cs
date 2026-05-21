@@ -1,4 +1,4 @@
-using InnoClinic.Shared.Protos;
+using InnoClinic.Contracts.Grpc;
 using Mapster;
 using Profiles.DAL.Entities;
 

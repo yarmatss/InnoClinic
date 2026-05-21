@@ -13,14 +13,16 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "."]
+COPY ["nuget.config", "."]
 COPY ["Profiles/Profiles.API/Profiles.API.csproj", "Profiles/Profiles.API/"]
 COPY ["Profiles/Profiles.BLL/Profiles.BLL.csproj", "Profiles/Profiles.BLL/"]
-COPY ["Shared/Shared/Shared.csproj", "Shared/Shared/"]
 COPY ["Profiles/Profiles.DAL/Profiles.DAL.csproj", "Profiles/Profiles.DAL/"]
 COPY ["Profiles/Profiles.Domain/Profiles.Domain.csproj", "Profiles/Profiles.Domain/"]
-RUN dotnet restore "./Profiles/Profiles.API/Profiles.API.csproj"
+
+RUN --mount=type=secret,id=NUGET_TOKEN,env=NUGET_TOKEN \
+    --mount=type=secret,id=NUGET_USER,env=NUGET_USER \
+	dotnet restore "./Profiles/Profiles.API/Profiles.API.csproj"
 COPY Profiles/ Profiles/
-COPY Shared/ Shared/
 WORKDIR "/src/Profiles/Profiles.API"
 RUN dotnet build "./Profiles.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 

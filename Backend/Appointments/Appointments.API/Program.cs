@@ -1,5 +1,13 @@
+using Appointments.API.Behaviors;
 using Appointments.API.GrpcHandlers;
+using Appointments.API.Options;
 using Appointments.Infrastructure;
+using FluentValidation;
+using InnoClinic.AspNetCore.Extensions;
+using InnoClinic.AspNetCore.Middlewares;
+using Microsoft.AspNetCore.HttpLogging;
+using Scalar.AspNetCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,9 +16,33 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.Configure<ClinicOptions>(
+    builder.Configuration.GetSection(ClinicOptions.SectionName));
+
+builder.Services.AddHttpLogging(o =>
+{
+    o.LoggingFields = HttpLoggingFields.RequestMethod |
+                      HttpLoggingFields.RequestPath |
+                      HttpLoggingFields.ResponseStatusCode |
+                      HttpLoggingFields.Duration;
+});
+
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), includeInternalTypes: true);
+builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
+
 builder.Services.AddGrpc();
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
 
@@ -18,8 +50,16 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
     await app.ApplyMigrationsAsync();
 }
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
+app.UseHttpLogging();
+
+app.MapEndpoints();
 
 app.UseHealthChecks("/health");
 
