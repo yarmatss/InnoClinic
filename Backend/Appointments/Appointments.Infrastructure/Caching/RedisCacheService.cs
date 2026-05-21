@@ -1,12 +1,13 @@
 using Appointments.Domain.Interfaces;
 using StackExchange.Redis;
-using System.Collections.Concurrent;
 
 namespace Appointments.Infrastructure.Caching;
 
 public class RedisCacheService(IConnectionMultiplexer redis) : ICacheService
 {
-    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
+    private static readonly SemaphoreSlim[] _locks = Enumerable.Range(0, 1024)
+        .Select(_ => new SemaphoreSlim(1, 1))
+        .ToArray();
 
     public async Task<string?> GetOrSetStringAsync(
         string key,
@@ -14,32 +15,29 @@ public class RedisCacheService(IConnectionMultiplexer redis) : ICacheService
         CancellationToken cancellationToken = default)
     {
         var db = redis.GetDatabase();
-        
-        var cachedValue = await db.StringGetAsync(key);
-        if (!cachedValue.IsNullOrEmpty)
+
+        if (await db.StringGetAsync(key) is { IsNullOrEmpty: false } cachedValue)
         {
             return cachedValue;
         }
 
-        var semaphore = _locks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
+        var semaphore = _locks[(uint)key.GetHashCode() % _locks.Length];
         await semaphore.WaitAsync(cancellationToken);
 
         try
         {
-            cachedValue = await db.StringGetAsync(key);
-            if (!cachedValue.IsNullOrEmpty)
+            if (await db.StringGetAsync(key) is { IsNullOrEmpty: false } retryValue)
             {
-                return cachedValue;
+                return retryValue;
             }
 
-            var result = await factory(cancellationToken);
-
-            if (result != null)
+            if (await factory(cancellationToken) is { } result)
             {
                 await db.StringSetAsync(key, result);
+                return result;
             }
 
-            return result;
+            return null;
         }
         finally
         {
