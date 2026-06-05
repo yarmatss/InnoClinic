@@ -1,14 +1,11 @@
 using Appointments.API.Extensions;
+using Appointments.API.Features.Shared.GetStaffSchedule;
 using Appointments.API.Options;
 using Appointments.Domain.Common;
-using Appointments.Domain.Constants;
 using Appointments.Domain.Entities;
 using Appointments.Domain.Enums;
 using Appointments.Domain.Exceptions;
-using Appointments.Domain.Interfaces;
 using Appointments.Infrastructure.Data;
-using Google.Protobuf;
-using Grpc.Core;
 using InnoClinic.Contracts.Grpc;
 using InnoClinic.Core.Common;
 using MediatR;
@@ -19,8 +16,7 @@ namespace Appointments.API.Features.BookAppointment;
 
 public class BookAppointmentHandler(
     AppointmentsDbContext dbContext,
-    ICacheService cacheService,
-    StaffScheduleSyncService.StaffScheduleSyncServiceClient profilesClient,
+    ISender sender,
     PatientService.PatientServiceClient patientClient,
     IOptions<ClinicOptions> clinicOptions,
     ILogger<BookAppointmentHandler> logger)
@@ -37,42 +33,16 @@ public class BookAppointmentHandler(
             return AppointmentErrors.PatientNotFound(request.PatientId);
         }
 
-        var redisKey = CacheConstants.MedicalStaffScheduleKey(request.MedicalStaffId);
+        var scheduleResult = await sender.Send(
+            new GetStaffScheduleQuery(request.MedicalStaffId), 
+            cancellationToken);
 
-        var scheduleJson = await cacheService.GetOrSetStringAsync(
-            redisKey,
-            async (ct) =>
-            {
-                logger.LogCacheMissFallback(request.MedicalStaffId);
-
-                try
-                {
-                    var fallbackSchedule = await profilesClient.GetStaffProfileAsync(
-                        new GetStaffProfileRequest { MedicalStaffId = request.MedicalStaffId.ToString() },
-                        cancellationToken: ct);
-
-                    var json = JsonFormatter.Default.Format(fallbackSchedule);
-                    logger.LogCacheRepopulated(request.MedicalStaffId);
-                    return json;
-                }
-                catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
-                {
-                    return null;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogFallbackError(ex, request.MedicalStaffId);
-                    throw;
-                }
-            },
-            cancellationToken: cancellationToken);
-
-        if (string.IsNullOrEmpty(scheduleJson))
+        if (scheduleResult.IsFailure)
         {
-            return AppointmentErrors.MedicalStaffNotFound(request.MedicalStaffId);
+            return scheduleResult.Error;
         }
 
-        var schedule = JsonParser.Default.Parse<SyncStaffProfileRequest>(scheduleJson);
+        var schedule = scheduleResult.Value;
 
         var clinicTimeZone = TimeZoneInfo.FindSystemTimeZoneById(clinicOptions.Value.TimeZone);
 
