@@ -21,12 +21,22 @@ public class BookAppointmentHandler(
     AppointmentsDbContext dbContext,
     ICacheService cacheService,
     StaffScheduleSyncService.StaffScheduleSyncServiceClient profilesClient,
+    PatientService.PatientServiceClient patientClient,
     IOptions<ClinicOptions> clinicOptions,
     ILogger<BookAppointmentHandler> logger)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
+        var patientResponse = await patientClient.GetPatientAsync(
+            new GetPatientRequest { PatientId = request.PatientId.ToString() },
+            cancellationToken: cancellationToken);
+
+        if (!patientResponse.Exists)
+        {
+            return AppointmentErrors.PatientNotFound(request.PatientId);
+        }
+
         var redisKey = CacheConstants.MedicalStaffScheduleKey(request.MedicalStaffId);
 
         var scheduleJson = await cacheService.GetOrSetStringAsync(

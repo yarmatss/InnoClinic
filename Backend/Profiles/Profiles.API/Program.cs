@@ -86,5 +86,6 @@ app.MapMedicalStaffEndpoints();
 app.MapSpecializationEndpoints();
 
 app.MapGrpcService<StaffMemberQueryHandler>();
+app.MapGrpcService<PatientQueryHandler>();
 
 app.Run();

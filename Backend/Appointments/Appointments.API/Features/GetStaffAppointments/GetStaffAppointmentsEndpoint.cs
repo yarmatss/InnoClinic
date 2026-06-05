@@ -4,21 +4,22 @@ using InnoClinic.AspNetCore.Abstract;
 using InnoClinic.AspNetCore.Filters;
 using MediatR;
 
-namespace Appointments.API.Features.BookAppointment;
+namespace Appointments.API.Features.GetStaffAppointments;
 
-public class BookAppointmentEndpoint : IEndpoint
+public class GetStaffAppointmentsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost($"{ApiRoutes.Appointments}/book", async (
-            BookAppointmentCommand command,
+        app.MapGet($"{ApiRoutes.Appointments}/staff/{{id:guid}}", async (
+            Guid id,
             ISender sender) =>
         {
-            var result = await sender.Send(command);
+            var query = new GetStaffAppointmentsQuery(id);
+            var result = await sender.Send(query);
             return result;
         })
         .WithTags("Appointments")
-        .RequireAuthorization(Policies.WriteAppointments)
+        .RequireAuthorization(Policies.ReadAppointments)
         .AddEndpointFilter<ResultFilter>();
     }
 }
