@@ -16,7 +16,8 @@ async function initAuth() {
     authorizationParams: {
       redirect_uri: config.redirectUri,
       audience: config.audience,
-      scope: "openid profile email read:patients write:patients read:staff write:staff write:specializations",
+      scope: "openid profile email read:patients write:patients read:staff write:staff \
+        write:specializations read:appointments write:appointments confirm:appointments read:results write:results",
     },
   });
 

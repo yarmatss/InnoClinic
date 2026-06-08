@@ -1,4 +1,6 @@
 using Appointments.API.Behaviors;
+using Appointments.API.Authorization;
+using Appointments.API.Extensions;
 using Appointments.API.GrpcHandlers;
 using Appointments.API.Options;
 using Appointments.Infrastructure;
@@ -15,6 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddAuth0Authentication(builder.Configuration);
+builder.Services.AddScopePolicies();
 
 builder.Services.Configure<ClinicOptions>(
     builder.Configuration.GetSection(ClinicOptions.SectionName));
@@ -58,6 +63,9 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 app.UseHttpLogging();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapEndpoints();
 

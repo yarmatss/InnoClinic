@@ -1,0 +1,16 @@
+syntax = "proto3";
+option csharp_namespace = "InnoClinic.Contracts.Grpc";
+package inno_clinic.contracts.grpc;
+
+service PatientService {
+  rpc GetPatient (GetPatientRequest) returns (GetPatientResponse);
+}
+
+message GetPatientRequest {
+  string patient_id = 1;
+}
+
+message GetPatientResponse {
+  string patient_id = 1;
+  bool exists = 2;
+}

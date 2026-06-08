@@ -8,7 +8,7 @@
     <Title>InnoClinic Protos</Title>
     <Authors>yarmatss</Authors>
     <Description>Shared gRPC definitions and generated clients/servers.</Description>
-	<Version>1.0.2</Version>
+	<Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,10 +23,12 @@
 
   <ItemGroup>
     <None Include="Protos\staff_profile_sync.proto" Pack="true" PackagePath="protos\" />
+    <None Include="Protos\patient_service.proto" Pack="true" PackagePath="protos\" />
   </ItemGroup>
 
   <ItemGroup>
     <Protobuf Include="Protos\staff_profile_sync.proto" GrpcServices="Both" />
+    <Protobuf Include="Protos\patient_service.proto" GrpcServices="Both" />
   </ItemGroup>
 
 </Project>
