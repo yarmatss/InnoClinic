@@ -12,10 +12,11 @@ public class GetStaffAppointmentsEndpoint : IEndpoint
     {
         app.MapGet($"{ApiRoutes.Appointments}/staff/{{id:guid}}", async (
             Guid id,
-            ISender sender) =>
+            ISender sender,
+            CancellationToken ct = default) =>
         {
             var query = new GetStaffAppointmentsQuery(id);
-            var result = await sender.Send(query);
+            var result = await sender.Send(query, ct);
             return result;
         })
         .WithTags("Appointments")

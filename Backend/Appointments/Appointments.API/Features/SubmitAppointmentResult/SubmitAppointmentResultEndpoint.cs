@@ -13,7 +13,8 @@ public class SubmitAppointmentResultEndpoint : IEndpoint
         app.MapPost($"{ApiRoutes.Appointments}/{{id:guid}}/results", async (
             Guid id, 
             SubmitAppointmentResultRequest request, 
-            ISender sender) =>
+            ISender sender,
+            CancellationToken ct = default) =>
         {
             var command = new SubmitAppointmentResultCommand(
                 id,
@@ -21,7 +22,7 @@ public class SubmitAppointmentResultEndpoint : IEndpoint
                 request.Conclusion,
                 request.Recommendations);
 
-            var result = await sender.Send(command);
+            var result = await sender.Send(command, ct);
             return result;
         })
         .WithTags("Appointments")

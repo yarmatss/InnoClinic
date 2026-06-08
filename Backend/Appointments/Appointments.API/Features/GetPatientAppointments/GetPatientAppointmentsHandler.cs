@@ -20,7 +20,10 @@ public class GetPatientAppointmentsHandler(ISqlConnectionFactory connectionFacto
             WHERE ""PatientId"" = @PatientId
             ORDER BY ""StartTime"" DESC";
 
-        var appointments = await connection.QueryAsync<AppointmentResponse>(sql, new { request.PatientId });
+        var appointments = await connection.QueryAsync<AppointmentResponse>(new CommandDefinition(
+            sql, 
+            new { request.PatientId }, 
+            cancellationToken: cancellationToken));
 
         return Result.Success(appointments);
     }

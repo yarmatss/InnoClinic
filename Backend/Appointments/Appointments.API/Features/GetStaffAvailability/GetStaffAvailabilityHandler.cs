@@ -37,13 +37,16 @@ public class GetStaffAvailabilityHandler(
               AND ""StartTime"" < @EndDate
               AND ""EndTime"" > @StartDate";
 
-        var bookedSlots = await connection.QueryAsync<BookedSlotDto>(sql, new
-        {
-            request.MedicalStaffId,
-            CancelledStatus = (int)AppointmentStatus.Cancelled,
-            request.StartDate,
-            request.EndDate
-        });
+        var bookedSlots = await connection.QueryAsync<BookedSlotDto>(new CommandDefinition(
+            sql,
+            new
+            {
+                request.MedicalStaffId,
+                CancelledStatus = (int)AppointmentStatus.Cancelled,
+                request.StartDate,
+                request.EndDate
+            },
+            cancellationToken: cancellationToken));
 
         var response = new StaffAvailabilityResponse(
             new StaffScheduleDto(

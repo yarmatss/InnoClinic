@@ -12,9 +12,10 @@ public class CancelAppointmentEndpoint : IEndpoint
     {
         app.MapPatch($"{ApiRoutes.Appointments}/{{id:guid}}/cancel", async (
             Guid id,
-            ISender sender) =>
+            ISender sender,
+            CancellationToken ct = default) =>
         {
-            var result = await sender.Send(new CancelAppointmentCommand(id));
+            var result = await sender.Send(new CancelAppointmentCommand(id), ct);
             return result;
         })
         .WithTags("Appointments")

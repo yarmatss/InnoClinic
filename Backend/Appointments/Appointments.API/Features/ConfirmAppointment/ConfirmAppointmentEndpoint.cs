@@ -12,9 +12,10 @@ public class ConfirmAppointmentEndpoint : IEndpoint
     {
         app.MapPatch($"{ApiRoutes.Appointments}/{{id:guid}}/confirm", async (
             Guid id,
-            ISender sender) =>
+            ISender sender,
+            CancellationToken ct = default) =>
         {
-            var result = await sender.Send(new ConfirmAppointmentCommand(id));
+            var result = await sender.Send(new ConfirmAppointmentCommand(id), ct);
             return result;
         })
         .WithTags("Appointments")

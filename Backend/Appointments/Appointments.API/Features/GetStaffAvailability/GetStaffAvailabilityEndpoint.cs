@@ -15,10 +15,11 @@ public class GetStaffAvailabilityEndpoint : IEndpoint
             Guid id,
             [FromQuery] DateTime startDate,
             [FromQuery] DateTime endDate,
-            ISender sender) =>
+            ISender sender,
+            CancellationToken ct = default) =>
         {
             var query = new GetStaffAvailabilityQuery(id, startDate, endDate);
-            var result = await sender.Send(query);
+            var result = await sender.Send(query, ct);
             return result;
         })
         .WithTags("Appointments")

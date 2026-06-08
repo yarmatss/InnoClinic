@@ -12,9 +12,10 @@ public class BookAppointmentEndpoint : IEndpoint
     {
         app.MapPost($"{ApiRoutes.Appointments}/book", async (
             BookAppointmentCommand command,
-            ISender sender) =>
+            ISender sender,
+            CancellationToken ct = default) =>
         {
-            var result = await sender.Send(command);
+            var result = await sender.Send(command, ct);
             return result;
         })
         .WithTags("Appointments")
