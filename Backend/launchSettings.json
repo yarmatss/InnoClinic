@@ -4,7 +4,9 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "profiles.api": "StartDebugging"
+        "profiles.api": "StartDebugging",
+        "appointments.api": "StartDebugging",
+        "notifications.worker": "StartDebugging"
       }
     }
   }
