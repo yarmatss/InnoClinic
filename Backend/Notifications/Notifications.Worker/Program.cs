@@ -1,6 +1,5 @@
 using MassTransit;
 using Notifications.Domain.Constants;
-using Notifications.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -15,8 +14,6 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 });
-
-builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();
 host.Run();
