@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Notifications/Notifications.Application/Notifications.Application.csproj" />
+    <Project Path="Notifications/Notifications.Domain/Notifications.Domain.csproj" />
+    <Project Path="Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj" />
+    <Project Path="Notifications/Notifications.Worker/Notifications.Worker.csproj" />
+  </Folder>
+  <Folder Name="/solution-items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>
