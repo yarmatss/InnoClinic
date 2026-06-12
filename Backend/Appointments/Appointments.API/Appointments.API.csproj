@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="InnoClinic.AspNetCore" />
+    <PackageReference Include="InnoClinic.Messaging" />
     <PackageReference Include="InnoClinic.Contracts.Grpc" />
     <PackageReference Include="InnoClinic.Core" />
     <PackageReference Include="MediatR" />

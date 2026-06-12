@@ -8,6 +8,8 @@ using Appointments.Domain.Exceptions;
 using Appointments.Infrastructure.Data;
 using InnoClinic.Contracts.Grpc;
 using InnoClinic.Core.Common;
+using InnoClinic.Messaging.Outbox;
+using InnoClinic.Messaging.Contracts;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -18,6 +20,7 @@ public class BookAppointmentHandler(
     AppointmentsDbContext dbContext,
     ISender sender,
     PatientService.PatientServiceClient patientClient,
+    INotificationProducer notificationProducer,
     IOptions<ClinicOptions> clinicOptions,
     ILogger<BookAppointmentHandler> logger)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
@@ -66,6 +69,15 @@ public class BookAppointmentHandler(
             };
 
             dbContext.Appointments.Add(appointment);
+
+            notificationProducer.Enqueue(new AppointmentBooked(
+                appointment.Id,
+                appointment.PatientId,
+                appointment.MedicalStaffId,
+                appointment.StartTime,
+                appointment.EndTime
+            ));
+
             await dbContext.SaveChangesAsync(cancellationToken);
 
             return appointment.Id;

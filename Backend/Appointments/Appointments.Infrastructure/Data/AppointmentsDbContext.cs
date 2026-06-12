@@ -1,4 +1,5 @@
 using Appointments.Domain.Entities;
+using InnoClinic.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -8,6 +9,7 @@ public class AppointmentsDbContext(DbContextOptions<AppointmentsDbContext> optio
 {
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<AppointmentResult> AppointmentResults => Set<AppointmentResult>();
+    public DbSet<NotificationOutbox> NotificationOutboxes => Set<NotificationOutbox>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
