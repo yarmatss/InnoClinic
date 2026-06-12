@@ -16,7 +16,7 @@
     </PackageVersion>
     <PackageVersion Include="InnoClinic.AspNetCore" Version="1.0.2" />
     <PackageVersion Include="InnoClinic.Core" Version="1.0.2" />
-    <PackageVersion Include="InnoClinic.Messaging" Version="1.0.7" />
+    <PackageVersion Include="InnoClinic.Messaging" Version="1.0.8" />
     <PackageVersion Include="InnoClinic.Contracts.Grpc" Version="1.0.4" />
     <PackageVersion Include="MailKit" Version="4.17.0" />
     <PackageVersion Include="MassTransit" Version="8.5.10" />

@@ -64,11 +64,13 @@ public abstract class PostgresOutboxProcessor(
         using var scope = scopeFactory.CreateScope();
         var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
+        var sanitizedTableName = Config.TableName.Replace("\"", "").Replace("'", "").Replace(";", "");
+
         using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync(stoppingToken);
 
         var selectSql = $@"
-            SELECT * FROM ""{Config.TableName}""
+            SELECT * FROM ""{sanitizedTableName}""
             WHERE ""Status"" = @PendingStatus AND ""RetryCount"" < @MaxRetry
             ORDER BY ""CreatedAtUtc""
             FOR UPDATE SKIP LOCKED
@@ -103,7 +105,7 @@ public abstract class PostgresOutboxProcessor(
                 }, stoppingToken);
 
                 var updateCommand = new CommandDefinition($@"
-                    UPDATE ""{Config.TableName}""
+                    UPDATE ""{sanitizedTableName}""
                     SET ""Status"" = @Status, ""ProcessedAtUtc"" = @Now
                     WHERE ""Id"" = @Id", new 
                     { 
@@ -132,7 +134,7 @@ public abstract class PostgresOutboxProcessor(
                 var retryIncrement = isInfrastructureError ? 0 : 1;
 
                 var errorCommand = new CommandDefinition($@"
-                    UPDATE ""{Config.TableName}""
+                    UPDATE ""{sanitizedTableName}""
                     SET ""RetryCount"" = ""RetryCount"" + @Increment, 
                         ""ErrorMessage"" = @Error,
                         ""Status"" = CASE 
