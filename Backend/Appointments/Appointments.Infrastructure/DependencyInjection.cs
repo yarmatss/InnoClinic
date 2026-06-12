@@ -4,7 +4,10 @@ using Appointments.Infrastructure.Caching;
 using Appointments.Infrastructure.Connection;
 using Appointments.Infrastructure.Data;
 using Appointments.Infrastructure.Interceptors;
+using Appointments.Infrastructure.Services;
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Messaging.Outbox;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +34,8 @@ public static class DependencyInjection
                     .AddInterceptors(sp.GetRequiredService<PostgresExceptionInterceptor>());
             });
 
+            services.AddScoped<INotificationProducer, NotificationProducer>();
+
             services.AddSingleton<ISqlConnectionFactory>(_ =>
                 new SqlConnectionFactory(connectionString));
 
@@ -42,14 +47,25 @@ public static class DependencyInjection
 
             services.AddSingleton<ICacheService, RedisCacheService>();
 
-            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
-            {
-                var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
-                    ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
+            var rabbitMqConnectionString = configuration.GetConnectionString(ConnectionConstants.RabbitMQConnection)
+                ?? throw new InvalidOperationException("RabbitMQ connection string not found.");
 
-                options.Address = new Uri(profilesApiUrl);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitMqConnectionString);
+                });
+            });
+
+            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
+                {
+                    var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
+                        ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
+
+                    options.Address = new Uri(profilesApiUrl);
+                })
+                .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
 
             services.AddGrpcClient<PatientService.PatientServiceClient>(options =>
             {

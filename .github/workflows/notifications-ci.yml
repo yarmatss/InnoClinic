@@ -3,10 +3,10 @@ name: Notifications Microservice CI
 on:
   push:
     branches: ["main"]
-    paths: ["Backend/Notifications/**", ".github/workflows/notifications-ci.yml"]
+    paths: ["Backend/Notifications/**", "Backend/Shared/**", ".github/workflows/notifications-ci.yml"]
   pull_request:
     branches: ["main"]
-    paths: ["Backend/Notifications/**"]
+    paths: ["Backend/Notifications/**", "Backend/Shared/**"]
 
 defaults:
   run:
