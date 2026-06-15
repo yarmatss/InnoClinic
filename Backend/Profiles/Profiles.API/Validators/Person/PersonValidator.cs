@@ -12,6 +12,7 @@ public class PersonValidator : AbstractValidator<IPersonDto>
         RuleFor(x => x.MiddleName).SetValidator(new MiddleNameValidator());
         RuleFor(x => x.Gender).SetValidator(new GenderValidator());
         RuleFor(x => x.NationalId).SetValidator(new NationalIdValidator());
+        RuleFor(x => x.Email).SetValidator(new EmailValidator());
         RuleFor(x => x.ContactPhone).SetValidator(new ContactPhoneValidator());
     }
 }

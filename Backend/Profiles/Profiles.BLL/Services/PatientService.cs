@@ -7,11 +7,15 @@ using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using InnoClinic.Core.Common;
 
+using InnoClinic.Messaging.Contracts;
+using InnoClinic.Messaging.Outbox;
+
 namespace Profiles.BLL.Services;
 
 internal class PatientService(
     IPatientRepository patientRepository,
-    IMedicalStaffRepository staffRepository) : IPatientService
+    IMedicalStaffRepository staffRepository,
+    INotificationProducer notificationProducer) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
@@ -24,6 +28,17 @@ internal class PatientService(
         var entity = model.Adapt<Patient>();
 
         patientRepository.MarkAdd(entity);
+
+        notificationProducer.Enqueue(new PatientCreated(
+            entity.Id,
+            entity.FirstName,
+            entity.LastName,
+            entity.BirthDate,
+            entity.Gender.ToString(),
+            entity.ContactPhone ?? string.Empty,
+            entity.Email
+        ));
+
         await patientRepository.SaveChangesAsync(cancellationToken);
 
         return entity.Adapt<PatientModel>();

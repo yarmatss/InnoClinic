@@ -59,6 +59,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "5000:8080"
       - "5001:8081" 
@@ -69,6 +71,7 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx 
       - ConnectionStrings__DefaultConnection=${Profiles__DbConnection}
+      - ConnectionStrings__RabbitMQ=${ConnectionStrings__RabbitMQ}
       - AppointmentsApiUrl=https://appointments.api:8083
       - DataProtection__Path=/app/keys
     volumes:

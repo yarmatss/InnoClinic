@@ -8,6 +8,8 @@ using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
+using InnoClinic.Messaging.Outbox;
+using InnoClinic.Messaging.Contracts;
 
 namespace Profiles.UnitTests.Services;
 
@@ -15,11 +17,12 @@ public class PatientServiceTests
 {
     private readonly IPatientRepository _patientRepo = Substitute.For<IPatientRepository>();
     private readonly IMedicalStaffRepository _staffRepo = Substitute.For<IMedicalStaffRepository>();
+    private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
     private readonly PatientService _sut;
 
     public PatientServiceTests()
     {
-        _sut = new PatientService(_patientRepo, _staffRepo);
+        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer);
     }
 
     #region CreateAsync
@@ -108,7 +111,7 @@ public class PatientServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithValidData_ReturnsSuccessResult()
+    public async Task CreateAsync_WithValidData_ReturnsSuccessResultAndEnqueuesEvent()
     {
         // Arrange
         var model = new PatientModelFaker().Generate();
@@ -123,6 +126,11 @@ public class PatientServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.InsuranceNumber.ShouldBe(model.InsuranceNumber);
+        
+        _notificationProducer.Received(1).Enqueue(Arg.Is<PatientCreated>(e => 
+            e.FirstName == model.FirstName &&
+            e.LastName == model.LastName &&
+            e.Email == model.Email));
     }
 
     #endregion

@@ -10,5 +10,6 @@ public abstract class Person : BaseEntity
     public DateOnly BirthDate { get; set; }
     public Gender Gender { get; set; }
     public string NationalId { get; set; } = null!;
+    public string Email { get; set; } = null!;
     public string? ContactPhone { get; set; }
 }

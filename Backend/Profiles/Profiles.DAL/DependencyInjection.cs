@@ -1,4 +1,6 @@
-﻿using InnoClinic.Contracts.Grpc;
+using InnoClinic.Contracts.Grpc;
+using InnoClinic.Messaging.Outbox;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +29,19 @@ public static class DependencyInjection
             services.AddScoped<IMedicalStaffRepository, MedicalStaffRepository>();
             services.AddScoped<ISpecializationRepository, SpecializationRepository>();
             services.AddScoped<IOutboxRepository, OutboxRepository>();
+
+            services.AddScoped<INotificationProducer, NotificationProducer>();
+
+            var rabbitMqConnectionString = configuration.GetConnectionString(ConnectionConstants.RabbitMQConnection)
+                ?? throw new InvalidOperationException("RabbitMQ connection string not found.");
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitMqConnectionString);
+                });
+            });
 
             services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
             {

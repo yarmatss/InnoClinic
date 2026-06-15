@@ -10,6 +10,7 @@ public record PatientResponseDto(
     DateOnly BirthDate,
     Gender Gender,
     string NationalId,
+    string Email,
     string? ContactPhone,
     string InsuranceNumber,
     string? EmergencyContact,

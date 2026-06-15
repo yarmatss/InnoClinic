@@ -10,6 +10,7 @@ public record MedicalStaffResponseDto(
     DateOnly BirthDate,
     Gender Gender,
     string NationalId,
+    string Email,
     string? ContactPhone,
     StaffType StaffType,
     string LicenseNumber,

@@ -9,6 +9,7 @@ public interface IPersonDto
     string? MiddleName { get; }
     Gender Gender { get; }
     string NationalId { get; }
+    string Email { get; }
     string? ContactPhone { get; }
 
     // BirthDate is omitted because medical staff and patients have different requirements

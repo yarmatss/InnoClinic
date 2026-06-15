@@ -62,6 +62,17 @@ internal class NationalIdValidator : AbstractValidator<string>
     }
 }
 
+internal class EmailValidator : AbstractValidator<string>
+{
+    public EmailValidator()
+    {
+        RuleFor(email => email)
+            .NotEmpty().WithMessage("Email is required.")
+            .MaximumLength(100).WithMessage("Email cannot exceed 100 characters.")
+            .EmailAddress().WithMessage("Invalid email address.");
+    }
+}
+
 internal class ContactPhoneValidator : AbstractValidator<string?>
 {
     public ContactPhoneValidator()

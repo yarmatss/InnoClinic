@@ -15,6 +15,7 @@ public sealed class MedicalStaffModelFaker : Faker<MedicalStaffModel>
         RuleFor(x => x.LastName, f => f.Name.LastName());
         RuleFor(x => x.MiddleName, f => f.Name.FirstName());
         RuleFor(x => x.NationalId, f => f.Random.AlphaNumeric(11));
+        RuleFor(x => x.Email, f => f.Internet.Email());
         RuleFor(x => x.BirthDate, f => DateOnly.FromDateTime(
             f.Date.Past(20, DateTime.UtcNow.AddYears(-20))));
         RuleFor(x => x.Gender, f => f.PickRandom<Gender>());
