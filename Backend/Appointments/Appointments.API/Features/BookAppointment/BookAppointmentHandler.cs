@@ -55,21 +55,20 @@ public class BookAppointmentHandler(
             return validationResult.Error;
         }
 
+        var appointment = new Appointment
+        {
+            Id = Guid.NewGuid(),
+            PatientId = request.PatientId,
+            MedicalStaffId = request.MedicalStaffId,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            Status = AppointmentStatus.Planned,
+            Comments = request.Comments
+        };
+        dbContext.Appointments.Add(appointment);
+
         try
         {
-            var appointment = new Appointment
-            {
-                Id = Guid.NewGuid(),
-                PatientId = request.PatientId,
-                MedicalStaffId = request.MedicalStaffId,
-                StartTime = request.StartTime,
-                EndTime = request.EndTime,
-                Status = AppointmentStatus.Planned,
-                Comments = request.Comments
-            };
-
-            dbContext.Appointments.Add(appointment);
-
             notificationProducer.Enqueue(new AppointmentBooked(
                 appointment.Id,
                 appointment.PatientId,

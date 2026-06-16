@@ -27,6 +27,7 @@ public static class DependencyInjection
                 ?? throw new InvalidOperationException("Connection string not found.");
 
             services.AddSingleton<PostgresExceptionInterceptor>();
+            services.AddSingleton(TimeProvider.System);
 
             services.AddDbContext<AppointmentsDbContext>((sp, options) =>
             {

@@ -4,17 +4,17 @@ using Profiles.DAL.Data;
 
 namespace Profiles.DAL.Repositories;
 
-public class NotificationProducer(ProfilesDbContext dbContext) : INotificationProducer
+public class NotificationProducer(ProfilesDbContext dbContext, TimeProvider timeProvider) : INotificationProducer
 {
     public void Enqueue<T>(T payload) where T : class
     {
         var outboxMessage = new NotificationOutbox
         {
             Id = Guid.NewGuid(),
-            MessageType = $"{typeof(T).FullName}, {typeof(T).Assembly.GetName().Name}",
+            MessageType = MessageTypeCache<T>.Name,
             Payload = JsonSerializer.Serialize(payload),
             Status = OutboxStatus.Pending,
-            CreatedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = timeProvider.GetUtcNow().UtcDateTime,
             RetryCount = 0
         };
 
