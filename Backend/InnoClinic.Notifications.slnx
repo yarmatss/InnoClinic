@@ -1,8 +1,5 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="Notifications/Notifications.Application/Notifications.Application.csproj" />
-    <Project Path="Notifications/Notifications.Domain/Notifications.Domain.csproj" />
-    <Project Path="Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj" />
     <Project Path="Notifications/Notifications.Worker/Notifications.Worker.csproj" />
   </Folder>
   <Folder Name="/solution-items/">

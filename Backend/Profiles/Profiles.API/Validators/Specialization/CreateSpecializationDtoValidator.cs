@@ -7,7 +7,7 @@ public class CreateSpecializationDtoValidator : AbstractValidator<CreateSpeciali
 {
     public CreateSpecializationDtoValidator()
     {
-        RuleFor(x => x.Name).SetValidator(new SpecializationNameValidator());
+        RuleFor(x => x.Name).NotEmpty().SetValidator(new SpecializationNameValidator());
         RuleFor(x => x.Code).SetValidator(new SpecializationCodeValidator());
     }
 }

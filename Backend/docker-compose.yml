@@ -128,6 +128,9 @@ services:
     build:
       context: .
       dockerfile: Notifications/Notifications.Worker/Dockerfile
+      secrets:
+        - NUGET_TOKEN
+        - NUGET_USER
     depends_on:
       rabbitmq:
         condition: service_healthy

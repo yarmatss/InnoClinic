@@ -15,5 +15,9 @@ public class PatientErrors : DomainErrors
         "Patient.DuplicateInsuranceNumber", 
         "A patient with this Insurance Number already exists.");
 
+    public static readonly Error DuplicateEmail = CreateConflict(
+        "Patient.DuplicateEmail",
+        "A patient with this email already exists.");
+
     public static readonly Error PrimaryDoctorNotFound = CreateNotFound("ActivePrimaryDoctor");
 }
