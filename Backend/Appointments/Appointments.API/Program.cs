@@ -1,3 +1,4 @@
+using Appointments.API.BackgroundJobs;
 using Appointments.API.Behaviors;
 using Appointments.API.Authorization;
 using Appointments.API.Extensions;
@@ -7,6 +8,8 @@ using Appointments.Infrastructure;
 using FluentValidation;
 using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
+using InnoClinic.Messaging.Outbox;
+using InnoClinic.Messaging.Extensions;
 using Microsoft.AspNetCore.HttpLogging;
 using Scalar.AspNetCore;
 using System.Reflection;
@@ -17,6 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddOutboxResilience();
+
+builder.Services.Configure<OutboxOptions>(
+    builder.Configuration.GetSection(OutboxOptions.SectionName));
+
+builder.Services.AddHostedService<NotificationWorker>();
 
 builder.Services.AddAuth0Authentication(builder.Configuration);
 builder.Services.AddScopePolicies();

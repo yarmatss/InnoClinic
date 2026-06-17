@@ -1,5 +1,6 @@
 using FluentValidation;
 using InnoClinic.AspNetCore.Middlewares;
+using InnoClinic.Messaging.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.DataProtection;
 using Profiles.API.Authorization;
@@ -24,6 +25,11 @@ builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
 builder.Services.AddAuth0Authentication(builder.Configuration);
 builder.Services.AddScopePolicies();
+
+builder.Services.AddOutboxResilience();
+builder.Services.Configure<InnoClinic.Messaging.Outbox.OutboxOptions>(
+    builder.Configuration.GetSection(InnoClinic.Messaging.Outbox.OutboxOptions.SectionName));
+builder.Services.AddHostedService<NotificationWorker>();
 
 var dataProtectionPath = builder.Configuration["DataProtection:Path"] ?? "/app/keys";
 builder.Services.AddDataProtection()

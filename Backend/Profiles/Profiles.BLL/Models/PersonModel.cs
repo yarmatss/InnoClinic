@@ -10,5 +10,6 @@ public abstract class PersonModel : BaseModel
     public DateOnly BirthDate { get; set; }
     public Gender Gender { get; set; }
     public required string NationalId { get; set; }
+    public required string Email { get; set; }
     public string? ContactPhone { get; set; }
 }

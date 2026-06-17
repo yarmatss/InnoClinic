@@ -8,6 +8,8 @@ using Appointments.Domain.Exceptions;
 using Appointments.Infrastructure.Data;
 using InnoClinic.Contracts.Grpc;
 using InnoClinic.Core.Common;
+using InnoClinic.Messaging.Outbox;
+using InnoClinic.Messaging.Contracts;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -18,6 +20,7 @@ public class BookAppointmentHandler(
     AppointmentsDbContext dbContext,
     ISender sender,
     PatientService.PatientServiceClient patientClient,
+    INotificationProducer notificationProducer,
     IOptions<ClinicOptions> clinicOptions,
     ILogger<BookAppointmentHandler> logger)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
@@ -52,20 +55,28 @@ public class BookAppointmentHandler(
             return validationResult.Error;
         }
 
+        var appointment = new Appointment
+        {
+            Id = Guid.NewGuid(),
+            PatientId = request.PatientId,
+            MedicalStaffId = request.MedicalStaffId,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            Status = AppointmentStatus.Planned,
+            Comments = request.Comments
+        };
+        dbContext.Appointments.Add(appointment);
+
         try
         {
-            var appointment = new Appointment
-            {
-                Id = Guid.NewGuid(),
-                PatientId = request.PatientId,
-                MedicalStaffId = request.MedicalStaffId,
-                StartTime = request.StartTime,
-                EndTime = request.EndTime,
-                Status = AppointmentStatus.Planned,
-                Comments = request.Comments
-            };
+            notificationProducer.Enqueue(new AppointmentBooked(
+                appointment.Id,
+                appointment.PatientId,
+                appointment.MedicalStaffId,
+                appointment.StartTime,
+                appointment.EndTime
+            ));
 
-            dbContext.Appointments.Add(appointment);
             await dbContext.SaveChangesAsync(cancellationToken);
 
             return appointment.Id;
