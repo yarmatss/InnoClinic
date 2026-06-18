@@ -116,6 +116,13 @@ internal class PatientService(
         if (existingNationalId.Any())
             return PatientErrors.DuplicateNationalId;
 
+        var existingEmail = await patientRepository.GetByConditionAsync(
+            p => p.Email == model.Email && (!currentId.HasValue || p.Id != currentId.Value),
+            cancellationToken);
+
+        if (existingEmail.Any())
+            return PatientErrors.DuplicateEmail;
+
         if (model.PrimaryDoctorId.HasValue)
         {
             var doctor = await staffRepository.GetByIdAsync(model.PrimaryDoctorId.Value, cancellationToken);

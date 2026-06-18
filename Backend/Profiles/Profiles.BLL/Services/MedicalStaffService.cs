@@ -306,6 +306,13 @@ internal class MedicalStaffService(
         if (existingNationalId.Any())
             return MedicalStaffErrors.DuplicateNationalId;
 
+        var existingEmail = await staffRepository.GetByConditionAsync(
+            s => s.Email == model.Email && (!currentId.HasValue || s.Id != currentId.Value),
+            cancellationToken);
+
+        if (existingEmail.Any())
+            return MedicalStaffErrors.DuplicateEmail;
+
         if (model.SupervisorId.HasValue)
         {
             var supervisor = await staffRepository.GetByIdAsync(model.SupervisorId.Value, cancellationToken);

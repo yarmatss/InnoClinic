@@ -15,6 +15,10 @@ public class MedicalStaffErrors : DomainErrors
         "MedicalStaff.DuplicateLicenseNumber", 
         "A medical staff member with this License Number already exists.");
 
+    public static readonly Error DuplicateEmail = CreateConflict(
+        "MedicalStaff.DuplicateEmail",
+        "A medical staff member with this email already exists.");
+
     public static readonly Error SupervisorNotFound = CreateNotFound("ActiveSupervisor");
 
     public static readonly Error InvalidSpecialization = CreateConflict(

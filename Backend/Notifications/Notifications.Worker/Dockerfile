@@ -12,11 +12,11 @@ WORKDIR /src
 COPY ["Directory.Packages.props", "."]
 COPY ["nuget.config", "."]
 COPY ["Notifications/Notifications.Worker/Notifications.Worker.csproj", "Notifications/Notifications.Worker/"]
-COPY ["Notifications/Notifications.Application/Notifications.Application.csproj", "Notifications/Notifications.Application/"]
-COPY ["Notifications/Notifications.Domain/Notifications.Domain.csproj", "Notifications/Notifications.Domain/"]
-COPY ["Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj", "Notifications/Notifications.Infrastructure/"]
-RUN dotnet restore "./Notifications/Notifications.Worker/Notifications.Worker.csproj"
-COPY Notifications/ Notifications/
+
+RUN --mount=type=secret,id=NUGET_TOKEN,env=NUGET_TOKEN \
+    --mount=type=secret,id=NUGET_USER,env=NUGET_USER \
+    dotnet restore "./Notifications/Notifications.Worker/Notifications.Worker.csproj"
+COPY Notifications/Notifications.Worker/ Notifications/Notifications.Worker/
 WORKDIR "/src/Notifications/Notifications.Worker"
 RUN dotnet build "./Notifications.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

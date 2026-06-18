@@ -11,7 +11,7 @@ public class CreatePatientDtoValidator : AbstractValidator<CreatePatientDto>
         Include(new PersonValidator());
 
         RuleFor(x => x.BirthDate).SetValidator(new BirthDateValidator());
-        RuleFor(x => x.InsuranceNumber).SetValidator(new InsuranceNumberValidator());
+        RuleFor(x => x.InsuranceNumber).NotEmpty().SetValidator(new InsuranceNumberValidator());
         RuleFor(x => x.EmergencyContact).SetValidator(new EmergencyContactValidator());
     }
 }

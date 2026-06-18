@@ -12,7 +12,7 @@ public class CreateMedicalStaffDtoValidator : AbstractValidator<CreateMedicalSta
 
         RuleFor(x => x.BirthDate).SetValidator(new MedicalStaffBirthDateValidator());
         RuleFor(x => x.StaffType).SetValidator(new StaffTypeValidator());
-        RuleFor(x => x.LicenseNumber).SetValidator(new LicenseNumberValidator());
+        RuleFor(x => x.LicenseNumber).NotEmpty().SetValidator(new LicenseNumberValidator());
         RuleFor(x => x.HireDate).SetValidator(new HireDateValidator());
     }
 }

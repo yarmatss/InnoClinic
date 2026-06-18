@@ -1,4 +1,4 @@
-namespace Notifications.Domain.Constants;
+namespace Notifications.Worker.Constants;
 
 public static class ConnectionConstants
 {
