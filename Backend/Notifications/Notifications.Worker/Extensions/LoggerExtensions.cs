@@ -19,4 +19,12 @@ public static partial class LoggerExtensions
         this ILogger logger,
         Guid patientId,
         string email);
+
+    [LoggerMessage(
+        EventId = 1002,
+        Level = LogLevel.Information, 
+        Message = "Email successfully sent to {Recipient}")]
+    public static partial void LogEmailSent(
+        this ILogger logger, 
+        string recipient);
 }

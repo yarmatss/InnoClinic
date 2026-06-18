@@ -134,8 +134,25 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     environment:
       - ConnectionStrings__RabbitMQ=${ConnectionStrings__RabbitMQ}
+      - Email__Host=${SMTP_HOST}
+      - Email__Port=${SMTP_PORT}
+      - Email__SenderName=${SMTP_SENDER_NAME}
+      - Email__SenderEmail=${SMTP_SENDER_EMAIL}
+      - Email__UserName=${SMTP_USERNAME}
+      - Email__Password=${SMTP_PASSWORD}
+      - Email__UseSsl=${SMTP_USE_SSL}
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: innoclinic_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
 
 volumes:
   postgres_data:
