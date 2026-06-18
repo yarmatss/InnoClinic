@@ -1,5 +1,6 @@
 using InnoClinic.Messaging.Contracts;
 using MassTransit;
+using Notifications.Worker.Extensions;
 
 namespace Notifications.Worker.Consumers;
 
@@ -9,12 +10,7 @@ public class PatientCreatedConsumer(ILogger<PatientCreatedConsumer> logger)
     public Task Consume(ConsumeContext<PatientCreated> context)
     {
         var message = context.Message;
-
-        logger.LogInformation("Processing patient creation notification for PatientId: {PatientId}, Email: {Email}",
-            message.PatientId, message.Email);
-
-        // TODO
-
+        logger.LogPatientCreationNotificationProcessing(message.PatientId, message.Email);
         return Task.CompletedTask;
     }
 }
