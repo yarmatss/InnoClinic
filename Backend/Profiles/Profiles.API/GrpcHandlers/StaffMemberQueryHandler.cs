@@ -18,16 +18,13 @@ public class StaffMemberQueryHandler(
         logger.LogProcessingGetStaffProfile(request.MedicalStaffId);
 
         if (!Guid.TryParse(request.MedicalStaffId, out var staffId))
-        {
             throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid MedicalStaffId format."));
-        }
 
         var staff = await staffRepository.GetByIdAsync(staffId, context.CancellationToken);
 
         if (staff is null)
-        {
-            throw new RpcException(new Status(StatusCode.NotFound, $"MedicalStaff with ID {request.MedicalStaffId} not found."));
-        }
+            throw new RpcException(new Status(StatusCode.NotFound, 
+                $"MedicalStaff with ID {request.MedicalStaffId} not found."));
 
         return staff.Adapt<SyncStaffProfileRequest>();
     }

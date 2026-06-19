@@ -33,9 +33,6 @@ internal class PatientService(
             entity.Id,
             entity.FirstName,
             entity.LastName,
-            entity.BirthDate,
-            entity.Gender.ToString(),
-            entity.ContactPhone ?? string.Empty,
             entity.Email
         ));
 

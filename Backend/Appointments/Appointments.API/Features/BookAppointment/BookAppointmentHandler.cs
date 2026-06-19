@@ -74,7 +74,10 @@ public class BookAppointmentHandler(
                 appointment.PatientId,
                 appointment.MedicalStaffId,
                 appointment.StartTime,
-                appointment.EndTime
+                appointment.EndTime,
+                patientResponse.Email,
+                patientResponse.FirstName + " " + patientResponse.LastName,
+                schedule.FirstName + " " + schedule.LastName
             ));
 
             await dbContext.SaveChangesAsync(cancellationToken);

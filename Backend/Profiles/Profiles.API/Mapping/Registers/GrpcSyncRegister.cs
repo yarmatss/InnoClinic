@@ -11,6 +11,8 @@ public class GrpcSyncRegister : IRegister
         config.NewConfig<MedicalStaff, SyncStaffProfileRequest>()
             .Map(dest => dest.MedicalStaffId, src => src.Id.ToString())
             .Map(dest => dest.IsActive, src => src.IsActive)
+            .Map(dest => dest.FirstName, src => src.FirstName)
+            .Map(dest => dest.LastName, src => src.LastName)
             .Map(dest => dest.SpecializationIds, src =>
                 src.StaffSpecializations != null
                 ? src.StaffSpecializations.Select(ss => ss.SpecializationId.ToString())

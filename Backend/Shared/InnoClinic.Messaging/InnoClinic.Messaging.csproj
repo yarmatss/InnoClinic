@@ -8,7 +8,7 @@
     <Title>InnoClinic Messaging</Title>
     <Authors>yarmatss</Authors>
     <Description>Shared messaging infrastructure, including Transactional Outbox pattern.</Description>
-    <Version>1.0.10</Version>
+    <Version>1.0.12</Version>
   </PropertyGroup>
 
   <ItemGroup>

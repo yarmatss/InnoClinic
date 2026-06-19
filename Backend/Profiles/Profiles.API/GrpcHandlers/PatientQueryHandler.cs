@@ -22,7 +22,10 @@ public class PatientQueryHandler(
         return new GetPatientResponse
         {
             PatientId = request.PatientId,
-            Exists = patient is not null
+            Exists = patient is not null,
+            Email = patient?.Email ?? string.Empty,
+            FirstName = patient?.FirstName ?? string.Empty,
+            LastName = patient?.LastName ?? string.Empty
         };
     }
 }

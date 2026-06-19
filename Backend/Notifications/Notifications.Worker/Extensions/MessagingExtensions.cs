@@ -18,6 +18,11 @@ public static class MessagingExtensions
                 x.AddConsumer<AppointmentBookedConsumer>();
                 x.AddConsumer<PatientCreatedConsumer>();
 
+                x.AddConfigureEndpointsCallback((context, name, cfg) =>
+                {
+                    cfg.RethrowFaultedMessages();
+                });
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(rabbitMqConnectionString);
