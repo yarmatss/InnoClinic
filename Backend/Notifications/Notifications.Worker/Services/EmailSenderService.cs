@@ -28,17 +28,9 @@ public partial class EmailSenderService(
     {
         await _pipeline.ExecuteAsync(async token =>
         {
-            using var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(_options.SenderName, _options.SenderEmail));
-            message.To.Add(MailboxAddress.Parse(recipient));
-            message.Subject = subject;
-
-            var bodyBuilder = new BodyBuilder { HtmlBody = body };
-            message.Body = bodyBuilder.ToMessageBody();
-
             using var client = new SmtpClient();
-            
-            var socketOptions = _options.UseSsl 
+
+            var socketOptions = _options.UseSsl
                 ? SecureSocketOptions.SslOnConnect
                 : SecureSocketOptions.Auto;
 
@@ -46,6 +38,14 @@ public partial class EmailSenderService(
 
             if (!string.IsNullOrEmpty(_options.UserName) && !string.IsNullOrEmpty(_options.Password))
                 await client.AuthenticateAsync(_options.UserName, _options.Password, token);
+
+            using var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_options.SenderName, _options.SenderEmail));
+            message.To.Add(MailboxAddress.Parse(recipient));
+            message.Subject = subject;
+
+            var bodyBuilder = new BodyBuilder { HtmlBody = body };
+            message.Body = bodyBuilder.ToMessageBody();
 
             await client.SendAsync(message, token);
             await client.DisconnectAsync(true, token);
