@@ -1,0 +1,59 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["Frontend/**", ".github/workflows/frontend-ci.yml"]
+  pull_request:
+    branches: ["main"]
+    paths: ["Frontend/**"]
+
+defaults:
+  run:
+    working-directory: ./Frontend
+
+jobs:
+  build-and-analyze:
+    name: Lint, Audit, Build & Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: "./Frontend/package-lock.json"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Security Vulnerability Audit
+        run: npm run audit
+
+      - name: Check Code Formatting (Prettier Defaults)
+        run: npm run format:check
+
+      - name: Run Linter (ESLint)
+        run: npm run lint
+
+      - name: Verify Production Build
+        run: npm run build
+
+      - name: SonarCloud Analysis
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        with:
+          projectBaseDir: ./Frontend
+          args: >
+            -Dsonar.projectKey=yarmatss_InnoClinic_Frontend
+            -Dsonar.organization=yarmatss
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=src
+            -Dsonar.exclusions=node_modules/**,dist/**,vite.config.ts,eslint.config.js
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
