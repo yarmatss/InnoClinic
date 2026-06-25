@@ -29,6 +29,35 @@ function App() {
     });
   };
 
+  const renderAuthSection = () => {
+    if (isLoading) {
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", minWidth: 60 }}>
+          <CircularProgress size={24} color="inherit" />
+        </Box>
+      );
+    }
+
+    if (isAuthenticated) {
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            {user?.name ?? "Signed in"}
+          </Typography>
+          <Button variant="outlined" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Box>
+      );
+    }
+
+    return (
+      <Button variant="outlined" onClick={handleLogin}>
+        Login
+      </Button>
+    );
+  };
+
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <AppBar position="static" color="default" elevation={0}>
@@ -47,24 +76,7 @@ function App() {
             InnoClinic
           </Typography>
 
-          {isLoading ? (
-            <Box sx={{ display: "flex", alignItems: "center", minWidth: 60 }}>
-              <CircularProgress size={24} color="inherit" />
-            </Box>
-          ) : isAuthenticated ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                {user?.name ?? "Signed in"}
-              </Typography>
-              <Button variant="outlined" onClick={handleLogout}>
-                Logout
-              </Button>
-            </Box>
-          ) : (
-            <Button variant="outlined" onClick={handleLogin}>
-              Login
-            </Button>
-          )}
+          {renderAuthSection()}
         </Toolbar>
       </AppBar>
 

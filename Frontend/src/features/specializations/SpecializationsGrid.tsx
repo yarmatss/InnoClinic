@@ -22,7 +22,7 @@ export function SpecializationsGrid({
   totalPages,
   pageNumber,
   onPageChange,
-}: SpecializationsGridProps) {
+}: Readonly<SpecializationsGridProps>) {
   if (items.length === 0) {
     return <Alert severity="info">No specializations found.</Alert>;
   }

@@ -25,7 +25,7 @@ export function SpecializationsFilter({
   sortOrder: initialSortOrder,
   onApplyFilter,
   onClearFilter,
-}: SpecializationsFilterProps) {
+}: Readonly<SpecializationsFilterProps>) {
   const [draftName, setDraftName] = useState("");
   const [draftPageSize, setDraftPageSize] = useState(initialPageSize);
   const [draftSortOrder, setDraftSortOrder] = useState<"asc" | "desc">(

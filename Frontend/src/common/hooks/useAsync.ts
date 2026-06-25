@@ -24,11 +24,7 @@ export function useAsync<T>(
   const [prevEnabled, setPrevEnabled] = useState(enabled);
   if (enabled !== prevEnabled) {
     setPrevEnabled(enabled);
-    if (!enabled) {
-      setIsLoading(false);
-    } else {
-      setIsLoading(true);
-    }
+    setIsLoading(enabled);
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
