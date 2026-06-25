@@ -1,5 +1,5 @@
-import { Button, Box, Typography } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { Button, Box, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 export function NotFoundPage() {
   return (
@@ -14,5 +14,5 @@ export function NotFoundPage() {
         Go to specializations
       </Button>
     </Box>
-  )
+  );
 }

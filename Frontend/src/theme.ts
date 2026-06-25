@@ -1,21 +1,21 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme } from "@mui/material/styles";
 
 export const appTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
     primary: {
-      main: '#2dd4bf',
+      main: "#2dd4bf",
     },
     secondary: {
-      main: '#8b5cf6',
+      main: "#8b5cf6",
     },
     background: {
-      default: '#050816',
-      paper: '#0f172a',
+      default: "#050816",
+      paper: "#0f172a",
     },
     text: {
-      primary: '#f8fafc',
-      secondary: '#94a3b8',
+      primary: "#f8fafc",
+      secondary: "#94a3b8",
     },
   },
   shape: {
@@ -23,13 +23,13 @@ export const appTheme = createTheme({
   },
   typography: {
     fontFamily: [
-      'Inter',
-      'ui-sans-serif',
-      'system-ui',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      'Segoe UI',
-      'sans-serif',
-    ].join(','),
+      "Inter",
+      "ui-sans-serif",
+      "system-ui",
+      "-apple-system",
+      "BlinkMacSystemFont",
+      "Segoe UI",
+      "sans-serif",
+    ].join(","),
   },
-})
+});

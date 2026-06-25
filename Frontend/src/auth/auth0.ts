@@ -1,13 +1,13 @@
-const redirectUri = `${window.location.origin}/`
-const audience = 'https://innocliniic/profiles'
+const redirectUri = `${window.location.origin}/`;
+const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 const scope =
-  'openid profile email read:patients write:patients read:staff write:staff \
+  "openid profile email read:patients write:patients read:staff write:staff \
   write:specializations read:appointments write:appointments \
-  confirm:appointments read:results write:results'
+  confirm:appointments read:results write:results";
 
 export const auth0Config = {
-  domain: 'yarmatss.eu.auth0.com',
-  clientId: 'U15y9gdVndMyH2cOIK8jrHBuOaMBKFYI',
+  domain: import.meta.env.VITE_AUTH0_DOMAIN,
+  clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
   audience,
   authorizationParams: {
     redirect_uri: redirectUri,
@@ -15,4 +15,4 @@ export const auth0Config = {
     scope,
   },
   logoutReturnTo: redirectUri,
-} as const
+} as const;
