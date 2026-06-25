@@ -17,12 +17,12 @@ function App() {
   const { isAuthenticated, isLoading, loginWithRedirect, logout, user } =
     useAuth0();
 
-  const handleLogin = async () => {
-    await loginWithRedirect();
+  const handleLogin = () => {
+    void loginWithRedirect();
   };
 
-  const handleLogout = async () => {
-    await logout({
+  const handleLogout = () => {
+    void logout({
       logoutParams: {
         returnTo: auth0Config.logoutReturnTo,
       },
