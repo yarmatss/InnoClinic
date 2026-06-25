@@ -4,6 +4,7 @@ import { Link as RouterLink } from "react-router-dom";
 export function NotFoundPage() {
   return (
     <Box sx={{ py: 4 }}>
+      <title>Page not found | InnoClinic</title>
       <Typography variant="h4" gutterBottom>
         Page not found
       </Typography>

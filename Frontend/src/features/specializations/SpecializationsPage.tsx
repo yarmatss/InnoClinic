@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useSpecializations } from "./useSpecializations";
 import { SpecializationsFilter } from "./SpecializationsFilter";
@@ -9,10 +9,6 @@ export function SpecializationsPage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  useEffect(() => {
-    document.title = "Specializations | InnoClinic";
-  }, []);
 
   const { specializations, isLoading, error, totalCount, totalPages } =
     useSpecializations({
@@ -42,6 +38,8 @@ export function SpecializationsPage() {
 
   return (
     <Stack spacing={3}>
+      <title>Specializations | InnoClinic</title>
+
       <Box>
         <Typography variant="h4" gutterBottom>
           Specializations
