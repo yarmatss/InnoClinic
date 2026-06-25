@@ -8,11 +8,12 @@ import App from "./App.tsx";
 import { auth0Config } from "./auth/auth0";
 import { appTheme } from "./theme";
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Auth0Provider
-      domain={auth0Config.domain}
-      clientId={auth0Config.clientId}
+      domain={auth0Config.domain ?? ""}
+      clientId={auth0Config.clientId ?? ""}
       authorizationParams={auth0Config.authorizationParams}
       cacheLocation="localstorage"
       useRefreshTokens

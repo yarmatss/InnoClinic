@@ -65,7 +65,9 @@ export function SpecializationsFilter({
         <TextField
           label="Filter by name"
           value={draftName}
-          onChange={(e) => setDraftName(e.target.value)}
+          onChange={(e) => {
+            setDraftName(e.target.value);
+          }}
           size="small"
           fullWidth
         />
@@ -75,7 +77,9 @@ export function SpecializationsFilter({
           <Select
             value={draftPageSize}
             label="Items Per Page"
-            onChange={(e) => setDraftPageSize(Number(e.target.value))}
+            onChange={(e) => {
+              setDraftPageSize(e.target.value);
+            }}
           >
             <MenuItem value={5}>5</MenuItem>
             <MenuItem value={10}>10</MenuItem>
@@ -88,9 +92,9 @@ export function SpecializationsFilter({
           <Select
             value={draftSortOrder}
             label="Sort Order"
-            onChange={(e) =>
-              setDraftSortOrder(e.target.value as "asc" | "desc")
-            }
+            onChange={(e) => {
+              setDraftSortOrder(e.target.value);
+            }}
           >
             <MenuItem value="asc">Ascending</MenuItem>
             <MenuItem value="desc">Descending</MenuItem>

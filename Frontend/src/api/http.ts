@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const baseURL =
-  import.meta.env.VITE_PROFILES_API_URL ?? "https://localhost:5001";
+  (import.meta.env.VITE_PROFILES_API_URL as string | undefined) ??
+  "https://localhost:5001";
 
 export const httpClient = axios.create({
   baseURL,

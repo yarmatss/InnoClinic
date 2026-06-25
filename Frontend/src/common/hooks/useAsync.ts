@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import type { ProblemDetails } from "../types/api";
 
 interface UseAsyncOptions {
@@ -10,22 +11,31 @@ export function useAsync<T>(
   dependencies: unknown[],
   options: UseAsyncOptions = {},
 ) {
-  const [data, setData] = useState<T | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { enabled = true } = options;
 
+  const [data, setData] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState(enabled);
+  const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
     string[]
   > | null>(null);
 
-  const { enabled = true } = options;
+  const [prevEnabled, setPrevEnabled] = useState(enabled);
+  if (enabled !== prevEnabled) {
+    setPrevEnabled(enabled);
+    if (!enabled) {
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
+  }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
   const execute = useCallback(asyncCallback, dependencies);
 
   useEffect(() => {
     if (!enabled) {
-      setIsLoading(false);
       return;
     }
 
@@ -42,21 +52,17 @@ export function useAsync<T>(
         if (!controller.signal.aborted) {
           setData(result);
         }
-      } catch (caughtError: any) {
+      } catch (caughtError: unknown) {
         if (controller.signal.aborted) return;
 
-        if (caughtError.response && caughtError.response.data) {
+        if (axios.isAxiosError(caughtError) && caughtError.response?.data) {
           const apiError = caughtError.response.data as ProblemDetails;
 
           if (apiError.errors) {
             setValidationErrors(apiError.errors);
           }
 
-          setError(
-            apiError.detail ??
-              apiError.title ??
-              "A validation failure occurred.",
-          );
+          setError(apiError.detail ?? apiError.title);
         } else {
           const fallbackMessage =
             caughtError instanceof Error

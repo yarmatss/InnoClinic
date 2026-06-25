@@ -50,7 +50,9 @@ export function SpecializationsGrid({
         <Pagination
           count={totalPages}
           page={pageNumber}
-          onChange={(_, value) => onPageChange(value)}
+          onChange={(_, value) => {
+            onPageChange(value);
+          }}
           color="primary"
         />
       )}
