@@ -12,7 +12,7 @@ export function NotFoundPage() {
         The route you opened does not exist.
       </Typography>
       <Button component={RouterLink} to="/" variant="contained">
-        Go to home
+        Return to Home page
       </Button>
     </Box>
   );

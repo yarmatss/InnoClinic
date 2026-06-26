@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useSpecializations } from "./useSpecializations";
 import { SpecializationsFilter } from "./SpecializationsFilter";
@@ -18,23 +18,22 @@ export function SpecializationsPage() {
       sortOrder,
     });
 
-  const handleApplyFilter = (params: {
-    name: string;
-    pageSize: number;
-    sortOrder: "asc" | "desc";
-  }) => {
-    setPageNumber(1);
-    setNameFilter(params.name);
-    setPageSize(params.pageSize);
-    setSortOrder(params.sortOrder);
-  };
+  const handleApplyFilter = useCallback(
+    (params: { name: string; pageSize: number; sortOrder: "asc" | "desc" }) => {
+      setPageNumber(1);
+      setNameFilter(params.name);
+      setPageSize(params.pageSize);
+      setSortOrder(params.sortOrder);
+    },
+    [],
+  );
 
-  const handleClearFilter = () => {
+  const handleClearFilter = useCallback(() => {
     setPageNumber(1);
     setPageSize(10);
     setNameFilter("");
     setSortOrder("asc");
-  };
+  }, []);
 
   return (
     <Stack spacing={3}>

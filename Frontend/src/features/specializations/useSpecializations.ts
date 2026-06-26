@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useAsync } from "../../common/hooks/useAsync";
 import { getSpecializations } from "./specializationsApi";
 
@@ -14,8 +15,8 @@ export function useSpecializations({
   nameFilter,
   sortOrder,
 }: UseSpecializationsProps) {
-  const { data, isLoading, error } = useAsync(
-    (signal) =>
+  const fetchSpecializations = useCallback(
+    (signal: AbortSignal) =>
       getSpecializations({
         pageNumber,
         pageSize,
@@ -26,6 +27,8 @@ export function useSpecializations({
       }),
     [pageNumber, pageSize, nameFilter, sortOrder],
   );
+
+  const { data, isLoading, error } = useAsync(fetchSpecializations);
 
   return {
     specializations: data?.items ?? [],

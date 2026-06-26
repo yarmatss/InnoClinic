@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useReducer, useCallback } from "react";
 import axios from "axios";
 import type { ProblemDetails } from "../types/api";
 
@@ -6,29 +6,61 @@ interface UseAsyncOptions {
   enabled?: boolean;
 }
 
+interface AsyncState<T> {
+  data: T | null;
+  isLoading: boolean;
+  error: string | null;
+  validationErrors: Record<string, string[]> | null;
+}
+
+type AsyncAction<T> =
+  | { type: "FETCH_INIT" }
+  | { type: "FETCH_SUCCESS"; payload: T }
+  | {
+      type: "FETCH_FAILURE";
+      error: string;
+      validationErrors?: Record<string, string[]> | null;
+    }
+  | { type: "SET_DATA"; payload: T | null }
+  | { type: "SET_VALIDATION_ERRORS"; payload: Record<string, string[]> | null };
+
+function asyncReducer<T>(
+  state: AsyncState<T>,
+  action: AsyncAction<T>,
+): AsyncState<T> {
+  switch (action.type) {
+    case "FETCH_INIT":
+      return { ...state, isLoading: true, error: null, validationErrors: null };
+    case "FETCH_SUCCESS":
+      return { ...state, isLoading: false, data: action.payload };
+    case "FETCH_FAILURE":
+      return {
+        ...state,
+        isLoading: false,
+        error: action.error,
+        validationErrors: action.validationErrors ?? null,
+      };
+    case "SET_DATA":
+      return { ...state, data: action.payload };
+    case "SET_VALIDATION_ERRORS":
+      return { ...state, validationErrors: action.payload };
+    default:
+      return state;
+  }
+}
+
 export function useAsync<T>(
   asyncCallback: (signal: AbortSignal) => Promise<T>,
-  dependencies: unknown[],
   options: UseAsyncOptions = {},
 ) {
   const { enabled = true } = options;
 
-  const [data, setData] = useState<T | null>(null);
-  const [isLoading, setIsLoading] = useState(enabled);
-  const [error, setError] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<
-    string,
-    string[]
-  > | null>(null);
-
-  const [prevEnabled, setPrevEnabled] = useState(enabled);
-  if (enabled !== prevEnabled) {
-    setPrevEnabled(enabled);
-    setIsLoading(enabled);
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
-  const execute = useCallback(asyncCallback, dependencies);
+  const [state, dispatch] = useReducer(asyncReducer<T>, {
+    data: null,
+    isLoading: enabled,
+    error: null,
+    validationErrors: null,
+  });
 
   useEffect(() => {
     if (!enabled) {
@@ -38,15 +70,13 @@ export function useAsync<T>(
     const controller = new AbortController();
 
     async function run() {
-      setIsLoading(true);
-      setError(null);
-      setValidationErrors(null);
+      dispatch({ type: "FETCH_INIT" });
 
       try {
-        const result = await execute(controller.signal);
+        const result = await asyncCallback(controller.signal);
 
         if (!controller.signal.aborted) {
-          setData(result);
+          dispatch({ type: "FETCH_SUCCESS", payload: result });
         }
       } catch (caughtError: unknown) {
         if (controller.signal.aborted) return;
@@ -54,21 +84,18 @@ export function useAsync<T>(
         if (axios.isAxiosError(caughtError) && caughtError.response?.data) {
           const apiError = caughtError.response.data as ProblemDetails;
 
-          if (apiError.errors) {
-            setValidationErrors(apiError.errors);
-          }
-
-          setError(apiError.detail ?? apiError.title);
+          dispatch({
+            type: "FETCH_FAILURE",
+            error: apiError.detail ?? apiError.title,
+            validationErrors: apiError.errors,
+          });
         } else {
           const fallbackMessage =
             caughtError instanceof Error
               ? caughtError.message
               : "A critical network communication failure occurred.";
-          setError(fallbackMessage);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
+
+          dispatch({ type: "FETCH_FAILURE", error: fallbackMessage });
         }
       }
     }
@@ -78,13 +105,21 @@ export function useAsync<T>(
     return () => {
       controller.abort();
     };
-  }, [execute, enabled]);
+  }, [asyncCallback, enabled]);
+
+  const setData = useCallback((data: T | null) => {
+    dispatch({ type: "SET_DATA", payload: data });
+  }, []);
+
+  const setValidationErrors = useCallback(
+    (errors: Record<string, string[]> | null) => {
+      dispatch({ type: "SET_VALIDATION_ERRORS", payload: errors });
+    },
+    [],
+  );
 
   return {
-    data,
-    isLoading,
-    error,
-    validationErrors,
+    ...state,
     setData,
     setValidationErrors,
   };
