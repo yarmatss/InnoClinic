@@ -4,14 +4,20 @@ on:
   push:
     branches: ["main"]
     paths:
-      [
-        "Backend/Profiles/**",
-        "Backend/Shared/**",
-        ".github/workflows/profiles-ci.yml",
-      ]
+      - "Backend/Profiles/**"
+      - "Backend/Shared/**"
+      - "Backend/Directory.Packages.props"
+      - "Backend/nuget.config"
+      - ".github/workflows/profiles-ci.yml"
+
   pull_request:
     branches: ["main"]
-    paths: ["Backend/Profiles/**", "Backend/Shared/**"]
+    paths:
+      - "Backend/Profiles/**"
+      - "Backend/Shared/**"
+      - "Backend/Directory.Packages.props"
+      - "Backend/nuget.config"
+      - ".github/workflows/profiles-ci.yml"
 
 defaults:
   run:
@@ -48,7 +54,6 @@ jobs:
 
       - name: Begin SonarCloud Analysis
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           dotnet sonarscanner begin \
