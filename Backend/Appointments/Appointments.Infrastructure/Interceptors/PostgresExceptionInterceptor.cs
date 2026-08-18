@@ -7,8 +7,6 @@ namespace Appointments.Infrastructure.Interceptors;
 
 public class PostgresExceptionInterceptor : SaveChangesInterceptor
 {
-    private const string PostgresExclusionViolationCode = "23P01";
-
     public override void SaveChangesFailed(DbContextErrorEventData eventData)
     {
         CheckAndThrow(eventData.Exception);
@@ -24,7 +22,7 @@ public class PostgresExceptionInterceptor : SaveChangesInterceptor
     private static void CheckAndThrow(Exception? exception)
     {
         if (exception is DbUpdateException { InnerException: PostgresException pgEx } && 
-            pgEx.SqlState == PostgresExclusionViolationCode)
+            pgEx.SqlState == PostgresErrorCodes.ExclusionViolation)
         {
             throw new ScheduleConflictException("A schedule conflict occurred.");
         }
