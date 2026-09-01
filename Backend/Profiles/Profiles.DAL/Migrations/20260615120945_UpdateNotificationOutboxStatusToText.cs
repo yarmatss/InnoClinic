@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,6 +17,8 @@ namespace Profiles.DAL.Migrations
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "integer");
+
+            migrationBuilder.Sql("UPDATE \"NotificationOutboxes\" SET \"MessageType\" = LEFT(\"MessageType\", 255) WHERE LENGTH(\"MessageType\") > 255;");
 
             migrationBuilder.AlterColumn<string>(
                 name: "MessageType",
