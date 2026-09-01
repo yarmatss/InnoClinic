@@ -3,10 +3,20 @@ name: Notifications Microservice CI
 on:
   push:
     branches: ["main"]
-    paths: ["Backend/Notifications/**", "Backend/Shared/**", ".github/workflows/notifications-ci.yml"]
+    paths:
+      - "Backend/Notifications/**"
+      - "Backend/Shared/**"
+      - "Backend/Directory.Packages.props"
+      - "Backend/nuget.config"
+      - ".github/workflows/notifications-ci.yml"
   pull_request:
     branches: ["main"]
-    paths: ["Backend/Notifications/**", "Backend/Shared/**"]
+    paths:
+      - "Backend/Notifications/**"
+      - "Backend/Shared/**"
+      - "Backend/Directory.Packages.props"
+      - "Backend/nuget.config"
+      - ".github/workflows/notifications-ci.yml"
 
 defaults:
   run:
@@ -16,49 +26,67 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
-    
+
+    permissions:
+      contents: read
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
-    - name: Setup .NET 10
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
 
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: "21"
 
-    - name: Install SonarScanner
-      run: dotnet tool install --global dotnet-sonarscanner
+      - name: Cache SonarQube packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-    - name: Begin SonarCloud Analysis
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        dotnet sonarscanner begin \
-          /k:"yarmatss_InnoClinic_Notifications" \
-          /o:"yarmatss" \
-          /d:sonar.token="$SONAR_TOKEN" \
-          /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.coverage.exclusions="**/*"
+      - name: Cache SonarScanner tool
+        id: cache-sonar-scanner
+        uses: actions/cache@v6
+        with:
+          path: ~/.sonar/scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
 
-    - name: Restore dependencies
-      env:
-        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
-        NUGET_USER: ${{ secrets.NUGET_USER }}
-      run: dotnet restore InnoClinic.Notifications.slnx
+      - name: Install SonarScanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        run: dotnet tool install dotnet-sonarscanner --tool-path ~/.sonar/scanner
 
-    - name: Build
-      run: dotnet build InnoClinic.Notifications.slnx --no-restore --configuration Release
+      - name: Begin SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ~/.sonar/scanner/dotnet-sonarscanner begin \
+            /k:"yarmatss_InnoClinic_Notifications" \
+            /o:"yarmatss" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.coverage.exclusions="**/*"
 
-    - name: End SonarCloud Analysis
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+      - name: Restore dependencies
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_USER: ${{ secrets.NUGET_USER }}
+        run: dotnet restore InnoClinic.Notifications.slnx
+
+      - name: Build
+        run: dotnet build InnoClinic.Notifications.slnx --no-restore --configuration Release
+
+      - name: End SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ~/.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
