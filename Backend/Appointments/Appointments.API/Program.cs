@@ -10,11 +10,12 @@ using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
 using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Extensions;
-using Microsoft.AspNetCore.HttpLogging;
 using Scalar.AspNetCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddAppObservability("appointments-api");
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -33,14 +34,6 @@ builder.Services.AddScopePolicies();
 builder.Services.Configure<ClinicOptions>(
     builder.Configuration.GetSection(ClinicOptions.SectionName));
 
-builder.Services.AddHttpLogging(o =>
-{
-    o.LoggingFields = HttpLoggingFields.RequestMethod |
-                      HttpLoggingFields.RequestPath |
-                      HttpLoggingFields.ResponseStatusCode |
-                      HttpLoggingFields.Duration;
-});
-
 builder.Services.AddMediatR(config =>
 {
     config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
@@ -51,7 +44,7 @@ builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 builder.Services.AddGrpc();
 
-builder.Services.AddHealthChecks();
+builder.Services.AddAppHealthChecks(builder.Configuration);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
@@ -71,14 +64,12 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-app.UseHttpLogging();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapEndpoints();
 
-app.UseHealthChecks("/health");
+app.MapAppHealthChecks();
 
 app.UseHttpsRedirection();
 
