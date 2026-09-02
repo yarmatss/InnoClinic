@@ -1,4 +1,5 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
 using InnoClinic.Messaging.Extensions;
 using Mapster;
@@ -9,7 +10,6 @@ using Profiles.API.Constants;
 using Profiles.API.Endpoints;
 using Profiles.API.Extensions;
 using Profiles.API.GrpcHandlers;
-using Profiles.API.Middlewares;
 using Profiles.API.Options;
 using Profiles.API.Validators;
 using Profiles.BLL;
@@ -18,6 +18,8 @@ using Scalar.AspNetCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddAppObservability("profiles-api");
 
 TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
@@ -61,11 +63,9 @@ builder.Services.Configure<OutboxOptions>(builder.Configuration.GetSection("Outb
 
 builder.Services.AddHostedService<OutboxProcessorJob>();
 
-builder.Services.AddHealthChecks();
+builder.Services.AddAppHealthChecks(builder.Configuration);
 
 var app = builder.Build();
-
-app.UseMiddleware<RequestLoggingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -75,7 +75,7 @@ if (app.Environment.IsDevelopment())
     await app.ApplyMigrationsAsync();
 }
 
-app.UseHealthChecks("/health");
+app.MapAppHealthChecks();
 
 app.UseHttpsRedirection();
 

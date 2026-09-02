@@ -14,7 +14,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="InnoClinic.AspNetCore" Version="1.0.2" />
+    <PackageVersion Include="InnoClinic.AspNetCore" Version="1.0.4" />
     <PackageVersion Include="InnoClinic.Core" Version="1.0.2" />
     <PackageVersion Include="InnoClinic.Messaging" Version="1.0.12" />
     <PackageVersion Include="InnoClinic.Contracts.Grpc" Version="1.0.6" />
@@ -51,5 +51,12 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.14.0" />
     <PackageVersion Include="Testcontainers.XunitV3" Version="4.14.0" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.0" />
+	<PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
+	<PackageVersion Include="Npgsql.OpenTelemetry" Version="10.0.3" />
+	<PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.18.0-beta.1" />
+	<PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.18.0-beta.1" />
+	<PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+	<PackageVersion Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+	<PackageVersion Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
   </ItemGroup>
 </Project>

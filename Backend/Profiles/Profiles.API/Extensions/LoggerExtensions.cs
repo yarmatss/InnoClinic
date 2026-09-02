@@ -1,4 +1,4 @@
-﻿namespace Profiles.API.Extensions;
+namespace Profiles.API.Extensions;
 
 using Microsoft.Extensions.Logging;
 
@@ -10,28 +10,6 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public static partial class LoggerExtensions
 {
-    [LoggerMessage(
-        EventId = 1000,
-        Level = LogLevel.Information,
-        Message = "Request {Method} {Path} started | TraceId: {TraceId}")]
-    public static partial void LogRequestStarted(
-        this ILogger logger,
-        string method,
-        string path,
-        string traceId);
-
-    [LoggerMessage(
-        EventId = 1001,
-        Level = LogLevel.Information,
-        Message = "Request {Method} {Path} finished with status {StatusCode} in {ElapsedMilliseconds}ms | TraceId: {TraceId}")]
-    public static partial void LogRequestFinished(
-        this ILogger logger,
-        string method,
-        string path,
-        int statusCode,
-        double elapsedMilliseconds,
-        string traceId);
-
     [LoggerMessage(
         EventId = 2000,
         Level = LogLevel.Information,
