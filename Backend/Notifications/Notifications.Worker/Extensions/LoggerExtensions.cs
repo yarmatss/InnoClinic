@@ -1,4 +1,4 @@
-﻿namespace Notifications.Worker.Extensions;
+namespace Notifications.Worker.Extensions;
 
 public static partial class LoggerExtensions
 {
@@ -27,4 +27,13 @@ public static partial class LoggerExtensions
     public static partial void LogEmailSent(
         this ILogger logger, 
         string recipient);
+
+    [LoggerMessage(
+        EventId = 1003,
+        Level = LogLevel.Information,
+        Message = "Processing appointment reminder notification for AppointmentId: {AppointmentId}, PatientId: {PatientId}")]
+    public static partial void LogAppointmentReminderNotificationProcessing(
+        this ILogger logger,
+        Guid appointmentId,
+        Guid patientId);
 }
