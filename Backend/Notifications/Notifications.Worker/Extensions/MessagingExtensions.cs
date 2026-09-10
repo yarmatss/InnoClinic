@@ -16,6 +16,7 @@ public static class MessagingExtensions
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<AppointmentBookedConsumer>();
+                x.AddConsumer<AppointmentReminderConsumer>();
                 x.AddConsumer<PatientCreatedConsumer>();
 
                 x.AddConfigureEndpointsCallback((context, name, cfg) =>

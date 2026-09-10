@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="Appointments/Appointments.API/Appointments.API.csproj" />
     <Project Path="Appointments/Appointments.Domain/Appointments.Domain.csproj" />
+    <Project Path="Appointments/Appointments.Functions/Appointments.Functions.csproj" />
     <Project Path="Appointments/Appointments.Infrastructure/Appointments.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/shared/">
