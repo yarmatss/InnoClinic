@@ -10,4 +10,5 @@ public class Appointment : BaseEntity
     public DateTime EndTime { get; set; }
     public AppointmentStatus Status { get; set; }
     public string? Comments { get; set; }
+    public bool ReminderSent { get; set; } = false;
 }
