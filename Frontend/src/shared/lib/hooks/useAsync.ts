@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useCallback } from "react";
 import axios from "axios";
-import type { ProblemDetails } from "../types/api";
+import type { ProblemDetails } from "../../types";
 
 interface UseAsyncOptions {
   enabled?: boolean;

@@ -8,7 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { Specialization } from "./types";
+import type { Specialization } from "../model/types";
 
 interface SpecializationsGridProps {
   items: Specialization[];

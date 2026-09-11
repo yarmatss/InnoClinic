@@ -1,6 +1,6 @@
-import { httpClient } from "../../api/http";
-import type { Specialization } from "./types";
-import type { PagedResponse } from "../../common/types/pagination";
+import { httpClient } from "@shared/api";
+import type { PagedResponse } from "@shared/types";
+import type { Specialization } from "../model/types";
 
 export interface SpecializationsQuery {
   pageNumber?: number;

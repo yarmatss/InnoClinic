@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { useAsync } from "../../common/hooks/useAsync";
-import { getSpecializations } from "./specializationsApi";
+import { useAsync } from "@shared/lib/hooks";
+import { getSpecializations } from "../api/specializationsApi";
 
 interface UseSpecializationsProps {
   pageNumber: number;

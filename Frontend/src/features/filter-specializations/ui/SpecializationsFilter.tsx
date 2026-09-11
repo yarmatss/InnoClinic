@@ -9,7 +9,7 @@ import {
   Select,
 } from "@mui/material";
 
-interface SpecializationsFilterProps {
+export interface SpecializationsFilterProps {
   pageSize: number;
   sortOrder: "asc" | "desc";
   onApplyFilter: (params: {

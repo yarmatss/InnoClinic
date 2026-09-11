@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
-import { useSpecializations } from "./useSpecializations";
-import { SpecializationsFilter } from "./SpecializationsFilter";
-import { SpecializationsGrid } from "./SpecializationsGrid";
+import { SpecializationsFilter } from "@features/filter-specializations";
+import {
+  SpecializationsGrid,
+  useSpecializations,
+} from "@entities/specialization";
 
 export function SpecializationsPage() {
   const [nameFilter, setNameFilter] = useState("");
