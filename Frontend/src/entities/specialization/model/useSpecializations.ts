@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { useAsync } from "../../common/hooks/useAsync";
-import { getSpecializations } from "./specializationsApi";
+import { useAsync } from "@shared/lib/hooks";
+import { getSpecializations } from "../api/specializationsApi";
 
 interface UseSpecializationsProps {
   pageNumber: number;
@@ -28,7 +28,7 @@ export function useSpecializations({
     [pageNumber, pageSize, nameFilter, sortOrder],
   );
 
-  const { data, isLoading, error } = useAsync(fetchSpecializations);
+  const { data, isLoading, error, refetch } = useAsync(fetchSpecializations);
 
   return {
     specializations: data?.items ?? [],
@@ -36,5 +36,6 @@ export function useSpecializations({
     totalPages: data?.totalPages ?? 0,
     isLoading,
     error,
+    refetch,
   };
 }
