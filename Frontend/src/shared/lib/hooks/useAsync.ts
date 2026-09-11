@@ -1,6 +1,6 @@
-import { useEffect, useReducer, useCallback } from "react";
+import { useEffect, useReducer, useCallback, useState } from "react";
 import axios from "axios";
-import type { ProblemDetails } from "../../types";
+import type { ProblemDetails } from "@shared/model";
 
 interface UseAsyncOptions {
   enabled?: boolean;
@@ -54,6 +54,7 @@ export function useAsync<T>(
   options: UseAsyncOptions = {},
 ) {
   const { enabled = true } = options;
+  const [refetchIndex, setRefetchIndex] = useState(0);
 
   const [state, dispatch] = useReducer(asyncReducer<T>, {
     data: null,
@@ -82,12 +83,20 @@ export function useAsync<T>(
         if (controller.signal.aborted) return;
 
         if (axios.isAxiosError(caughtError) && caughtError.response?.data) {
-          const apiError = caughtError.response.data as ProblemDetails;
+          const responseData = caughtError.response.data as unknown;
+          let errorMessage: string | undefined;
+          let validationErrors: Record<string, string[]> | null = null;
+
+          if (typeof responseData === "object" && responseData !== null) {
+            const problem = responseData as Partial<ProblemDetails>;
+            errorMessage = problem.detail ?? problem.title;
+            validationErrors = problem.errors ?? null;
+          }
 
           dispatch({
             type: "FETCH_FAILURE",
-            error: apiError.detail ?? apiError.title,
-            validationErrors: apiError.errors,
+            error: errorMessage ?? caughtError.message,
+            validationErrors,
           });
         } else {
           const fallbackMessage =
@@ -105,7 +114,11 @@ export function useAsync<T>(
     return () => {
       controller.abort();
     };
-  }, [asyncCallback, enabled]);
+  }, [asyncCallback, enabled, refetchIndex]);
+
+  const refetch = useCallback(() => {
+    setRefetchIndex((prev) => prev + 1);
+  }, []);
 
   const setData = useCallback((data: T | null) => {
     dispatch({ type: "SET_DATA", payload: data });
@@ -120,6 +133,7 @@ export function useAsync<T>(
 
   return {
     ...state,
+    refetch,
     setData,
     setValidationErrors,
   };

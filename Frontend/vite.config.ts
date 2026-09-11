@@ -16,6 +16,24 @@ export default defineConfig({
       "@shared": fileURLToPath(new URL("./src/shared", import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@mui") || id.includes("@emotion")) {
+              return "mui";
+            }
+            if (id.includes("@auth0")) {
+              return "auth0";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
+
   server: {
     port: 5500,
     strictPort: true,

@@ -28,7 +28,7 @@ export function useSpecializations({
     [pageNumber, pageSize, nameFilter, sortOrder],
   );
 
-  const { data, isLoading, error } = useAsync(fetchSpecializations);
+  const { data, isLoading, error, refetch } = useAsync(fetchSpecializations);
 
   return {
     specializations: data?.items ?? [],
@@ -36,5 +36,6 @@ export function useSpecializations({
     totalPages: data?.totalPages ?? 0,
     isLoading,
     error,
+    refetch,
   };
 }

@@ -12,6 +12,7 @@ import {
 export interface SpecializationsFilterProps {
   pageSize: number;
   sortOrder: "asc" | "desc";
+  name?: string;
   onApplyFilter: (params: {
     name: string;
     pageSize: number;
@@ -23,14 +24,36 @@ export interface SpecializationsFilterProps {
 export function SpecializationsFilter({
   pageSize: initialPageSize,
   sortOrder: initialSortOrder,
+  name: initialName = "",
   onApplyFilter,
   onClearFilter,
 }: Readonly<SpecializationsFilterProps>) {
-  const [draftName, setDraftName] = useState("");
+  const [draftName, setDraftName] = useState(initialName);
   const [draftPageSize, setDraftPageSize] = useState(initialPageSize);
   const [draftSortOrder, setDraftSortOrder] = useState<"asc" | "desc">(
     initialSortOrder,
   );
+
+  const [prevProps, setPrevProps] = useState({
+    name: initialName,
+    pageSize: initialPageSize,
+    sortOrder: initialSortOrder,
+  });
+
+  if (
+    prevProps.name !== initialName ||
+    prevProps.pageSize !== initialPageSize ||
+    prevProps.sortOrder !== initialSortOrder
+  ) {
+    setPrevProps({
+      name: initialName,
+      pageSize: initialPageSize,
+      sortOrder: initialSortOrder,
+    });
+    setDraftName(initialName);
+    setDraftPageSize(initialPageSize);
+    setDraftSortOrder(initialSortOrder);
+  }
 
   const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,6 +86,7 @@ export function SpecializationsFilter({
         }}
       >
         <TextField
+          id="specializations-search-input"
           label="Filter by name"
           value={draftName}
           onChange={(e) => {
@@ -73,8 +97,12 @@ export function SpecializationsFilter({
         />
 
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel>Items Per Page</InputLabel>
+          <InputLabel id="specializations-page-size-label">
+            Items Per Page
+          </InputLabel>
           <Select
+            labelId="specializations-page-size-label"
+            id="specializations-page-size-select"
             value={draftPageSize}
             label="Items Per Page"
             onChange={(e) => {
@@ -88,8 +116,12 @@ export function SpecializationsFilter({
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel>Sort Order</InputLabel>
+          <InputLabel id="specializations-sort-order-label">
+            Sort Order
+          </InputLabel>
           <Select
+            labelId="specializations-sort-order-label"
+            id="specializations-sort-order-select"
             value={draftSortOrder}
             label="Sort Order"
             onChange={(e) => {

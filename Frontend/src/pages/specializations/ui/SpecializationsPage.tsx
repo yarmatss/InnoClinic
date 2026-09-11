@@ -1,41 +1,37 @@
-import { useState, useCallback } from "react";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Pagination,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { SpecializationsFilter } from "@features/filter-specializations";
 import {
   SpecializationsGrid,
   useSpecializations,
 } from "@entities/specialization";
+import { useSpecializationsSearchParams } from "../model/useSpecializationsSearchParams";
+import { SpecializationsSkeleton } from "./SpecializationsSkeleton";
 
 export function SpecializationsPage() {
-  const [nameFilter, setNameFilter] = useState("");
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const {
+    nameFilter,
+    pageNumber,
+    pageSize,
+    sortOrder,
+    handleApplyFilter,
+    handleClearFilter,
+    handlePageChange,
+  } = useSpecializationsSearchParams();
 
-  const { specializations, isLoading, error, totalCount, totalPages } =
+  const { specializations, isLoading, error, totalCount, totalPages, refetch } =
     useSpecializations({
       pageNumber,
       pageSize,
       nameFilter,
       sortOrder,
     });
-
-  const handleApplyFilter = useCallback(
-    (params: { name: string; pageSize: number; sortOrder: "asc" | "desc" }) => {
-      setPageNumber(1);
-      setNameFilter(params.name);
-      setPageSize(params.pageSize);
-      setSortOrder(params.sortOrder);
-    },
-    [],
-  );
-
-  const handleClearFilter = useCallback(() => {
-    setPageNumber(1);
-    setPageSize(10);
-    setNameFilter("");
-    setSortOrder("asc");
-  }, []);
 
   return (
     <Stack spacing={3}>
@@ -48,28 +44,72 @@ export function SpecializationsPage() {
       </Box>
 
       <SpecializationsFilter
+        name={nameFilter}
         pageSize={pageSize}
         sortOrder={sortOrder}
         onApplyFilter={handleApplyFilter}
         onClearFilter={handleClearFilter}
       />
 
-      {isLoading && <CircularProgress />}
+      {error && (
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={refetch}>
+              Retry
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      )}
 
-      {error && <Alert severity="error">{error}</Alert>}
+      {isLoading && specializations.length === 0 && (
+        <SpecializationsSkeleton count={pageSize} />
+      )}
 
-      {!isLoading && !error && (
-        <Stack spacing={2}>
-          <Typography variant="body2" color="text.secondary">
-            Total Results: {totalCount} (Showing {specializations.length} items)
-          </Typography>
+      {!error && (specializations.length > 0 || !isLoading) && (
+        <Stack
+          spacing={2}
+          sx={{
+            opacity: isLoading ? 0.6 : 1,
+            transition: "opacity 0.2s ease-in-out",
+            pointerEvents: isLoading ? "none" : "auto",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              minHeight: 24,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Total Results: {totalCount} (Showing {specializations.length}{" "}
+              items)
+            </Typography>
+            {isLoading && (
+              <Typography variant="caption" color="text.secondary">
+                Updating...
+              </Typography>
+            )}
+          </Box>
 
-          <SpecializationsGrid
-            items={specializations}
-            totalPages={totalPages}
-            pageNumber={pageNumber}
-            onPageChange={setPageNumber}
-          />
+          <SpecializationsGrid items={specializations} />
+
+          {totalPages > 1 && (
+            <Box sx={{ display: "flex", justifyContent: "center", pt: 2 }}>
+              <Pagination
+                count={totalPages}
+                page={pageNumber}
+                onChange={(_, value) => {
+                  handlePageChange(value);
+                }}
+                color="primary"
+              />
+            </Box>
+          )}
         </Stack>
       )}
     </Stack>

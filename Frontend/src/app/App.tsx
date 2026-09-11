@@ -1,6 +1,6 @@
 import { Box, Container } from "@mui/material";
 import { Header } from "@widgets/header";
-import { AppRouter } from "./routers";
+import { AppRouter } from "./router";
 
 export default function App() {
   return (
