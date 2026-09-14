@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-cd Frontend && npx lint-staged
+cd Frontend && npx lint-staged && npm run lint:fsd

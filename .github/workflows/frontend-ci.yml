@@ -49,6 +49,9 @@ jobs:
       - name: Run Linter (ESLint)
         run: npm run lint
 
+      - name: Check FSD Architecture (Steiger)
+        run: npm run lint:fsd
+
       - name: Verify Production Build
         run: npm run build
 
@@ -61,7 +64,7 @@ jobs:
             -Dsonar.organization=yarmatss
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src
-            -Dsonar.exclusions=node_modules/**,dist/**,vite.config.ts,eslint.config.js
+            -Dsonar.exclusions=node_modules/**,dist/**,vite.config.ts,eslint.config.ts,steiger.config.ts
             -Dsonar.coverage.exclusions=**/*
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
