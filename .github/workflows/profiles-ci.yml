@@ -60,6 +60,9 @@ jobs:
             /o:"yarmatss" \
             /d:sonar.token="$SONAR_TOKEN" \
             /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" \
+            /d:sonar.pullrequest.branch="${{ github.head_ref }}" \
+            /d:sonar.pullrequest.base="${{ github.base_ref }}" \
             /d:sonar.coverage.exclusions="**/*"
 
       - name: Restore dependencies
