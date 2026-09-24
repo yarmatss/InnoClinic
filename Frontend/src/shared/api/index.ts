@@ -1,1 +1,1 @@
-export { httpClient } from "./http";
+export { httpClient, setAuthTokenGetter } from "./http";

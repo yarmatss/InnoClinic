@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using FluentValidation;
 using Mapster;
 using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
 using InnoClinic.AspNetCore.Filters;
+using InnoClinic.AspNetCore.Extensions;
+using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
@@ -20,6 +23,9 @@ public static class PatientEndpoints
             var group = routes.MapGroup(ApiRoutes.Patients)
                 .WithTags("Patients")
                 .AddEndpointFilter<ResultFilter>();
+
+            group.MapGet("/me", GetCurrentPatientAsync)
+                .RequireAuthorization();
 
             group.MapGet("/", GetAllPatientsAsync)
                 .RequireAuthorization(Policies.ReadPatients);
@@ -106,6 +112,20 @@ public static class PatientEndpoints
 
         var model = dto.Adapt<PatientModel>();
         var result = await patientService.UpdateAsync(id, model, ct);
+
+        return result.Map(p => p.Adapt<PatientResponseDto>());
+    }
+
+    private static async Task<Result<PatientResponseDto>> GetCurrentPatientAsync(
+        ClaimsPrincipal user,
+        IPatientService patientService,
+        CancellationToken ct = default)
+    {
+        var userId = user.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return PatientErrors.Unauthorized;
+
+        var result = await patientService.GetCurrentAsync(userId, user.GetEmail(), ct);
 
         return result.Map(p => p.Adapt<PatientResponseDto>());
     }

@@ -1,3 +1,4 @@
+using InnoClinic.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Profiles.API.Authorization;
@@ -10,24 +11,24 @@ public static class Policies
     public const string WriteStaff = nameof(WriteStaff);
     public const string WriteSpecializations = nameof(WriteSpecializations);
 
-    public const string ScopeReadPatients = "read:patients";
-    public const string ScopeWritePatients = "write:patients";
-    public const string ScopeReadStaff = "read:staff";
-    public const string ScopeWriteStaff = "write:staff";
-    public const string ScopeWriteSpecializations = "write:specializations";
+    public const string ScopeReadPatients = ClinicPermissions.Patients.Read;
+    public const string ScopeWritePatients = ClinicPermissions.Patients.Write;
+    public const string ScopeReadStaff = ClinicPermissions.Staff.Read;
+    public const string ScopeWriteStaff = ClinicPermissions.Staff.Write;
+    public const string ScopeWriteSpecializations = ClinicPermissions.Specializations.Write;
 
     extension(IServiceCollection services)
     {
         public IServiceCollection AddScopePolicies()
         {
-            services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
+            services.AddScopeAuthorizationHandler();
 
             services.AddAuthorizationBuilder()
-                .AddPolicy(ReadPatients, p => p.Requirements.Add(new ScopeRequirement(ScopeReadPatients)))
-                .AddPolicy(WritePatients, p => p.Requirements.Add(new ScopeRequirement(ScopeWritePatients)))
-                .AddPolicy(ReadStaff, p => p.Requirements.Add(new ScopeRequirement(ScopeReadStaff)))
-                .AddPolicy(WriteStaff, p => p.Requirements.Add(new ScopeRequirement(ScopeWriteStaff)))
-                .AddPolicy(WriteSpecializations, p => p.Requirements.Add(new ScopeRequirement(ScopeWriteSpecializations)));
+                .AddScopePolicy(ReadPatients, ClinicPermissions.Patients.Read)
+                .AddScopePolicy(WritePatients, ClinicPermissions.Patients.Write)
+                .AddScopePolicy(ReadStaff, ClinicPermissions.Staff.Read)
+                .AddScopePolicy(WriteStaff, ClinicPermissions.Staff.Write)
+                .AddScopePolicy(WriteSpecializations, ClinicPermissions.Specializations.Write);
 
             return services;
         }

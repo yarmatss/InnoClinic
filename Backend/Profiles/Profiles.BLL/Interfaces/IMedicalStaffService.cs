@@ -1,4 +1,4 @@
-﻿using Profiles.BLL.Models;
+using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
@@ -45,5 +45,10 @@ public interface IMedicalStaffService
     Task<Result> DeleteScheduleOverrideAsync(
         Guid staffId,
         DateOnly date,
+        CancellationToken cancellationToken);
+
+    Task<Result<MedicalStaffModel>> GetCurrentAsync(
+        string userId,
+        string? email,
         CancellationToken cancellationToken);
 }

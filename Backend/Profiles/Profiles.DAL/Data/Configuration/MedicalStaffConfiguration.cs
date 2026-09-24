@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Profiles.DAL.Entities;
 
@@ -15,5 +15,9 @@ public sealed class MedicalStaffConfiguration : IEntityTypeConfiguration<Medical
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasQueryFilter(ms => ms.IsActive);
+
+        builder.HasIndex(ms => ms.UserId)
+            .IsUnique()
+            .HasFilter("\"UserId\" IS NOT NULL");
     }
 }

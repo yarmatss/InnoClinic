@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace Appointments.API.Authorization;
+namespace InnoClinic.AspNetCore.Authorization;
 
 public sealed class ScopeRequirement(string scope) : IAuthorizationRequirement
 {

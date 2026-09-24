@@ -1,4 +1,4 @@
-﻿using Profiles.BLL.Models;
+using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
@@ -21,5 +21,10 @@ public interface IPatientService
     Task<Result<PatientModel>> UpdateAsync(
         Guid id, 
         PatientModel model, 
+        CancellationToken cancellationToken);
+
+    Task<Result<PatientModel>> GetCurrentAsync(
+        string userId,
+        string? email,
         CancellationToken cancellationToken);
 }

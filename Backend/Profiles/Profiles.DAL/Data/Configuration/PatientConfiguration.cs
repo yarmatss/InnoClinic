@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Profiles.DAL.Entities;
 
@@ -13,5 +13,9 @@ public sealed class PatientConfiguration : IEntityTypeConfiguration<Patient>
             .WithMany()
             .HasForeignKey(p => p.PrimaryDoctorId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasIndex(p => p.UserId)
+            .IsUnique()
+            .HasFilter("\"UserId\" IS NOT NULL");
     }
 }
