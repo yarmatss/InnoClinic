@@ -13,6 +13,7 @@ public static class NotificationExtensions
         public IServiceCollection AddNotifications(IConfiguration configuration)
         {
             services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+            services.Configure<FrontendOptions>(configuration.GetSection(FrontendOptions.SectionName));
             
             services.AddSingleton<IEmailSenderService, EmailSenderService>();
 

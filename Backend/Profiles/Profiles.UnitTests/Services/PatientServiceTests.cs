@@ -8,8 +8,10 @@ using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
+using Profiles.BLL.Interfaces;
 using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Contracts;
+using Profiles.BLL.Models;
 
 namespace Profiles.UnitTests.Services;
 
@@ -18,11 +20,14 @@ public class PatientServiceTests
     private readonly IPatientRepository _patientRepo = Substitute.For<IPatientRepository>();
     private readonly IMedicalStaffRepository _staffRepo = Substitute.For<IMedicalStaffRepository>();
     private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
+    private readonly IAuth0ManagementService _auth0Service = Substitute.For<IAuth0ManagementService>();
     private readonly PatientService _sut;
 
     public PatientServiceTests()
     {
-        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer);
+        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new Auth0UserProvisionResult("auth0|123", "https://invite.url"));
+        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer, _auth0Service);
     }
 
     #region CreateAsync

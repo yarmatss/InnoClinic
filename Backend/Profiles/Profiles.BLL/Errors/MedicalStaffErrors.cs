@@ -1,4 +1,4 @@
-﻿using Profiles.DAL.Entities;
+using Profiles.DAL.Entities;
 using InnoClinic.Core.Common;
 
 namespace Profiles.BLL.Errors;
@@ -30,4 +30,8 @@ public class MedicalStaffErrors : DomainErrors
         "StartTime must be before EndTime.");
 
     public static readonly Error OverrideNotFound = CreateNotFound("ScheduleOverride");
+
+    public static readonly Error Unauthorized = CreateUnauthorized(
+        "MedicalStaff.Unauthorized",
+        "User identifier claim not found.");
 }

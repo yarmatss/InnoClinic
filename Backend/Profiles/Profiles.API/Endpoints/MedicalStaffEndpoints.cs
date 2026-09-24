@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using FluentValidation;
 using Mapster;
 using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
 using InnoClinic.AspNetCore.Filters;
+using InnoClinic.AspNetCore.Extensions;
+using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
@@ -20,6 +23,9 @@ public static class MedicalStaffEndpoints
             var group = routes.MapGroup(ApiRoutes.MedicalStaff)
                 .WithTags("Medical Staff")
                 .AddEndpointFilter<ResultFilter>();
+
+            group.MapGet("/me", GetCurrentStaffAsync)
+                .RequireAuthorization();
 
             group.MapGet("/{id:guid}", GetStaffByIdAsync)
                 .WithName("GetStaffById")
@@ -188,5 +194,19 @@ public static class MedicalStaffEndpoints
         CancellationToken ct = default)
     {
         return await staffService.DeleteScheduleOverrideAsync(id, date, ct);
+    }
+
+    private static async Task<Result<MedicalStaffResponseDto>> GetCurrentStaffAsync(
+        ClaimsPrincipal user,
+        IMedicalStaffService staffService,
+        CancellationToken ct = default)
+    {
+        var userId = user.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return MedicalStaffErrors.Unauthorized;
+
+        var result = await staffService.GetCurrentAsync(userId, user.GetEmail(), ct);
+
+        return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 }
