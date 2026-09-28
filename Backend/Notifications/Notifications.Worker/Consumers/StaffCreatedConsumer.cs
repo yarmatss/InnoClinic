@@ -1,40 +1,39 @@
 using InnoClinic.Messaging.Contracts;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Notifications.Worker.Extensions;
 using Notifications.Worker.Interfaces;
 using Notifications.Worker.Options;
 
 namespace Notifications.Worker.Consumers;
 
-public class PatientCreatedConsumer(
+public class StaffCreatedConsumer(
     IEmailSenderService emailSender,
     IOptions<FrontendOptions> frontendOptions,
-    ILogger<PatientCreatedConsumer> logger) 
-    : IConsumer<PatientCreated>
+    ILogger<StaffCreatedConsumer> logger) 
+    : IConsumer<StaffCreated>
 {
     private readonly FrontendOptions _frontend = frontendOptions.Value;
 
-    public async Task Consume(ConsumeContext<PatientCreated> context)
+    public async Task Consume(ConsumeContext<StaffCreated> context)
     {
         var message = context.Message;
-        logger.LogPatientCreationNotificationProcessing(message.PatientId, message.Email);
+        logger.LogInformation("Processing StaffCreated notification for StaffId {StaffId}, Email {Email}", message.StaffId, message.Email);
 
         var isGoogle = IsGoogleEmail(message.Email);
         var googleLoginUrl = isGoogle ? $"{_frontend.BaseUrl.TrimEnd('/')}/?connection=google-oauth2" : null;
 
-        var (subject, body) = BuildWelcomeEmail(message.FirstName, message.LastName, message.InvitationUrl, googleLoginUrl);
+        var (subject, body) = BuildInvitationEmail(message.FirstName, message.LastName, message.InvitationUrl, googleLoginUrl);
 
         await emailSender.SendAsync(message.Email, subject, body, context.CancellationToken);
     }
 
-    private static (string Subject, string Body) BuildWelcomeEmail(
+    private static (string Subject, string Body) BuildInvitationEmail(
         string firstName,
         string lastName,
         string? invitationUrl,
         string? googleLoginUrl)
     {
-        var subject = "Welcome to InnoClinic!";
+        var subject = "InnoClinic Staff Invitation";
 
         var googleSection = !string.IsNullOrWhiteSpace(googleLoginUrl)
             ? $"""
@@ -48,12 +47,12 @@ public class PatientCreatedConsumer(
             : "";
 
         var passwordSection = !string.IsNullOrWhiteSpace(invitationUrl)
-            ? $"<p><a href=\"{invitationUrl}\">Click here to set up your password</a>.</p>"
-            : "<p>Your account has been successfully created.</p>";
+            ? $"<p><a href=\"{invitationUrl}\">Click here to set up your password and access the InnoClinic staff portal</a>.</p>"
+            : "<p>Your staff account has been created by an administrator.</p>";
 
         var body = $"""
             <h2>Hello {firstName} {lastName}!</h2>
-            <p>Welcome to InnoClinic. Your patient profile is ready.</p>
+            <p>Welcome to the InnoClinic team.</p>
             {googleSection}
             {passwordSection}
             """;

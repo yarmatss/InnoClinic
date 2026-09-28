@@ -1,6 +1,8 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using InnoClinic.Contracts.Grpc;
 using InnoClinic.Core.Common;
+using InnoClinic.Messaging.Contracts;
+using InnoClinic.Messaging.Outbox;
 using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
@@ -14,7 +16,9 @@ namespace Profiles.BLL.Services;
 internal class MedicalStaffService(
     IMedicalStaffRepository staffRepository,
     ISpecializationRepository specializationRepository,
-    IOutboxRepository outboxRepository) : IMedicalStaffService
+    IOutboxRepository outboxRepository,
+    IAuth0ManagementService auth0Service,
+    INotificationProducer notificationProducer) : IMedicalStaffService
 {
     public async Task<Result<MedicalStaffModel>> CreateAsync(
         MedicalStaffModel model, 
@@ -28,11 +32,59 @@ internal class MedicalStaffService(
         entity.Id = Guid.NewGuid();
         entity.IsActive = true;
 
+        var provisionResult = await auth0Service.ProvisionUserAsync(
+            model.Email,
+            model.FirstName,
+            model.LastName,
+            model.StaffType.ToString(),
+            cancellationToken);
+
+        var invitationUrl = provisionResult.IsSuccess ? provisionResult.Value.InvitationUrl : null;
+        if (provisionResult.IsSuccess)
+        {
+            entity.UserId = provisionResult.Value.UserId;
+        }
+
         staffRepository.MarkAdd(entity);
         QueueProfileSyncEvent(entity);
+
+        notificationProducer.Enqueue(new StaffCreated(
+            entity.Id,
+            entity.FirstName,
+            entity.LastName,
+            entity.Email,
+            invitationUrl
+        ));
+
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return entity.Adapt<MedicalStaffModel>();
+    }
+
+    public async Task<Result<MedicalStaffModel>> GetCurrentAsync(
+        string userId,
+        string? email,
+        CancellationToken cancellationToken)
+    {
+        var entity = await staffRepository.GetByUserIdAsync(userId, cancellationToken);
+        if (entity is not null)
+        {
+            return entity.Adapt<MedicalStaffModel>();
+        }
+
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var existingByEmail = await staffRepository.GetByEmailAsync(email, cancellationToken, trackChanges: true);
+            if (existingByEmail is not null && existingByEmail.UserId is null)
+            {
+                existingByEmail.UserId = userId;
+                staffRepository.MarkUpdate(existingByEmail);
+                await staffRepository.SaveChangesAsync(cancellationToken);
+                return existingByEmail.Adapt<MedicalStaffModel>();
+            }
+        }
+
+        return MedicalStaffErrors.NotFound;
     }
 
     public async Task<Result<MedicalStaffModel>> GetByIdAsync(

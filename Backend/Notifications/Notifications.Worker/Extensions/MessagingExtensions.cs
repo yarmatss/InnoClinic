@@ -18,6 +18,7 @@ public static class MessagingExtensions
                 x.AddConsumer<AppointmentBookedConsumer>();
                 x.AddConsumer<AppointmentReminderConsumer>();
                 x.AddConsumer<PatientCreatedConsumer>();
+                x.AddConsumer<StaffCreatedConsumer>();
 
                 x.AddConfigureEndpointsCallback((context, name, cfg) =>
                 {

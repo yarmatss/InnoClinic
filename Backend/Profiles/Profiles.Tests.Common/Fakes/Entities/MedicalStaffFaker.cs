@@ -21,7 +21,7 @@ public sealed class MedicalStaffFaker : Faker<MedicalStaff>
         RuleFor(x => x.Gender, f => f.PickRandom<Gender>());
         RuleFor(x => x.ContactPhone, f => f.Phone.PhoneNumber("+48#########"));
         RuleFor(x => x.StaffType, f => f.PickRandom(
-            StaffType.Doctor, StaffType.Nurse, StaffType.Administrator));
+            StaffType.Doctor, StaffType.Administrator, StaffType.Receptionist));
         RuleFor(x => x.LicenseNumber, f => f.Random.AlphaNumeric(10).ToUpper());
         RuleFor(x => x.HireDate, f => DateOnly.FromDateTime(f.Date.Past(5)));
         RuleFor(x => x.IsActive, _ => true);

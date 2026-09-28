@@ -1,9 +1,10 @@
-﻿using Profiles.Domain.Enums;
+using Profiles.Domain.Enums;
 
 namespace Profiles.DAL.Entities;
 
 public abstract class Person : BaseEntity
 {
+    public string? UserId { get; set; }
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
     public string? MiddleName { get; set; }

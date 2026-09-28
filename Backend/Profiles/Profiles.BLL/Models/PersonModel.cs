@@ -1,9 +1,10 @@
-﻿using Profiles.Domain.Enums;
+using Profiles.Domain.Enums;
 
 namespace Profiles.BLL.Models;
 
 public abstract class PersonModel : BaseModel
 {
+    public string? UserId { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string? MiddleName { get; set; }

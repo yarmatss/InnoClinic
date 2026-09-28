@@ -1,4 +1,4 @@
-﻿using Profiles.DAL.Entities;
+using Profiles.DAL.Entities;
 using InnoClinic.Core.Common;
 
 namespace Profiles.BLL.Errors;
@@ -20,4 +20,8 @@ public class PatientErrors : DomainErrors
         "A patient with this email already exists.");
 
     public static readonly Error PrimaryDoctorNotFound = CreateNotFound("ActivePrimaryDoctor");
+
+    public static readonly Error Unauthorized = CreateUnauthorized(
+        "Patient.Unauthorized",
+        "User identifier claim not found.");
 }

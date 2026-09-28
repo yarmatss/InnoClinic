@@ -1,10 +1,9 @@
-﻿namespace Profiles.Domain.Enums;
+namespace Profiles.Domain.Enums;
 
 public enum StaffType
 {
     None = 0,
     Doctor = 1,
-    Nurse = 2,
-    Administrator = 3,
-    Receptionist = 4
+    Administrator = 2,
+    Receptionist = 3
 }

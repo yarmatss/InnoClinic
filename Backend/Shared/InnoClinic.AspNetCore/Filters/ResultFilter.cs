@@ -1,4 +1,4 @@
-﻿using InnoClinic.Core.Common;
+using InnoClinic.Core.Common;
 using InnoClinic.Core.Constants;
 using Microsoft.AspNetCore.Http;
 
@@ -32,6 +32,8 @@ public class ResultFilter : IEndpointFilter
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.Conflict => StatusCodes.Status409Conflict,
+            ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+            ErrorType.Forbidden => StatusCodes.Status403Forbidden,
             _ => StatusCodes.Status400BadRequest
         };
 

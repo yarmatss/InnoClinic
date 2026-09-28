@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
@@ -15,7 +15,8 @@ namespace Profiles.BLL.Services;
 internal class PatientService(
     IPatientRepository patientRepository,
     IMedicalStaffRepository staffRepository,
-    INotificationProducer notificationProducer) : IPatientService
+    INotificationProducer notificationProducer,
+    IAuth0ManagementService auth0Service) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
@@ -27,18 +28,59 @@ internal class PatientService(
 
         var entity = model.Adapt<Patient>();
 
+        var provisionResult = await auth0Service.ProvisionUserAsync(
+            model.Email,
+            model.FirstName,
+            model.LastName,
+            "Patient",
+            cancellationToken);
+
+        if (provisionResult.IsSuccess)
+        {
+            entity.UserId = provisionResult.Value.UserId;
+        }
+
+        var invitationUrl = provisionResult.IsSuccess ? provisionResult.Value.InvitationUrl : null;
+
         patientRepository.MarkAdd(entity);
 
         notificationProducer.Enqueue(new PatientCreated(
             entity.Id,
             entity.FirstName,
             entity.LastName,
-            entity.Email
+            entity.Email,
+            invitationUrl
         ));
 
         await patientRepository.SaveChangesAsync(cancellationToken);
 
         return entity.Adapt<PatientModel>();
+    }
+
+    public async Task<Result<PatientModel>> GetCurrentAsync(
+        string userId,
+        string? email,
+        CancellationToken cancellationToken)
+    {
+        var entity = await patientRepository.GetByUserIdAsync(userId, cancellationToken);
+        if (entity is not null)
+        {
+            return entity.Adapt<PatientModel>();
+        }
+
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var existingByEmail = await patientRepository.GetByEmailAsync(email, cancellationToken, trackChanges: true);
+            if (existingByEmail is not null && existingByEmail.UserId is null)
+            {
+                existingByEmail.UserId = userId;
+                patientRepository.MarkUpdate(existingByEmail);
+                await patientRepository.SaveChangesAsync(cancellationToken);
+                return existingByEmail.Adapt<PatientModel>();
+            }
+        }
+
+        return PatientErrors.NotFound;
     }
 
     public async Task<Result<PagedResponse<PatientModel>>> GetAllAsync(

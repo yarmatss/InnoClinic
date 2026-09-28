@@ -1,7 +1,7 @@
 namespace InnoClinic.Messaging.Contracts;
 
-public record PatientCreated(
-    Guid PatientId,
+public record StaffCreated(
+    Guid StaffId,
     string FirstName,
     string LastName,
     string Email,

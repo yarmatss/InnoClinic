@@ -1,4 +1,4 @@
-﻿namespace InnoClinic.Core.Common;
+namespace InnoClinic.Core.Common;
 
 public abstract class DomainErrors
 {
@@ -11,4 +11,14 @@ public abstract class DomainErrors
         code,
         description,
         ErrorType.Conflict);
+
+    protected static Error CreateUnauthorized(string code = "Auth.Unauthorized", string description = "The request is unauthorized.") => new(
+        code,
+        description,
+        ErrorType.Unauthorized);
+
+    protected static Error CreateForbidden(string code = "Auth.Forbidden", string description = "You do not have permission to access this resource.") => new(
+        code,
+        description,
+        ErrorType.Forbidden);
 }

@@ -1,3 +1,4 @@
+using InnoClinic.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Appointments.API.Authorization;
@@ -10,24 +11,24 @@ public static class Policies
     public const string ReadResults = nameof(ReadResults);
     public const string WriteResults = nameof(WriteResults);
 
-    public const string ScopeReadAppointments = "read:appointments";
-    public const string ScopeWriteAppointments = "write:appointments";
-    public const string ScopeConfirmAppointments = "confirm:appointments";
-    public const string ScopeReadResults = "read:results";
-    public const string ScopeWriteResults = "write:results";
+    public const string ScopeReadAppointments = ClinicPermissions.Appointments.Read;
+    public const string ScopeWriteAppointments = ClinicPermissions.Appointments.Write;
+    public const string ScopeConfirmAppointments = ClinicPermissions.Appointments.Confirm;
+    public const string ScopeReadResults = ClinicPermissions.Results.Read;
+    public const string ScopeWriteResults = ClinicPermissions.Results.Write;
 
     extension(IServiceCollection services)
     {
         public IServiceCollection AddScopePolicies()
         {
-            services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
+            services.AddScopeAuthorizationHandler();
 
             services.AddAuthorizationBuilder()
-                .AddPolicy(ReadAppointments, p => p.Requirements.Add(new ScopeRequirement(ScopeReadAppointments)))
-                .AddPolicy(WriteAppointments, p => p.Requirements.Add(new ScopeRequirement(ScopeWriteAppointments)))
-                .AddPolicy(ConfirmAppointments, p => p.Requirements.Add(new ScopeRequirement(ScopeConfirmAppointments)))
-                .AddPolicy(ReadResults, p => p.Requirements.Add(new ScopeRequirement(ScopeReadResults)))
-                .AddPolicy(WriteResults, p => p.Requirements.Add(new ScopeRequirement(ScopeWriteResults)));
+                .AddScopePolicy(ReadAppointments, ClinicPermissions.Appointments.Read)
+                .AddScopePolicy(WriteAppointments, ClinicPermissions.Appointments.Write)
+                .AddScopePolicy(ConfirmAppointments, ClinicPermissions.Appointments.Confirm)
+                .AddScopePolicy(ReadResults, ClinicPermissions.Results.Read)
+                .AddScopePolicy(WriteResults, ClinicPermissions.Results.Write);
 
             return services;
         }
