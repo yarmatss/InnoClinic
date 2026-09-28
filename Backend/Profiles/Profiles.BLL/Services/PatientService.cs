@@ -9,6 +9,7 @@ using InnoClinic.Core.Common;
 
 using InnoClinic.Messaging.Contracts;
 using InnoClinic.Messaging.Outbox;
+using Profiles.Domain.Enums;
 
 namespace Profiles.BLL.Services;
 
@@ -16,7 +17,7 @@ internal class PatientService(
     IPatientRepository patientRepository,
     IMedicalStaffRepository staffRepository,
     INotificationProducer notificationProducer,
-    IAuth0ManagementService auth0Service) : IPatientService
+    IAuthManagementService auth0Service) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
@@ -32,7 +33,7 @@ internal class PatientService(
             model.Email,
             model.FirstName,
             model.LastName,
-            "Patient",
+            UserRole.Patient,
             cancellationToken);
 
         if (provisionResult.IsSuccess)

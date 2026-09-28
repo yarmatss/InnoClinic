@@ -30,6 +30,7 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
         bool trackChanges = false)
     {
         return await GetQuery(trackChanges)
+            .AsSplitQuery()
             .Include(x => x.StaffSpecializations)
                 .ThenInclude(ss => ss.Specialization)
             .Include(x => x.WorkingHours)
@@ -66,6 +67,7 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
         bool trackChanges = false)
     {
         return await GetQuery(trackChanges)
+            .AsSplitQuery()
             .Include(x => x.StaffSpecializations)
                 .ThenInclude(ss => ss.Specialization)
             .Include(x => x.WorkingHours)
@@ -79,6 +81,7 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
         bool trackChanges = false)
     {
         return await GetQuery(trackChanges)
+            .AsSplitQuery()
             .Include(x => x.StaffSpecializations)
                 .ThenInclude(ss => ss.Specialization)
             .Include(x => x.WorkingHours)

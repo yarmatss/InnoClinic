@@ -9,28 +9,29 @@ using Microsoft.Extensions.Options;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.BLL.Options;
+using Profiles.Domain.Enums;
 
 namespace Profiles.BLL.Services;
 
 public class Auth0ManagementService(
     IOptions<Auth0ManagementOptions> options,
     ILogger<Auth0ManagementService> logger,
-    IManagementApiClient? client = null) : IAuth0ManagementService
+    IManagementApiClient? client = null) : IAuthManagementService
 {
     private readonly Auth0ManagementOptions _options = options.Value;
 
-    public async Task<Result<Auth0UserProvisionResult>> ProvisionUserAsync(
+    public async Task<Result<UserProvisionResult>> ProvisionUserAsync(
         string email,
         string firstName,
         string lastName,
-        string roleName,
+        UserRole role,
         CancellationToken ct = default)
     {
         if (!_options.IsConfigured || client is null)
         {
             logger.LogWarning("Auth0 Management API is not configured. Falling back to local placeholder user ID.");
             var fallbackId = $"auth0|local_{Guid.NewGuid():N}";
-            return new Auth0UserProvisionResult(fallbackId, null);
+            return new UserProvisionResult(fallbackId, null);
         }
 
         try
@@ -42,7 +43,7 @@ public class Auth0ManagementService(
                 return new Error("Auth0.UserCreationFailure", "Could not obtain user ID from Auth0.", ErrorType.Failure);
             }
 
-            var roleId = ResolveRoleId(roleName);
+            var roleId = ResolveRoleId(role);
             if (!string.IsNullOrWhiteSpace(roleId))
             {
                 await AssignRoleAsync(client, userId, roleId, ct);
@@ -50,7 +51,7 @@ public class Auth0ManagementService(
 
             var ticketUrl = await GenerateInvitationTicketAsync(client, userId, ct);
 
-            return new Auth0UserProvisionResult(userId, ticketUrl);
+            return new UserProvisionResult(userId, ticketUrl);
         }
         catch (Exception ex)
         {
@@ -66,6 +67,8 @@ public class Auth0ManagementService(
         string lastName,
         CancellationToken ct)
     {
+        var targetConnection = _options.Connection ?? "Username-Password-Authentication";
+
         try
         {
             var user = await client.Users.CreateAsync(new CreateUserRequestContent
@@ -74,7 +77,7 @@ public class Auth0ManagementService(
                 GivenName = firstName,
                 FamilyName = lastName,
                 Name = $"{firstName} {lastName}".Trim(),
-                Connection = _options.Connection ?? "Username-Password-Authentication",
+                Connection = targetConnection,
                 Password = GenerateSecurePassword(),
                 EmailVerified = true,
                 VerifyEmail = false
@@ -82,15 +85,19 @@ public class Auth0ManagementService(
 
             return user.UserId;
         }
-        catch (ErrorApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+        catch (Exception ex) when (ex is ConflictError || (ex is ErrorApiException apiEx && apiEx.StatusCode == HttpStatusCode.Conflict))
         {
-            logger.LogInformation("User with email {Email} already exists in Auth0. Retrieving existing user.", email);
+            logger.LogInformation(ex, "User with email {Email} already exists in Auth0. Retrieving existing user.", email);
             var users = await client.Users.ListUsersByEmailAsync(new ListUsersByEmailRequestParameters
             {
                 Email = email
             }, cancellationToken: ct);
 
-            return users.FirstOrDefault()?.UserId;
+            var targetUser = users.FirstOrDefault(u =>
+                u.Identities != null && u.Identities.Any(i => i.Connection == targetConnection))
+                ?? users.FirstOrDefault();
+
+            return targetUser?.UserId;
         }
     }
 
@@ -129,14 +136,14 @@ public class Auth0ManagementService(
         }
     }
 
-    private string? ResolveRoleId(string roleName)
+    private string? ResolveRoleId(UserRole role)
     {
-        return roleName.ToLowerInvariant() switch
+        return role switch
         {
-            "patient" => _options.PatientRoleId,
-            "doctor" => _options.DoctorRoleId,
-            "administrator" => _options.AdministratorRoleId,
-            "receptionist" => _options.ReceptionistRoleId,
+            UserRole.Patient => _options.PatientRoleId,
+            UserRole.Doctor => _options.DoctorRoleId,
+            UserRole.Administrator => _options.AdministratorRoleId,
+            UserRole.Receptionist => _options.ReceptionistRoleId,
             _ => null
         };
     }

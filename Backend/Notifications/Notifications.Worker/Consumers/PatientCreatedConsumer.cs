@@ -1,67 +1,28 @@
 using InnoClinic.Messaging.Contracts;
 using MassTransit;
-using Microsoft.Extensions.Options;
 using Notifications.Worker.Extensions;
+using Notifications.Worker.Helpers;
 using Notifications.Worker.Interfaces;
-using Notifications.Worker.Options;
 
 namespace Notifications.Worker.Consumers;
 
 public class PatientCreatedConsumer(
     IEmailSenderService emailSender,
-    IOptions<FrontendOptions> frontendOptions,
+    EmailTemplateHelper templateHelper,
     ILogger<PatientCreatedConsumer> logger) 
     : IConsumer<PatientCreated>
 {
-    private readonly FrontendOptions _frontend = frontendOptions.Value;
-
     public async Task Consume(ConsumeContext<PatientCreated> context)
     {
         var message = context.Message;
         logger.LogPatientCreationNotificationProcessing(message.PatientId, message.Email);
 
-        var isGoogle = IsGoogleEmail(message.Email);
-        var googleLoginUrl = isGoogle ? $"{_frontend.BaseUrl.TrimEnd('/')}/?connection=google-oauth2" : null;
-
-        var (subject, body) = BuildWelcomeEmail(message.FirstName, message.LastName, message.InvitationUrl, googleLoginUrl);
+        var (subject, body) = templateHelper.BuildAccountEmail(
+            message,
+            subject: "Welcome to InnoClinic!",
+            welcomeText: "Welcome to InnoClinic. Your patient profile is ready.",
+            passwordLinkText: "Click here to set up your password");
 
         await emailSender.SendAsync(message.Email, subject, body, context.CancellationToken);
     }
-
-    private static (string Subject, string Body) BuildWelcomeEmail(
-        string firstName,
-        string lastName,
-        string? invitationUrl,
-        string? googleLoginUrl)
-    {
-        var subject = "Welcome to InnoClinic!";
-
-        var googleSection = !string.IsNullOrWhiteSpace(googleLoginUrl)
-            ? $"""
-               <p style="margin: 20px 0;">
-                   <a href="{googleLoginUrl}" style="background-color: #4285F4; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
-                       Sign in with Google
-                   </a>
-               </p>
-               <p>Or, if you prefer to use a standard password:</p>
-               """
-            : "";
-
-        var passwordSection = !string.IsNullOrWhiteSpace(invitationUrl)
-            ? $"<p><a href=\"{invitationUrl}\">Click here to set up your password</a>.</p>"
-            : "<p>Your account has been successfully created.</p>";
-
-        var body = $"""
-            <h2>Hello {firstName} {lastName}!</h2>
-            <p>Welcome to InnoClinic. Your patient profile is ready.</p>
-            {googleSection}
-            {passwordSection}
-            """;
-
-        return (subject, body);
-    }
-
-    private static bool IsGoogleEmail(string email) =>
-        email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) ||
-        email.EndsWith("@googlemail.com", StringComparison.OrdinalIgnoreCase);
 }

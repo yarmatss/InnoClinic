@@ -1,0 +1,18 @@
+<div class="email-container">
+    <h2 class="email-title">Appointment Confirmed!</h2>
+    <p>Dear {{ patient_name | html.escape }},</p>
+    <p>Your appointment has been successfully scheduled and approved.</p>
+
+    <div class="info-card" style="background-color: #f8fafc; border-left: 4px solid #2dd4bf; border-radius: 4px; padding: 14px 18px; margin: 20px 0;">
+        <div class="info-row" style="margin-bottom: 8px;">
+            <strong style="color: #475569;">Doctor:</strong>
+            <span style="color: #0f172a; margin-left: 4px;">{{ medical_staff_name | html.escape }}</span>
+        </div>
+        <div class="info-row">
+            <strong style="color: #475569;">Date & Time:</strong>
+            <span style="color: #0f172a; margin-left: 4px;">{{ formatted_date | html.escape }}</span>
+        </div>
+    </div>
+
+    <p style="font-size: 13px; color: #64748b;">Please arrive 10 minutes prior to your scheduled appointment. If you need to make changes, manage your booking via the InnoClinic portal.</p>
+</div>

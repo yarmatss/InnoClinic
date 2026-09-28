@@ -1,4 +1,5 @@
 using Notifications.Worker.Constants;
+using Notifications.Worker.Helpers;
 using Notifications.Worker.Interfaces;
 using Notifications.Worker.Options;
 using Notifications.Worker.Services;
@@ -16,6 +17,7 @@ public static class NotificationExtensions
             services.Configure<FrontendOptions>(configuration.GetSection(FrontendOptions.SectionName));
             
             services.AddSingleton<IEmailSenderService, EmailSenderService>();
+            services.AddSingleton<EmailTemplateHelper>();
 
             services.AddResiliencePipeline(NotificationConstants.EmailRetryPipeline, builder =>
             {
