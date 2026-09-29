@@ -1,10 +1,11 @@
-﻿namespace Notifications.Worker.Interfaces;
+using Notifications.Worker.Models;
+
+namespace Notifications.Worker.Interfaces;
 
 public interface IEmailSenderService
 {
     Task SendAsync(
         string recipient,
-        string subject,
-        string body,
+        EmailContent content,
         CancellationToken ct = default);
 }

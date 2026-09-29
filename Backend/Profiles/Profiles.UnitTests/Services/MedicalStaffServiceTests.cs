@@ -11,6 +11,7 @@ using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
 using Profiles.BLL.Models;
+using Profiles.Domain.Enums;
 
 namespace Profiles.UnitTests.Services;
 
@@ -19,14 +20,14 @@ public class MedicalStaffServiceTests
     private readonly IMedicalStaffRepository _staffRepo = Substitute.For<IMedicalStaffRepository>();
     private readonly ISpecializationRepository _specRepo = Substitute.For<ISpecializationRepository>();
     private readonly IOutboxRepository _outboxRepo = Substitute.For<IOutboxRepository>();
-    private readonly IAuth0ManagementService _auth0Service = Substitute.For<IAuth0ManagementService>();
+    private readonly IAuthManagementService _auth0Service = Substitute.For<IAuthManagementService>();
     private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
     private readonly MedicalStaffService _sut;
 
     public MedicalStaffServiceTests()
     {
-        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new Auth0UserProvisionResult("auth0|123", "https://invite.url"));
+        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<CancellationToken>())
+            .Returns(new UserProvisionResult("auth0|123", "https://invite.url"));
         _sut = new MedicalStaffService(_staffRepo, _specRepo, _outboxRepo, _auth0Service, _notificationProducer);
     }
 

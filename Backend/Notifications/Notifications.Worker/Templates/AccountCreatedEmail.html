@@ -1,0 +1,22 @@
+<div class="email-container">
+    <h2 class="email-title">Hello {{ first_name | html.escape }} {{ last_name | html.escape }}!</h2>
+    <p>{{ welcome_text | html.escape }}</p>
+
+    {{~ if invitation_url ~}}
+    <div style="margin: 20px 0;">
+        <a href="{{ invitation_url | html.escape }}" class="btn-primary">
+            {{ password_link_text | html.escape }}
+        </a>
+    </div>
+    <p style="color: #64748b; font-size: 14px;">
+        Alternatively, you can sign in directly to the <a href="{{ portal_url | html.escape }}" style="color: #0f766e; text-decoration: underline;">InnoClinic Portal</a> using your linked social or institutional account.
+    </p>
+    {{~ else ~}}
+    <div style="margin: 20px 0;">
+        <a href="{{ portal_url | html.escape }}" class="btn-primary">
+            Go to InnoClinic Portal
+        </a>
+    </div>
+    <p>Your account has been successfully created and is ready to use.</p>
+    {{~ end ~}}
+</div>

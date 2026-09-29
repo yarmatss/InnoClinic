@@ -1,0 +1,18 @@
+<div class="email-container">
+    <h2 class="email-title">Appointment Reminder</h2>
+    <p>Dear {{ patient_name | html.escape }},</p>
+    <p>This is a friendly reminder that you have an upcoming appointment scheduled with InnoClinic:</p>
+
+    <div class="info-card" style="background-color: #f8fafc; border-left: 4px solid #2dd4bf; border-radius: 4px; padding: 14px 18px; margin: 20px 0;">
+        <div class="info-row" style="margin-bottom: 8px;">
+            <strong style="color: #475569;">Doctor:</strong>
+            <span style="color: #0f172a; margin-left: 4px;">{{ medical_staff_name | html.escape }}</span>
+        </div>
+        <div class="info-row">
+            <strong style="color: #475569;">Date & Time:</strong>
+            <span style="color: #0f172a; margin-left: 4px;">{{ formatted_date | html.escape }} (UTC)</span>
+        </div>
+    </div>
+
+    <p style="font-size: 13px; color: #64748b;">If you need to reschedule or cancel, please contact the clinic or manage your appointment through the patient portal.</p>
+</div>

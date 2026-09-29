@@ -1,0 +1,43 @@
+.email-container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.6;
+    font-size: 15px;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.email-title {
+    color: #0f766e;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+}
+
+.info-card {
+    background-color: #f8fafc;
+    border-left: 4px solid #2dd4bf;
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin: 20px 0;
+}
+
+.info-row {
+    margin-bottom: 8px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: #0f766e;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+}

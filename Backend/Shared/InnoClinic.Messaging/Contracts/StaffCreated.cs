@@ -5,4 +5,5 @@ public record StaffCreated(
     string FirstName,
     string LastName,
     string Email,
-    string? InvitationUrl = null);
+    string? InvitationUrl = null)
+    : AccountCreated(FirstName, LastName, Email, InvitationUrl);

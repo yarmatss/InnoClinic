@@ -10,6 +10,7 @@ using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
+using Profiles.Domain.Extensions;
 
 namespace Profiles.BLL.Services;
 
@@ -17,7 +18,7 @@ internal class MedicalStaffService(
     IMedicalStaffRepository staffRepository,
     ISpecializationRepository specializationRepository,
     IOutboxRepository outboxRepository,
-    IAuth0ManagementService auth0Service,
+    IAuthManagementService auth0Service,
     INotificationProducer notificationProducer) : IMedicalStaffService
 {
     public async Task<Result<MedicalStaffModel>> CreateAsync(
@@ -36,7 +37,7 @@ internal class MedicalStaffService(
             model.Email,
             model.FirstName,
             model.LastName,
-            model.StaffType.ToString(),
+            model.StaffType.ToUserRole(),
             cancellationToken);
 
         var invitationUrl = provisionResult.IsSuccess ? provisionResult.Value.InvitationUrl : null;

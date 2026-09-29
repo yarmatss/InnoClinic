@@ -42,7 +42,7 @@ public static class DependencyInjection
                 });
             });
 
-            services.AddScoped<IAuth0ManagementService, Auth0ManagementService>();
+            services.AddScoped<IAuthManagementService, Auth0ManagementService>();
 
             services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<IMedicalStaffService, MedicalStaffService>();
