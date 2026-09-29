@@ -1,12 +1,13 @@
 using System.Reflection;
 using InnoClinic.Messaging.Contracts;
 using Microsoft.Extensions.Options;
+using Notifications.Worker.Models;
 using Notifications.Worker.Options;
 using Scriban;
 
-namespace Notifications.Worker.Helpers;
+namespace Notifications.Worker.Services;
 
-public class EmailTemplateHelper(IOptions<FrontendOptions> frontendOptions)
+public class EmailComposer(IOptions<FrontendOptions> frontendOptions)
 {
     private readonly FrontendOptions _frontend = frontendOptions.Value;
 
@@ -20,7 +21,7 @@ public class EmailTemplateHelper(IOptions<FrontendOptions> frontendOptions)
 
     private static readonly Template AppointmentReminderTemplate = ParseTemplate("AppointmentReminderEmail.html");
 
-    public (string Subject, string Body) BuildAccountEmail(
+    public EmailContent ComposeAccountEmail(
         AccountCreated message,
         string subject,
         string welcomeText,
@@ -39,10 +40,10 @@ public class EmailTemplateHelper(IOptions<FrontendOptions> frontendOptions)
         };
 
         var renderedHtml = AccountEmailTemplate.Render(model);
-        return (subject, WrapWithStyles(renderedHtml));
+        return new EmailContent(subject, WrapWithStyles(renderedHtml));
     }
 
-    public (string Subject, string Body) BuildAppointmentBookedEmail(
+    public static EmailContent ComposeAppointmentBookedEmail(
         string patientName,
         string medicalStaffName,
         DateTime startTime)
@@ -57,10 +58,10 @@ public class EmailTemplateHelper(IOptions<FrontendOptions> frontendOptions)
         };
 
         var renderedHtml = AppointmentBookedTemplate.Render(model);
-        return (subject, WrapWithStyles(renderedHtml));
+        return new EmailContent(subject, WrapWithStyles(renderedHtml));
     }
 
-    public (string Subject, string Body) BuildAppointmentReminderEmail(
+    public static EmailContent ComposeAppointmentReminderEmail(
         string patientName,
         string medicalStaffName,
         DateTime startTime)
@@ -75,7 +76,7 @@ public class EmailTemplateHelper(IOptions<FrontendOptions> frontendOptions)
         };
 
         var renderedHtml = AppointmentReminderTemplate.Render(model);
-        return (subject, WrapWithStyles(renderedHtml));
+        return new EmailContent(subject, WrapWithStyles(renderedHtml));
     }
 
     private static string WrapWithStyles(string html) =>

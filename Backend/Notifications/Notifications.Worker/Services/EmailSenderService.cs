@@ -5,6 +5,7 @@ using MimeKit;
 using Notifications.Worker.Constants;
 using Notifications.Worker.Extensions;
 using Notifications.Worker.Interfaces;
+using Notifications.Worker.Models;
 using Notifications.Worker.Options;
 using Polly;
 using Polly.Registry;
@@ -14,7 +15,7 @@ namespace Notifications.Worker.Services;
 public partial class EmailSenderService(
     IOptions<EmailOptions> options,
     ResiliencePipelineProvider<string> pipelineProvider,
-    ILogger<EmailSenderService> logger) 
+    ILogger<EmailSenderService> logger)
     : IEmailSenderService
 {
     private readonly EmailOptions _options = options.Value;
@@ -22,8 +23,7 @@ public partial class EmailSenderService(
 
     public async Task SendAsync(
         string recipient,
-        string subject,
-        string body,
+        EmailContent content,
         CancellationToken ct = default)
     {
         await _pipeline.ExecuteAsync(async token =>
@@ -42,14 +42,14 @@ public partial class EmailSenderService(
             using var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_options.SenderName, _options.SenderEmail));
             message.To.Add(MailboxAddress.Parse(recipient));
-            message.Subject = subject;
+            message.Subject = content.Subject;
 
-            var bodyBuilder = new BodyBuilder { HtmlBody = body };
+            var bodyBuilder = new BodyBuilder { HtmlBody = content.Body };
             message.Body = bodyBuilder.ToMessageBody();
 
             await client.SendAsync(message, token);
             await client.DisconnectAsync(true, token);
-            
+
             logger.LogEmailSent(recipient);
         }, ct);
     }

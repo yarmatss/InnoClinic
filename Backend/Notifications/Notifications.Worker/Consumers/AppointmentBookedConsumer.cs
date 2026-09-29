@@ -1,14 +1,13 @@
 using InnoClinic.Messaging.Contracts;
 using MassTransit;
 using Notifications.Worker.Extensions;
-using Notifications.Worker.Helpers;
 using Notifications.Worker.Interfaces;
+using Notifications.Worker.Services;
 
 namespace Notifications.Worker.Consumers;
 
 public class AppointmentBookedConsumer(
     IEmailSenderService emailSender,
-    EmailTemplateHelper templateHelper,
     ILogger<AppointmentBookedConsumer> logger) 
     : IConsumer<AppointmentBooked>
 {
@@ -18,11 +17,11 @@ public class AppointmentBookedConsumer(
 
         logger.LogAppointmentBookingNotificationProcessing(message.AppointmentId, message.PatientId);
 
-        var (subject, body) = templateHelper.BuildAppointmentBookedEmail(
+        var emailContent = EmailComposer.ComposeAppointmentBookedEmail(
             message.PatientName,
             message.MedicalStaffName,
             message.StartTime);
 
-        await emailSender.SendAsync(message.PatientEmail, subject, body, context.CancellationToken);
+        await emailSender.SendAsync(message.PatientEmail, emailContent, context.CancellationToken);
     }
 }
