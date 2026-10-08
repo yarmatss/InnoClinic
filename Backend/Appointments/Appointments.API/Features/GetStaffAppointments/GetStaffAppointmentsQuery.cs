@@ -4,7 +4,8 @@ using MediatR;
 
 namespace Appointments.API.Features.GetStaffAppointments;
 
-public record GetStaffAppointmentsQuery(Guid StaffId) : IRequest<Result<IEnumerable<AppointmentResponse>>>;
+public record GetStaffAppointmentsQuery(string UserId, Guid StaffId) 
+    : IRequest<Result<IEnumerable<AppointmentResponse>>>;
 
 public record AppointmentResponse(
     Guid Id,

@@ -6,6 +6,7 @@ using Appointments.Infrastructure.Data;
 using Appointments.Infrastructure.Interceptors;
 using Appointments.Infrastructure.Services;
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Messaging.Outbox;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -59,20 +60,17 @@ public static class DependencyInjection
                 });
             });
 
-            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
-                {
-                    var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
-                        ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
+            var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
+                ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
 
-                    options.Address = new Uri(profilesApiUrl);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
+            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
+            { 
+                options.Address = new Uri(profilesApiUrl); 
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
 
             services.AddGrpcClient<PatientService.PatientServiceClient>(options =>
             {
-                var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
-                    ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
-
                 options.Address = new Uri(profilesApiUrl);
             })
             .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));

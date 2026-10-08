@@ -24,4 +24,8 @@ public class PatientErrors : DomainErrors
     public static readonly Error Unauthorized = CreateUnauthorized(
         "Patient.Unauthorized",
         "User identifier claim not found.");
+
+    public static readonly Error Forbidden = CreateForbidden(
+        "Patient.Forbidden",
+        "You do not have permission to perform this action or access this resource.");
 }

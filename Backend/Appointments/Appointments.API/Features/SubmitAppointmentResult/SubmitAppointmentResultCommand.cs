@@ -1,4 +1,4 @@
-﻿using InnoClinic.Core.Common;
+using InnoClinic.Core.Common;
 using MediatR;
 
 namespace Appointments.API.Features.SubmitAppointmentResult;
@@ -9,6 +9,7 @@ public record SubmitAppointmentResultRequest(
     string Recommendations);
 
 public record SubmitAppointmentResultCommand(
+    string UserId,
     Guid AppointmentId,
     string Complaints,
     string Conclusion,

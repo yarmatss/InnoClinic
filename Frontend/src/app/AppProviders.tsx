@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useLayoutEffect } from "react";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
@@ -12,7 +12,7 @@ interface AppProvidersProps {
 function AxiosAuthInterceptor({ children }: Readonly<{ children: ReactNode }>) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isAuthenticated) {
       setAuthTokenGetter(() =>
         getAccessTokenSilently({
@@ -24,6 +24,10 @@ function AxiosAuthInterceptor({ children }: Readonly<{ children: ReactNode }>) {
     } else {
       setAuthTokenGetter(null);
     }
+
+    return () => {
+      setAuthTokenGetter(null);
+    };
   }, [getAccessTokenSilently, isAuthenticated]);
 
   return <>{children}</>;

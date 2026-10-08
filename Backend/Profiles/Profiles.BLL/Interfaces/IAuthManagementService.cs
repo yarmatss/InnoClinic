@@ -1,6 +1,6 @@
+using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using Profiles.BLL.Models;
-using Profiles.Domain.Enums;
 
 namespace Profiles.BLL.Interfaces;
 
@@ -11,5 +11,6 @@ public interface IAuthManagementService
         string firstName,
         string lastName,
         UserRole role,
+        Guid profileId,
         CancellationToken ct = default);
 }

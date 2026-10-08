@@ -1,4 +1,4 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using Grpc.Core;
 using InnoClinic.Contracts.Grpc;
 using Microsoft.Extensions.Options;
@@ -41,7 +41,7 @@ public class OutboxProcessorJob(
         using var scope = scopeFactory.CreateScope();
 
         var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
-        var grpcClient = scope.ServiceProvider.GetRequiredService<StaffScheduleSyncService.StaffScheduleSyncServiceClient>();
+        var scheduleGrpcClient = scope.ServiceProvider.GetRequiredService<StaffScheduleSyncService.StaffScheduleSyncServiceClient>();
 
         var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, stoppingToken);
 
@@ -52,14 +52,25 @@ public class OutboxProcessorJob(
         {
             try
             {
-                var request = JsonParser.Default.Parse<SyncStaffProfileRequest>(message.Content);
-
-                var response = await grpcClient.SyncStaffProfileAsync(request, cancellationToken: stoppingToken);
-
-                if (response.Success)
+                switch (message.Type)
                 {
-                    message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
-                    logger.LogOutboxSyncSuccess(request.MedicalStaffId);
+                    case nameof(SyncStaffProfileRequest):
+                    {
+                        var request = JsonParser.Default.Parse<SyncStaffProfileRequest>(message.Content);
+                        var response = await scheduleGrpcClient.SyncStaffProfileAsync(request, cancellationToken: stoppingToken);
+                        if (response.Success)
+                        {
+                            message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
+                            logger.LogOutboxSyncSuccess(request.MedicalStaffId);
+                        }
+                        break;
+                    }
+                    default:
+                    {
+                        message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
+                        message.Error = $"Unknown outbox message type: {message.Type}";
+                        break;
+                    }
                 }
             }
             catch (RpcException rpcEx)

@@ -8,7 +8,7 @@
     <Title>InnoClinic Core</Title>
     <Authors>yarmatss</Authors>
     <Description>Core domain logic and error handling patterns.</Description>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
 </Project>

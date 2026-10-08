@@ -3,13 +3,13 @@ using System.Security.Cryptography;
 using Auth0.Core.Exceptions;
 using Auth0.ManagementApi;
 using Auth0.ManagementApi.Users;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.BLL.Options;
-using Profiles.Domain.Enums;
 
 namespace Profiles.BLL.Services;
 
@@ -25,6 +25,7 @@ public class Auth0ManagementService(
         string firstName,
         string lastName,
         UserRole role,
+        Guid profileId,
         CancellationToken ct = default)
     {
         if (!_options.IsConfigured || client is null)
@@ -36,7 +37,14 @@ public class Auth0ManagementService(
 
         try
         {
-            var userId = await CreateOrGetUserIdAsync(client, email, firstName, lastName, ct);
+            var userId = await CreateOrGetUserIdAsync(
+                client,
+                email,
+                firstName,
+                lastName,
+                role,
+                profileId,
+                ct);
 
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -65,6 +73,8 @@ public class Auth0ManagementService(
         string email,
         string firstName,
         string lastName,
+        UserRole role,
+        Guid profileId,
         CancellationToken ct)
     {
         var targetConnection = _options.Connection ?? "Username-Password-Authentication";
@@ -80,7 +90,12 @@ public class Auth0ManagementService(
                 Connection = targetConnection,
                 Password = GenerateSecurePassword(),
                 EmailVerified = true,
-                VerifyEmail = false
+                VerifyEmail = false,
+                AppMetadata = new Dictionary<string, object?>
+                {
+                    ["profile_id"] = profileId.ToString(),
+                    ["role"] = role.ToString()
+                }
             }, cancellationToken: ct);
 
             return user.UserId;
@@ -96,6 +111,18 @@ public class Auth0ManagementService(
             var targetUser = users.FirstOrDefault(u =>
                 u.Identities != null && u.Identities.Any(i => i.Connection == targetConnection))
                 ?? users.FirstOrDefault();
+
+            if (targetUser?.UserId is not null)
+            {
+                await client.Users.UpdateAsync(targetUser.UserId, new UpdateUserRequestContent
+                {
+                    AppMetadata = new Dictionary<string, object?>
+                    {
+                        ["profile_id"] = profileId.ToString(),
+                        ["role"] = role.ToString()
+                    }
+                }, cancellationToken: ct);
+            }
 
             return targetUser?.UserId;
         }

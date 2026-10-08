@@ -1,3 +1,4 @@
+using InnoClinic.Core.Authorization;
 using Profiles.Domain.Enums;
 
 namespace Profiles.Domain.Extensions;

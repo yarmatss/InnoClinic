@@ -6,8 +6,10 @@ using Appointments.API.GrpcHandlers;
 using Appointments.API.Options;
 using Appointments.Infrastructure;
 using FluentValidation;
+using InnoClinic.AspNetCore.Authorization;
 using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Extensions;
 using Scalar.AspNetCore;
@@ -21,6 +23,10 @@ builder.AddAppObservability("appointments-api");
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserResolver, ClaimsUserResolver>();
+
 builder.Services.AddOutboxResilience();
 
 builder.Services.Configure<OutboxOptions>(
