@@ -15,7 +15,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="InnoClinic.AspNetCore" Version="1.0.8" />
+    <PackageVersion Include="InnoClinic.AspNetCore" Version="1.0.9" />
     <PackageVersion Include="InnoClinic.Core" Version="1.0.5" />
     <PackageVersion Include="InnoClinic.Messaging" Version="1.0.16" />
     <PackageVersion Include="InnoClinic.Contracts.Grpc" Version="1.0.11" />

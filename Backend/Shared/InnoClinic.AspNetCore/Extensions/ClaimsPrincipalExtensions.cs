@@ -42,11 +42,11 @@ public static class ClaimsPrincipalExtensions
             if (string.IsNullOrWhiteSpace(userId))
                 return null;
 
-            var role = principal?.GetUserRole();
+            var role = principal.GetUserRole();
             if (role is null)
                 return null;
 
-            var profileId = principal?.GetProfileId();
+            var profileId = principal.GetProfileId();
 
             return new User(
                 UserId: userId,
