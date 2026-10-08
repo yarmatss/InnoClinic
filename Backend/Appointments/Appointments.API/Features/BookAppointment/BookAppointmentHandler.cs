@@ -7,9 +7,10 @@ using Appointments.Domain.Enums;
 using Appointments.Domain.Exceptions;
 using Appointments.Infrastructure.Data;
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
-using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Contracts;
+using InnoClinic.Messaging.Outbox;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -22,11 +23,19 @@ public class BookAppointmentHandler(
     PatientService.PatientServiceClient patientClient,
     INotificationProducer notificationProducer,
     IOptions<ClinicOptions> clinicOptions,
-    ILogger<BookAppointmentHandler> logger)
+    ILogger<BookAppointmentHandler> logger,
+    IUserResolver userResolver)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(request.UserId);
+        if (user is null)
+            return AppointmentErrors.Unauthorized;
+
+        if (user.Role == UserRole.Patient && user.PatientId != request.PatientId)
+            return AppointmentErrors.Forbidden;
+
         var patientResponse = await patientClient.GetPatientAsync(
             new GetPatientRequest { PatientId = request.PatientId.ToString() },
             cancellationToken: cancellationToken);

@@ -25,7 +25,9 @@ public class TestAuthHandler(
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, "test-user-id"),
-            new(ClaimTypes.Name, "TestUser")
+            new(ClaimTypes.Name, "TestUser"),
+            new("https://innoclinic/role", Context.Request.Headers.TryGetValue("X-Test-Role", out var r) ? r.ToString() : "Administrator"),
+            new("https://innoclinic/profile_id", Context.Request.Headers.TryGetValue("X-Test-Profile-Id", out var pid) ? pid.ToString() : "00000000-0000-0000-0000-000000000001")
         };
 
         if (Context.Request.Headers.TryGetValue("X-Test-Scope", out var scopes))

@@ -48,4 +48,14 @@ public static class AppointmentErrors
         "Appointment.ScheduleConflict",
         "The requested time slot overlaps with an existing appointment.",
         ErrorType.Conflict);
+
+    public static readonly Error Forbidden = new(
+        "Appointment.Forbidden",
+        "You do not have permission to perform this action.",
+        ErrorType.Forbidden);
+
+    public static readonly Error Unauthorized = new(
+        "Appointment.Unauthorized",
+        "You must be authenticated and have a valid profile to perform this action.",
+        ErrorType.Unauthorized);
 }

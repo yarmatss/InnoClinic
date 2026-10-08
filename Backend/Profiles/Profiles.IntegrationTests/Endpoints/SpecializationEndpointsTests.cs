@@ -169,7 +169,7 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
     }
 
     [Fact]
-    public async Task GetAllSpecializations_WhenUnauthenticated_Returns200_BecauseAllowAnonymous()
+    public async Task GetAllSpecializations_WhenUnauthenticated_Returns401()
     {
         // Arrange: Explicitly mark request as anonymous
         Client.DefaultRequestHeaders.Add("X-Test-Anonymous", "true");
@@ -179,7 +179,7 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
             "/api/specializations?PageNumber=1&PageSize=10", 
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     #endregion

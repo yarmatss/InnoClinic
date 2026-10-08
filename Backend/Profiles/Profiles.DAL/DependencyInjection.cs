@@ -47,35 +47,36 @@ public static class DependencyInjection
 
             services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
             {
-                var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl] 
+                var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl]
                     ?? throw new InvalidOperationException($"{ConnectionConstants.AppointmentsApiUrl} not found in configuration.");
 
                 options.Address = new Uri(appointmentsApiUrl);
             })
-            .ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var handler = new SocketsHttpHandler
-                {
-                    EnableMultipleHttp2Connections = true,
-                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                    KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                    SslOptions = new SslClientAuthenticationOptions
-                    {
-                        RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => 
-                        {
-                            if (sslPolicyErrors == SslPolicyErrors.None)
-                                return true;
-
-                            return configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
-                        }
-                    }
-                };
-                return handler;
-            });
+            .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
 
             return services;
         }
+    }
+
+    private static SocketsHttpHandler CreateSocketsHttpHandler(IConfiguration configuration)
+    {
+        return new SocketsHttpHandler
+        {
+            EnableMultipleHttp2Connections = true,
+            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+            SslOptions = new SslClientAuthenticationOptions
+            {
+                RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                {
+                    if (sslPolicyErrors == SslPolicyErrors.None)
+                        return true;
+
+                    return configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
+                }
+            }
+        };
     }
 
     extension(IHost host)

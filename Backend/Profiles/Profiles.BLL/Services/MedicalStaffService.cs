@@ -11,6 +11,7 @@ using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Domain.Extensions;
+using InnoClinic.Core.Authorization;
 
 namespace Profiles.BLL.Services;
 
@@ -19,12 +20,18 @@ internal class MedicalStaffService(
     ISpecializationRepository specializationRepository,
     IOutboxRepository outboxRepository,
     IAuthManagementService auth0Service,
-    INotificationProducer notificationProducer) : IMedicalStaffService
+    INotificationProducer notificationProducer,
+    IUserResolver userResolver) : IMedicalStaffService
 {
     public async Task<Result<MedicalStaffModel>> CreateAsync(
         MedicalStaffModel model, 
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
         if (validationError is not null)
             return validationError;
@@ -38,6 +45,7 @@ internal class MedicalStaffService(
             model.FirstName,
             model.LastName,
             model.StaffType.ToUserRole(),
+            entity.Id,
             cancellationToken);
 
         var invitationUrl = provisionResult.IsSuccess ? provisionResult.Value.InvitationUrl : null;
@@ -80,7 +88,9 @@ internal class MedicalStaffService(
             {
                 existingByEmail.UserId = userId;
                 staffRepository.MarkUpdate(existingByEmail);
+                QueueProfileSyncEvent(existingByEmail);
                 await staffRepository.SaveChangesAsync(cancellationToken);
+
                 return existingByEmail.Adapt<MedicalStaffModel>();
             }
         }
@@ -90,8 +100,13 @@ internal class MedicalStaffService(
 
     public async Task<Result<MedicalStaffModel>> GetByIdAsync(
         Guid id, 
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null) 
+            return MedicalStaffErrors.Unauthorized;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             id,
             cancellationToken,
@@ -100,20 +115,34 @@ internal class MedicalStaffService(
         if (existingEntity is null)
             return MedicalStaffErrors.NotFound;
 
-        return existingEntity.Adapt<MedicalStaffModel>();
+        var model = existingEntity.Adapt<MedicalStaffModel>();
+        ApplyFieldVisibility(model, user, id);
+        return model;
     }
 
     public async Task<Result<PagedResponse<MedicalStaffModel>>> GetPagedAsync(
         MedicalStaffQueryParameters query,
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null) 
+            return MedicalStaffErrors.Unauthorized;
+
         var (entities, totalCount) = await staffRepository.GetPagedAsync(
             query,
             cancellationToken);
 
+        var models = entities.Adapt<IReadOnlyList<MedicalStaffModel>>();
+
+        foreach (var model in models)
+        {
+            ApplyFieldVisibility(model, user, model.Id);
+        }
+
         var pagedResult = new PagedResponse<MedicalStaffModel>
         {
-            Items = entities.Adapt<IReadOnlyList<MedicalStaffModel>>(),
+            Items = models,
             TotalCount = totalCount,
             PageNumber = query.PageNumber!.Value,
             PageSize = query.PageSize!.Value
@@ -125,8 +154,13 @@ internal class MedicalStaffService(
     public async Task<Result<MedicalStaffModel>> UpdateAsync(
         Guid id, 
         MedicalStaffModel model, 
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             id,
             cancellationToken,
@@ -149,8 +183,15 @@ internal class MedicalStaffService(
         return existingEntity.Adapt<MedicalStaffModel>();
     }
 
-    public async Task<Result> DeactivateAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Result> DeactivateAsync(
+        Guid id,
+        string userId,
+        CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             id,
             cancellationToken,
@@ -171,8 +212,13 @@ internal class MedicalStaffService(
     public async Task<Result> AssignSpecializationsAsync(
         Guid staffId,
         IReadOnlyList<StaffSpecializationModel> assignments,
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             staffId,
             cancellationToken,
@@ -209,8 +255,13 @@ internal class MedicalStaffService(
     public async Task<Result> SetWorkingHoursAsync(
         Guid staffId,
         IReadOnlyList<WorkingHoursModel> workingHoursModels,
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             staffId,
             cancellationToken,
@@ -267,8 +318,13 @@ internal class MedicalStaffService(
     public async Task<Result> SetScheduleOverridesAsync(
         Guid staffId,
         IReadOnlyList<ScheduleOverrideModel> overrideModels,
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             staffId,
             cancellationToken,
@@ -318,8 +374,13 @@ internal class MedicalStaffService(
     public async Task<Result> DeleteScheduleOverrideAsync(
         Guid staffId,
         DateOnly date,
+        string userId,
         CancellationToken cancellationToken)
     {
+        var user = userResolver.Resolve(userId);
+        if (user is null || !user.IsAdmin)
+            return MedicalStaffErrors.Forbidden;
+
         var existingEntity = await staffRepository.GetByIdAsync(
             staffId,
             cancellationToken,
@@ -338,6 +399,17 @@ internal class MedicalStaffService(
         await staffRepository.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private static void ApplyFieldVisibility(MedicalStaffModel model, User user, Guid targetId)
+    {
+        if (user.IsAdmin || user.StaffId == targetId) 
+            return;
+
+        model.NationalId = string.Empty;
+        model.LicenseNumber = string.Empty;
+        model.Email = string.Empty;
+        model.ContactPhone = string.Empty;
     }
 
     private async Task<Error?> ValidateUniquenessAsync(

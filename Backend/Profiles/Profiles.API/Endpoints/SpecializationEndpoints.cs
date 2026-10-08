@@ -1,13 +1,16 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Extensions;
+using InnoClinic.AspNetCore.Filters;
+using InnoClinic.Core.Common;
 using Mapster;
 using Profiles.API.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Specialization;
-using InnoClinic.AspNetCore.Filters;
+using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
-using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
+using System.Security.Claims;
 
 namespace Profiles.API.Endpoints;
 
@@ -22,7 +25,7 @@ public static class SpecializationEndpoints
                 .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/", GetAllSpecializationsAsync)
-                .AllowAnonymous();
+                .RequireAuthorization();
 
             group.MapPost("/", CreateSpecializationAsync)
                 .RequireAuthorization(Policies.WriteSpecializations);
@@ -36,6 +39,7 @@ public static class SpecializationEndpoints
 
     private static async Task<Result<SpecializationResponseDto>> CreateSpecializationAsync(
         CreateSpecializationDto dto,
+        ClaimsPrincipal user,
         IValidator<CreateSpecializationDto> validator,
         ISpecializationService specializationService,
         CancellationToken ct = default)
@@ -46,8 +50,12 @@ public static class SpecializationEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
+        var userId = user.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) 
+            return SpecializationErrors.Unauthorized;
+
         var model = dto.Adapt<SpecializationModel>();
-        var result = await specializationService.CreateAsync(model, ct);
+        var result = await specializationService.CreateAsync(model, userId, ct);
 
         return result.Map(m => 
         {
@@ -58,6 +66,7 @@ public static class SpecializationEndpoints
 
     private static async Task<Result<PagedResponse<SpecializationResponseDto>>> GetAllSpecializationsAsync(
         [AsParameters] SpecializationQueryParameters query,
+        ClaimsPrincipal user,
         IValidator<SpecializationQueryParameters> validator,
         ISpecializationService specializationService,
         CancellationToken ct = default)
@@ -67,6 +76,10 @@ public static class SpecializationEndpoints
         {
             return new ValidationError(validationResult.ToDictionary());
         }
+
+        var userId = user.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) 
+            return SpecializationErrors.Unauthorized;
 
         var result = await specializationService.GetPagedAsync(query, ct);
 
@@ -82,6 +95,7 @@ public static class SpecializationEndpoints
     private static async Task<Result<SpecializationResponseDto>> UpdateSpecializationAsync(
         Guid id,
         UpdateSpecializationDto dto,
+        ClaimsPrincipal user,
         IValidator<UpdateSpecializationDto> validator,
         ISpecializationService specializationService,
         CancellationToken ct = default)
@@ -92,8 +106,12 @@ public static class SpecializationEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
+        var userId = user.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) 
+            return SpecializationErrors.Unauthorized;
+
         var model = dto.Adapt<SpecializationModel>();
-        var result = await specializationService.UpdateAsync(id, model, ct);
+        var result = await specializationService.UpdateAsync(id, model, userId, ct);
 
         return result.Map(m => m.Adapt<SpecializationResponseDto>());
     }

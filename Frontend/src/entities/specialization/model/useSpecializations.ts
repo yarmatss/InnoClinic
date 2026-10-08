@@ -7,6 +7,7 @@ interface UseSpecializationsProps {
   pageSize: number;
   nameFilter: string;
   sortOrder: "asc" | "desc";
+  enabled?: boolean;
 }
 
 export function useSpecializations({
@@ -14,6 +15,7 @@ export function useSpecializations({
   pageSize,
   nameFilter,
   sortOrder,
+  enabled = true,
 }: UseSpecializationsProps) {
   const fetchSpecializations = useCallback(
     (signal: AbortSignal) =>
@@ -28,7 +30,9 @@ export function useSpecializations({
     [pageNumber, pageSize, nameFilter, sortOrder],
   );
 
-  const { data, isLoading, error, refetch } = useAsync(fetchSpecializations);
+  const { data, isLoading, error, refetch } = useAsync(fetchSpecializations, {
+    enabled,
+  });
 
   return {
     specializations: data?.items ?? [],

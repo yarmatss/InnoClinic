@@ -34,4 +34,8 @@ public class MedicalStaffErrors : DomainErrors
     public static readonly Error Unauthorized = CreateUnauthorized(
         "MedicalStaff.Unauthorized",
         "User identifier claim not found.");
+
+    public static readonly Error Forbidden = CreateForbidden(
+        "MedicalStaff.Forbidden",
+        "You do not have permission to perform this action or access this resource.");
 }

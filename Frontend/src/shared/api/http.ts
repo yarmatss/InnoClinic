@@ -11,9 +11,11 @@ export const httpClient = axios.create({
   },
 });
 
-let tokenGetter: (() => Promise<string>) | null = null;
+let tokenGetter: (() => Promise<string | undefined>) | null = null;
 
-export const setAuthTokenGetter = (getter: (() => Promise<string>) | null) => {
+export const setAuthTokenGetter = (
+  getter: (() => Promise<string | undefined>) | null,
+) => {
   tokenGetter = getter;
 };
 

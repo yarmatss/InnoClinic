@@ -1,6 +1,8 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Authorization;
 using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Messaging.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.DataProtection;
@@ -24,6 +26,9 @@ builder.AddAppObservability("profiles-api");
 TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
 builder.Services.AddBusinessLogicLayer(builder.Configuration);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserResolver, ClaimsUserResolver>();
 
 builder.Services.AddAuth0Authentication(builder.Configuration);
 builder.Services.AddScopePolicies();

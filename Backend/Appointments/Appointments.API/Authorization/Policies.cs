@@ -1,5 +1,4 @@
 using InnoClinic.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Appointments.API.Authorization;
 

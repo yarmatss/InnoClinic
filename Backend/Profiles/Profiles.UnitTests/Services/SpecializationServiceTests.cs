@@ -1,3 +1,4 @@
+using InnoClinic.Core.Authorization;
 using NSubstitute;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Services;
@@ -14,11 +15,13 @@ namespace Profiles.UnitTests.Services;
 public class SpecializationServiceTests
 {
     private readonly ISpecializationRepository _specRepo = Substitute.For<ISpecializationRepository>();
+    private readonly IUserResolver _userResolver = Substitute.For<IUserResolver>();
     private readonly SpecializationService _sut;
 
     public SpecializationServiceTests()
     {
-        _sut = new SpecializationService(_specRepo);
+        _userResolver.Resolve(Arg.Any<string>()).Returns(new User("test-user", null, Guid.NewGuid(), UserRole.Administrator));
+        _sut = new SpecializationService(_specRepo, _userResolver);
     }
 
     #region CreateAsync
@@ -35,7 +38,7 @@ public class SpecializationServiceTests
             .Returns(new List<Specialization> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -53,7 +56,7 @@ public class SpecializationServiceTests
             .Returns(Array.Empty<Specialization>());
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -101,7 +104,7 @@ public class SpecializationServiceTests
         _specRepo.GetByIdAsync(id, Arg.Any<CancellationToken>(), trackChanges: true).Returns((Specialization?)null);
 
         // Act
-        var result = await _sut.UpdateAsync(id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -122,7 +125,7 @@ public class SpecializationServiceTests
             .Returns(new List<Specialization> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -142,7 +145,7 @@ public class SpecializationServiceTests
             .Returns(Array.Empty<Specialization>());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -151,3 +154,4 @@ public class SpecializationServiceTests
 
     #endregion
 }
+

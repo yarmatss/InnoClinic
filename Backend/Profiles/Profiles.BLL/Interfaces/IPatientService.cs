@@ -8,19 +8,23 @@ public interface IPatientService
 {
     Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
+        string userId,
         CancellationToken cancellationToken);
 
     Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
         PatientQueryParameters queryModel,
+        string userId,
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> GetByIdAsync(
         Guid id, 
+        string userId,
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> UpdateAsync(
         Guid id, 
         PatientModel model, 
+        string userId,
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> GetCurrentAsync(

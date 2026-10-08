@@ -1,5 +1,10 @@
+using InnoClinic.Core.Authorization;
+using InnoClinic.Messaging.Contracts;
+using InnoClinic.Messaging.Outbox;
 using NSubstitute;
 using Profiles.BLL.Errors;
+using Profiles.BLL.Interfaces;
+using Profiles.BLL.Models;
 using Profiles.BLL.Services;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
@@ -8,11 +13,6 @@ using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
-using Profiles.BLL.Interfaces;
-using InnoClinic.Messaging.Outbox;
-using InnoClinic.Messaging.Contracts;
-using Profiles.BLL.Models;
-using Profiles.Domain.Enums;
 
 namespace Profiles.UnitTests.Services;
 
@@ -22,13 +22,15 @@ public class PatientServiceTests
     private readonly IMedicalStaffRepository _staffRepo = Substitute.For<IMedicalStaffRepository>();
     private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
     private readonly IAuthManagementService _auth0Service = Substitute.For<IAuthManagementService>();
+    private readonly IUserResolver _userResolver = Substitute.For<IUserResolver>();
     private readonly PatientService _sut;
 
     public PatientServiceTests()
     {
-        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<CancellationToken>())
+        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(new UserProvisionResult("auth0|123", "https://invite.url"));
-        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer, _auth0Service);
+        _userResolver.Resolve(Arg.Any<string>()).Returns(new User("test-user", null, Guid.NewGuid(), UserRole.Administrator));
+        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer, _auth0Service, _userResolver);
     }
 
     #region CreateAsync
@@ -45,7 +47,7 @@ public class PatientServiceTests
             .Returns(new List<Patient> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -64,7 +66,7 @@ public class PatientServiceTests
             .Returns<IReadOnlyList<Patient>>(Array.Empty<Patient>(), [duplicate]);
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -85,7 +87,7 @@ public class PatientServiceTests
         _staffRepo.GetByIdAsync(model.PrimaryDoctorId.Value, Arg.Any<CancellationToken>()).Returns((MedicalStaff?)null);
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -109,7 +111,7 @@ public class PatientServiceTests
         _staffRepo.GetByIdAsync(model.PrimaryDoctorId.Value, Arg.Any<CancellationToken>()).Returns(inactiveDoctor);
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -127,7 +129,7 @@ public class PatientServiceTests
             .Returns(Array.Empty<Patient>());
 
         // Act
-        var result = await _sut.CreateAsync(model, CancellationToken.None);
+        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -156,7 +158,7 @@ public class PatientServiceTests
             .Returns((entities.AsReadOnly() as IReadOnlyList<Patient>, totalCount));
 
         // Act
-        var result = await _sut.GetAllAsync(query, CancellationToken.None);
+        var result = await _sut.GetAllAsync(query, "test-user", CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -178,7 +180,7 @@ public class PatientServiceTests
         _patientRepo.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((Patient?)null);
 
         // Act
-        var result = await _sut.GetByIdAsync(id, CancellationToken.None);
+        var result = await _sut.GetByIdAsync(id, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -193,7 +195,7 @@ public class PatientServiceTests
         _patientRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>()).Returns(entity);
 
         // Act
-        var result = await _sut.GetByIdAsync(entity.Id, CancellationToken.None);
+        var result = await _sut.GetByIdAsync(entity.Id, "test-user", CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -215,7 +217,7 @@ public class PatientServiceTests
         _patientRepo.GetByIdAsync(id, Arg.Any<CancellationToken>(), trackChanges: true).Returns((Patient?)null);
 
         // Act
-        var result = await _sut.UpdateAsync(id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -236,7 +238,7 @@ public class PatientServiceTests
             .Returns(new List<Patient> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -257,7 +259,7 @@ public class PatientServiceTests
             .Returns<IReadOnlyList<Patient>>(Array.Empty<Patient>(), [duplicate]);
             
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -277,7 +279,7 @@ public class PatientServiceTests
             .Returns(Array.Empty<Patient>());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

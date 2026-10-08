@@ -1,4 +1,4 @@
-namespace Profiles.Domain.Enums;
+namespace InnoClinic.Core.Authorization;
 
 public enum UserRole
 {
