@@ -29,16 +29,10 @@ internal sealed record ClinicUser(string Id, UserRole Role, Guid ProfileId) : IC
 
     private static bool TryParseRole(string? value, out UserRole role)
     {
-        foreach (var candidate in Enum.GetValues<UserRole>())
-        {
-            if (string.Equals(candidate.ToString(), value, StringComparison.OrdinalIgnoreCase))
-            {
-                role = candidate;
-                return true;
-            }
-        }
+        var name = Enum.GetNames<UserRole>()
+            .FirstOrDefault(n => string.Equals(n, value, StringComparison.OrdinalIgnoreCase));
 
-        role = default;
-        return false;
+        role = name is null ? default : Enum.Parse<UserRole>(name);
+        return name is not null;
     }
 }

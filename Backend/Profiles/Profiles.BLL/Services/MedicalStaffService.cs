@@ -175,7 +175,11 @@ internal class MedicalStaffService(
         catch
         {
             if (currentRole != newRole)
-                await auth0Service.ChangeRoleAsync(userId, newRole, currentRole, CancellationToken.None);
+                await auth0Service.ChangeRoleAsync(
+                    userId,
+                    currentRole: newRole,
+                    newRole: currentRole,
+                    CancellationToken.None);
             throw;
         }
 

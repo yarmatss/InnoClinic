@@ -6,6 +6,7 @@ using InnoClinic.Core.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Profiles.BLL.Errors;
+using Profiles.BLL.Extensions;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.BLL.Options;
@@ -67,7 +68,7 @@ public class Auth0ManagementService(
         }
         catch (Exception ex) when (IsConflict(ex))
         {
-            logger.LogWarning("An Auth0 account for profile {ProfileId} already exists; refusing to reuse it.", profileId);
+            logger.LogWarning(ex, "An Auth0 account for profile {ProfileId} already exists; refusing to reuse it.", profileId);
             return AccountErrors.EmailAlreadyRegistered;
         }
         catch (Exception ex)
@@ -196,7 +197,7 @@ public class Auth0ManagementService(
         }
         catch (Exception ex)
         {
-            logger.LogCritical(ex, "Failed to revert the roles of Auth0 user {UserId}; fix its roles manually.", userId);
+            logger.LogRoleRevertFailed(ex, userId);
         }
     }
 

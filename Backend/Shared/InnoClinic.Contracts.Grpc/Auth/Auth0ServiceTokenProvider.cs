@@ -19,13 +19,13 @@ internal sealed class Auth0ServiceTokenProvider(
     {
         var settings = options.Value;
 
-        if (TryGetCached(settings, out var token))
+        if (TryGetCached(out var token))
             return token;
 
         await _lock.WaitAsync(cancellationToken);
         try
         {
-            if (TryGetCached(settings, out token))
+            if (TryGetCached(out token))
                 return token;
 
             var httpClient = httpClientFactory.CreateClient(HttpClientName);
@@ -57,7 +57,7 @@ internal sealed class Auth0ServiceTokenProvider(
         }
     }
 
-    private bool TryGetCached(ServiceTokenOptions settings, out string token)
+    private bool TryGetCached(out string token)
     {
         var cached = _cached;
         if (cached is not null && cached.RefreshAt > timeProvider.GetUtcNow())
