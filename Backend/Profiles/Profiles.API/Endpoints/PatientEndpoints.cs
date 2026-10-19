@@ -1,12 +1,9 @@
-using System.Security.Claims;
 using FluentValidation;
 using Mapster;
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
 using InnoClinic.AspNetCore.Filters;
-using InnoClinic.AspNetCore.Extensions;
-using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
@@ -28,15 +25,15 @@ public static class PatientEndpoints
                 .RequireAuthorization();
 
             group.MapGet("/", GetAllPatientsAsync)
-                .RequireAuthorization(Policies.ReadPatients);
+                .RequirePermission(ClinicPermissions.Patients.Read);
             group.MapGet("/{id:guid}", GetPatientByIdAsync)
-                .RequireAuthorization(Policies.ReadPatients);
+                .RequirePermission(ClinicPermissions.Patients.Read);
 
             group.MapPost("/", CreatePatientAsync)
-                .RequireAuthorization(Policies.WritePatients);
+                .RequirePermission(ClinicPermissions.Patients.Write);
             
             group.MapPut("/{id:guid}", UpdatePatientAsync)
-                .RequireAuthorization(Policies.WritePatients);
+                .RequirePermission(ClinicPermissions.Patients.Write);
 
             return group;
         }
@@ -44,7 +41,6 @@ public static class PatientEndpoints
 
     private static async Task<Result<PatientResponseDto>> CreatePatientAsync(
         CreatePatientDto dto,
-        ClaimsPrincipal user,
         IValidator<CreatePatientDto> validator,
         IPatientService patientService,
         CancellationToken ct = default)
@@ -55,12 +51,8 @@ public static class PatientEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return PatientErrors.Unauthorized;
-
         var model = dto.Adapt<PatientModel>();
-        var result = await patientService.CreateAsync(model, userId, ct);
+        var result = await patientService.CreateAsync(model, ct);
 
         return result.Map(p => 
         {
@@ -71,7 +63,6 @@ public static class PatientEndpoints
 
     private static async Task<Result<PagedResponse<PatientResponseDto>>> GetAllPatientsAsync(
         [AsParameters] PatientQueryParameters query,
-        ClaimsPrincipal user,
         IValidator<PatientQueryParameters> validator,
         IPatientService patientService,
         CancellationToken ct = default)
@@ -82,11 +73,7 @@ public static class PatientEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return PatientErrors.Unauthorized;
-
-        var result = await patientService.GetAllAsync(query, userId, ct);
+        var result = await patientService.GetAllAsync(query, ct);
 
         return result.Map(pagedModel => new PagedResponse<PatientResponseDto>
         {
@@ -99,15 +86,10 @@ public static class PatientEndpoints
 
     private static async Task<Result<PatientResponseDto>> GetPatientByIdAsync(
         Guid id,
-        ClaimsPrincipal user,
         IPatientService patientService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return PatientErrors.Unauthorized;
-
-        var result = await patientService.GetByIdAsync(id, userId, ct);
+        var result = await patientService.GetByIdAsync(id, ct);
 
         return result.Map(p => p.Adapt<PatientResponseDto>());
     }
@@ -115,7 +97,6 @@ public static class PatientEndpoints
     private static async Task<Result<PatientResponseDto>> UpdatePatientAsync(
         Guid id,
         UpdatePatientDto dto,
-        ClaimsPrincipal user,
         IValidator<UpdatePatientDto> validator,
         IPatientService patientService,
         CancellationToken ct = default)
@@ -126,26 +107,17 @@ public static class PatientEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return PatientErrors.Unauthorized;
-
         var model = dto.Adapt<PatientModel>();
-        var result = await patientService.UpdateAsync(id, model, userId, ct);
+        var result = await patientService.UpdateAsync(id, model, ct);
 
         return result.Map(p => p.Adapt<PatientResponseDto>());
     }
 
     private static async Task<Result<PatientResponseDto>> GetCurrentPatientAsync(
-        ClaimsPrincipal user,
         IPatientService patientService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId))
-            return PatientErrors.Unauthorized;
-
-        var result = await patientService.GetCurrentAsync(userId, user.GetEmail(), ct);
+        var result = await patientService.GetCurrentAsync(ct);
 
         return result.Map(p => p.Adapt<PatientResponseDto>());
     }

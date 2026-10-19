@@ -6,23 +6,16 @@ using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
-using InnoClinic.Core.Authorization;
 
 namespace Profiles.BLL.Services;
 
 internal class SpecializationService(
-    ISpecializationRepository specializationRepository,
-    IUserResolver userResolver) : ISpecializationService
+    ISpecializationRepository specializationRepository) : ISpecializationService
 {
     public async Task<Result<SpecializationModel>> CreateAsync(
         SpecializationModel model,
-        string userId,
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(userId);
-        if (user is null || !user.IsAdmin)
-            return SpecializationErrors.Forbidden;
-
         var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
         if (validationError is not null)
             return validationError;
@@ -57,13 +50,8 @@ internal class SpecializationService(
     public async Task<Result<SpecializationModel>> UpdateAsync(
         Guid id,
         SpecializationModel model,
-        string userId,
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(userId);
-        if (user is null || !user.IsAdmin)
-            return SpecializationErrors.Forbidden;
-
         var existingEntity = await specializationRepository.GetByIdAsync(
             id,
             cancellationToken,

@@ -9,7 +9,6 @@ public record SubmitAppointmentResultRequest(
     string Recommendations);
 
 public record SubmitAppointmentResultCommand(
-    string UserId,
     Guid AppointmentId,
     string Complaints,
     string Conclusion,

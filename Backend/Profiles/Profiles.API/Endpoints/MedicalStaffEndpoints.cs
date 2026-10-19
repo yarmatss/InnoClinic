@@ -1,12 +1,9 @@
-using System.Security.Claims;
 using FluentValidation;
 using Mapster;
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
 using InnoClinic.AspNetCore.Filters;
-using InnoClinic.AspNetCore.Extensions;
-using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
@@ -29,26 +26,26 @@ public static class MedicalStaffEndpoints
 
             group.MapGet("/{id:guid}", GetStaffByIdAsync)
                 .WithName("GetStaffById")
-                .RequireAuthorization(Policies.ReadStaff);
+                .RequirePermission(ClinicPermissions.Staff.Read);
             group.MapGet("/active", GetAllActiveStaffAsync)
-                .RequireAuthorization(Policies.ReadStaff);
+                .RequirePermission(ClinicPermissions.Staff.Read);
 
             group.MapPost("/", CreateStaffAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
 
             group.MapPut("/{id:guid}", UpdateStaffAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapPut("/{id:guid}/specializations", AssignSpecializationsAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapPut("/{id:guid}/working-hours", SetWorkingHoursAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapPut("/{id:guid}/schedule-overrides", SetScheduleOverridesAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
 
             group.MapDelete("/{id:guid}/schedule-overrides/{date}", DeleteScheduleOverrideAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapDelete("/{id:guid}", DeactivateStaffAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             
             return group;
         }
@@ -56,7 +53,6 @@ public static class MedicalStaffEndpoints
 
     private static async Task<Result<MedicalStaffResponseDto>> CreateStaffAsync(
         CreateMedicalStaffDto dto,
-        ClaimsPrincipal user,
         IValidator<CreateMedicalStaffDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
@@ -67,12 +63,8 @@ public static class MedicalStaffEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
         var model = dto.Adapt<MedicalStaffModel>();
-        var result = await staffService.CreateAsync(model, userId, ct);
+        var result = await staffService.CreateAsync(model, ct);
 
         return result.Map(s => 
         {
@@ -83,22 +75,16 @@ public static class MedicalStaffEndpoints
 
     private static async Task<Result<MedicalStaffResponseDto>> GetStaffByIdAsync(
         Guid id,
-        ClaimsPrincipal user,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
-        var result = await staffService.GetByIdAsync(id, userId, ct);
+        var result = await staffService.GetByIdAsync(id, ct);
 
         return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 
     private static async Task<Result<PagedResponse<MedicalStaffResponseDto>>> GetAllActiveStaffAsync(
         [AsParameters] MedicalStaffQueryParameters query,
-        ClaimsPrincipal user,
         IValidator<MedicalStaffQueryParameters> validator,
         IMedicalStaffService medicalStaffService,
         CancellationToken ct = default)
@@ -109,11 +95,7 @@ public static class MedicalStaffEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
-        var result = await medicalStaffService.GetPagedAsync(query, userId, ct);
+        var result = await medicalStaffService.GetPagedAsync(query, ct);
 
         return result.Map(pagedModel => new PagedResponse<MedicalStaffResponseDto>
         {
@@ -127,7 +109,6 @@ public static class MedicalStaffEndpoints
     private static async Task<Result<MedicalStaffResponseDto>> UpdateStaffAsync(
         Guid id,
         UpdateMedicalStaffDto dto,
-        ClaimsPrincipal user,
         IValidator<UpdateMedicalStaffDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
@@ -138,27 +119,18 @@ public static class MedicalStaffEndpoints
             return new ValidationError(validationResult.ToDictionary());
         }
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
         var model = dto.Adapt<MedicalStaffModel>();
-        var result = await staffService.UpdateAsync(id, model, userId, ct);
+        var result = await staffService.UpdateAsync(id, model, ct);
 
         return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }
 
     private static async Task<Result> DeactivateStaffAsync(
         Guid id,
-        ClaimsPrincipal user,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
-        var result = await staffService.DeactivateAsync(id, userId, ct);
+        var result = await staffService.DeactivateAsync(id, ct);
 
         return result;
     }
@@ -166,7 +138,6 @@ public static class MedicalStaffEndpoints
     private static async Task<Result> AssignSpecializationsAsync(
         Guid id,
         AssignSpecializationsDto request,
-        ClaimsPrincipal user,
         IValidator<AssignSpecializationsDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
@@ -175,20 +146,15 @@ public static class MedicalStaffEndpoints
         if (!validationResult.IsValid)
             return new ValidationError(validationResult.ToDictionary());
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
         var assignments = request.Specializations.Adapt<List<StaffSpecializationModel>>();
         assignments.ForEach(a => a.StaffId = id);
 
-        return await staffService.AssignSpecializationsAsync(id, assignments, userId, ct);
+        return await staffService.AssignSpecializationsAsync(id, assignments, ct);
     }
 
     private static async Task<Result> SetWorkingHoursAsync(
         Guid id,
         SetWorkingHoursDto request,
-        ClaimsPrincipal user,
         IValidator<SetWorkingHoursDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
@@ -197,19 +163,14 @@ public static class MedicalStaffEndpoints
         if (!validationResult.IsValid)
             return new ValidationError(validationResult.ToDictionary());
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
         var workingHours = request.WorkingHours.Adapt<List<WorkingHoursModel>>();
 
-        return await staffService.SetWorkingHoursAsync(id, workingHours, userId, ct);
+        return await staffService.SetWorkingHoursAsync(id, workingHours, ct);
     }
 
     private static async Task<Result> SetScheduleOverridesAsync(
         Guid id,
         SetScheduleOverridesDto request,
-        ClaimsPrincipal user,
         IValidator<SetScheduleOverridesDto> validator,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
@@ -218,39 +179,25 @@ public static class MedicalStaffEndpoints
         if (!validationResult.IsValid)
             return new ValidationError(validationResult.ToDictionary());
 
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
         var overrides = request.Overrides.Adapt<List<ScheduleOverrideModel>>();
 
-        return await staffService.SetScheduleOverridesAsync(id, overrides, userId, ct);
+        return await staffService.SetScheduleOverridesAsync(id, overrides, ct);
     }
 
     private static async Task<Result> DeleteScheduleOverrideAsync(
         Guid id,
         DateOnly date,
-        ClaimsPrincipal user,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId)) 
-            return MedicalStaffErrors.Unauthorized;
-
-        return await staffService.DeleteScheduleOverrideAsync(id, date, userId, ct);
+        return await staffService.DeleteScheduleOverrideAsync(id, date, ct);
     }
 
     private static async Task<Result<MedicalStaffResponseDto>> GetCurrentStaffAsync(
-        ClaimsPrincipal user,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId))
-            return MedicalStaffErrors.Unauthorized;
-
-        var result = await staffService.GetCurrentAsync(userId, user.GetEmail(), ct);
+        var result = await staffService.GetCurrentAsync(ct);
 
         return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }

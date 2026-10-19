@@ -4,7 +4,6 @@ using MediatR;
 namespace Appointments.API.Features.BookAppointment;
 
 public record BookAppointmentCommand(
-    string UserId,
     Guid PatientId,
     Guid MedicalStaffId,
     DateTime StartTime,

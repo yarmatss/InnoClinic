@@ -15,7 +15,6 @@ public sealed class PatientConfiguration : IEntityTypeConfiguration<Patient>
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(p => p.UserId)
-            .IsUnique()
-            .HasFilter("\"UserId\" IS NOT NULL");
+            .IsUnique();
     }
 }

@@ -2,6 +2,7 @@ using Appointments.Domain.Common;
 using Appointments.Domain.Entities;
 using Appointments.Domain.Enums;
 using Appointments.Infrastructure.Data;
+using Appointments.API.Authorization;
 using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using MediatR;
@@ -11,26 +12,19 @@ namespace Appointments.API.Features.SubmitAppointmentResult;
 
 public class SubmitAppointmentResultHandler(
     AppointmentsDbContext dbContext,
-    IUserResolver userResolver)
+    IAccessResolver accessResolver)
     : IRequestHandler<SubmitAppointmentResultCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(SubmitAppointmentResultCommand request, CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(request.UserId);
-        if (user is null)
-            return AppointmentErrors.Unauthorized;
-
         var appointment = await dbContext.Appointments
             .FirstOrDefaultAsync(a => a.Id == request.AppointmentId, cancellationToken);
 
-        if (appointment is null)
+        if (appointment is null || !accessResolver.Check(appointment, AppointmentOperations.SubmitResult).IsAllowed)
             return AppointmentErrors.NotFound(request.AppointmentId);
 
-        if (!user.IsAdmin && (!user.IsDoctor || user.StaffId != appointment.MedicalStaffId))
-            return AppointmentErrors.Forbidden;
-
         if (appointment.Status == AppointmentStatus.Cancelled)
-            return AppointmentErrors.CannotCancel;
+            return AppointmentErrors.CannotSubmitResult;
 
         var existingResult = await dbContext.AppointmentResults
             .AnyAsync(r => r.AppointmentId == request.AppointmentId, cancellationToken);

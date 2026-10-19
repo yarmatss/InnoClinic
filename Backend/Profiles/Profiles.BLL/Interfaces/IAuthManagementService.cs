@@ -13,4 +13,17 @@ public interface IAuthManagementService
         UserRole role,
         Guid profileId,
         CancellationToken ct = default);
+
+    Task<Result> ChangeRoleAsync(
+        string userId,
+        UserRole currentRole,
+        UserRole newRole,
+        CancellationToken ct = default);
+
+    Task<Result> SetBlockedAsync(
+        string userId,
+        bool blocked,
+        CancellationToken ct = default);
+
+    Task DeleteUserAsync(string userId, CancellationToken ct = default);
 }

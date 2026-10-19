@@ -31,22 +31,4 @@ public class PatientRepository(ProfilesDbContext context) :
 
         return (items, totalCount);
     }
-
-    public async Task<Patient?> GetByUserIdAsync(
-        string userId,
-        CancellationToken ct,
-        bool trackChanges = false)
-    {
-        return await GetQuery(trackChanges)
-            .FirstOrDefaultAsync(p => p.UserId == userId, ct);
-    }
-
-    public async Task<Patient?> GetByEmailAsync(
-        string email,
-        CancellationToken ct,
-        bool trackChanges = false)
-    {
-        return await GetQuery(trackChanges)
-            .FirstOrDefaultAsync(p => p.Email == email, ct);
-    }
 }

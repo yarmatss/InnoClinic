@@ -17,15 +17,15 @@ internal class PatientService(
     IMedicalStaffRepository staffRepository,
     INotificationProducer notificationProducer,
     IAuthManagementService auth0Service,
-    IUserResolver userResolver) : IPatientService
+    ICurrentUser currentUser,
+    IAccessResolver accessResolver) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
-        string userId,
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(userId);
-        if (user is null || (!user.IsReceptionist && !user.IsAdmin))
+        var id = Guid.NewGuid();
+        if (!accessResolver.Check(new PatientRef(id), Operation.Create).IsAllowed)
             return PatientErrors.Forbidden;
 
         var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
@@ -33,7 +33,7 @@ internal class PatientService(
             return validationError;
 
         var entity = model.Adapt<Patient>();
-        entity.Id = Guid.NewGuid();
+        entity.Id = id;
 
         var provisionResult = await auth0Service.ProvisionUserAsync(
             model.Email,
@@ -43,12 +43,11 @@ internal class PatientService(
             entity.Id,
             cancellationToken);
 
-        if (provisionResult.IsSuccess)
-        {
-            entity.UserId = provisionResult.Value.UserId;
-        }
+        if (provisionResult.IsFailure)
+            return provisionResult.Error;
 
-        var invitationUrl = provisionResult.IsSuccess ? provisionResult.Value.InvitationUrl : null;
+        var (accountId, invitationUrl) = provisionResult.Value;
+        entity.UserId = accountId;
 
         patientRepository.MarkAdd(entity);
 
@@ -60,47 +59,35 @@ internal class PatientService(
             invitationUrl
         ));
 
-        await patientRepository.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await patientRepository.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            await auth0Service.DeleteUserAsync(accountId, CancellationToken.None);
+            throw;
+        }
 
         return entity.Adapt<PatientModel>();
     }
 
     public async Task<Result<PatientModel>> GetCurrentAsync(
-        string userId,
-        string? email,
         CancellationToken cancellationToken)
     {
-        var entity = await patientRepository.GetByUserIdAsync(userId, cancellationToken);
-        if (entity is not null)
-        {
-            return entity.Adapt<PatientModel>();
-        }
+        var entity = await patientRepository.GetByIdAsync(currentUser.ProfileId, cancellationToken);
+        if (entity is null)
+            return PatientErrors.NotFound;
 
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            var existingByEmail = await patientRepository.GetByEmailAsync(email, cancellationToken, trackChanges: true);
-            if (existingByEmail is not null && existingByEmail.UserId is null)
-            {
-                existingByEmail.UserId = userId;
-                patientRepository.MarkUpdate(existingByEmail);
-                await patientRepository.SaveChangesAsync(cancellationToken);
-                return existingByEmail.Adapt<PatientModel>();
-            }
-        }
-
-        return PatientErrors.NotFound;
+        return entity.Adapt<PatientModel>();
     }
 
     public async Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
         PatientQueryParameters queryModel,
-        string userId,
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(userId);
-        if (user is null) 
-            return PatientErrors.Unauthorized;
-
-        if (user.IsPatient)
+        var access = accessResolver.Check(new PatientDirectory(), Operation.Read);
+        if (!access.IsAllowed)
             return PatientErrors.Forbidden;
 
         var (entities, totalCount) = await patientRepository.GetPagedAsync(
@@ -109,7 +96,7 @@ internal class PatientService(
 
         var models = entities.Adapt<IReadOnlyList<PatientModel>>();
 
-        if (user.IsDoctor)
+        if (access == AccessLevel.Masked)
         {
             foreach (var model in models)
             {
@@ -130,14 +117,10 @@ internal class PatientService(
 
     public async Task<Result<PatientModel>> GetByIdAsync(
         Guid id, 
-        string userId,
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(userId);
-        if (user is null) 
-            return PatientErrors.Unauthorized;
-
-        if (user.IsPatient && user.PatientId != id)
+        var access = accessResolver.Check(new PatientRef(id), Operation.Read);
+        if (!access.IsAllowed)
             return PatientErrors.Forbidden;
 
         var entity = await patientRepository.GetByIdAsync(id, cancellationToken);
@@ -147,7 +130,7 @@ internal class PatientService(
 
         var model = entity.Adapt<PatientModel>();
 
-        if (user.IsDoctor)
+        if (access == AccessLevel.Masked)
             MaskSensitivePatientFields(model);
 
         return model;
@@ -156,11 +139,9 @@ internal class PatientService(
     public async Task<Result<PatientModel>> UpdateAsync(
         Guid id, 
         PatientModel model, 
-        string userId,
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(userId);
-        if (user is null || (!user.IsReceptionist && !user.IsAdmin))
+        if (!accessResolver.Check(new PatientRef(id), Operation.Update).IsAllowed)
             return PatientErrors.Forbidden;
 
         var existingEntity = await patientRepository.GetByIdAsync(id, cancellationToken, trackChanges: true);

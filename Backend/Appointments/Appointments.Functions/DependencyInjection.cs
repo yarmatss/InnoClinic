@@ -1,11 +1,11 @@
 using Appointments.Infrastructure.Data;
 using Appointments.Infrastructure.Services;
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Contracts.Grpc.Auth;
 using InnoClinic.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Security;
 
 namespace Appointments.Functions;
 
@@ -38,41 +38,10 @@ public static class DependencyInjection
             var profilesApiUrl = configuration["ProfilesApiUrl"]
                 ?? throw new InvalidOperationException("Configuration 'ProfilesApiUrl' not found.");
 
-            services.AddGrpcClient<PatientService.PatientServiceClient>(options =>
-            {
-                options.Address = new Uri(profilesApiUrl);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
-
-            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
-            {
-                options.Address = new Uri(profilesApiUrl);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
+            services.AddInternalGrpcClient<PatientService.PatientServiceClient>(profilesApiUrl, configuration);
+            services.AddInternalGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(profilesApiUrl, configuration);
 
             return services;
         }
-    }
-
-    private static SocketsHttpHandler CreateSocketsHttpHandler(IConfiguration configuration)
-    {
-        return new SocketsHttpHandler
-        {
-            EnableMultipleHttp2Connections = true,
-            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-            SslOptions = new SslClientAuthenticationOptions
-            {
-                RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
-                {
-                    if (sslPolicyErrors == SslPolicyErrors.None)
-                        return true;
-
-                    return configuration["AZURE_FUNCTIONS_ENVIRONMENT"] == "Development"
-                        || configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
-                }
-            }
-        };
     }
 }

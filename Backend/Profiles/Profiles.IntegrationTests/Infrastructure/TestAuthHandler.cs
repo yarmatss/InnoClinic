@@ -1,9 +1,9 @@
-using System.Security.Claims;
-using System.Text.Encodings.Web;
+using InnoClinic.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Profiles.API.Authorization;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 namespace Profiles.IntegrationTests.Infrastructure;
 
@@ -24,23 +24,16 @@ public class TestAuthHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, "test-user-id"),
-            new(ClaimTypes.Name, "TestUser"),
-            new("https://innoclinic/role", Context.Request.Headers.TryGetValue("X-Test-Role", out var r) ? r.ToString() : "Administrator"),
-            new("https://innoclinic/profile_id", Context.Request.Headers.TryGetValue("X-Test-Profile-Id", out var pid) ? pid.ToString() : "00000000-0000-0000-0000-000000000001")
+            new(ClinicClaims.Subject, "test-user-id"),
+            new(ClinicClaims.Role, Context.Request.Headers.TryGetValue("X-Test-Role", out var r) ? r.ToString() : "Administrator"),
+            new(ClinicClaims.ProfileId, Context.Request.Headers.TryGetValue("X-Test-Profile-Id", out var pid) ? pid.ToString() : "00000000-0000-0000-0000-000000000001")
         };
 
-        if (Context.Request.Headers.TryGetValue("X-Test-Scope", out var scopes))
-        {
-            foreach (var scope in scopes)
-            {
-                claims.Add(new Claim("scope", scope!));
-            }
-        }
-        else
-        {
-            claims.Add(new Claim("scope", $"{Policies.ScopeReadPatients} {Policies.ScopeWritePatients} {Policies.ScopeReadStaff} {Policies.ScopeWriteStaff} {Policies.ScopeWriteSpecializations}"));
-        }
+        var permissions = Context.Request.Headers.TryGetValue("X-Test-Permission", out var requested)
+            ? requested.Select(p => p!)
+            : ClinicPermissions.All;
+
+        claims.AddRange(permissions.Select(p => new Claim(ClinicClaims.Permissions, p)));
 
         var identity = new ClaimsIdentity(claims, AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);

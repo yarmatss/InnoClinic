@@ -7,6 +7,7 @@ using Appointments.Domain.Enums;
 using Appointments.Domain.Exceptions;
 using Appointments.Infrastructure.Data;
 using InnoClinic.Contracts.Grpc;
+using Appointments.API.Authorization;
 using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using InnoClinic.Messaging.Contracts;
@@ -24,16 +25,12 @@ public class BookAppointmentHandler(
     INotificationProducer notificationProducer,
     IOptions<ClinicOptions> clinicOptions,
     ILogger<BookAppointmentHandler> logger,
-    IUserResolver userResolver)
+    IAccessResolver accessResolver)
     : IRequestHandler<BookAppointmentCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(request.UserId);
-        if (user is null)
-            return AppointmentErrors.Unauthorized;
-
-        if (user.Role == UserRole.Patient && user.PatientId != request.PatientId)
+        if (!accessResolver.Check(new PatientRef(request.PatientId), AppointmentOperations.Book).IsAllowed)
             return AppointmentErrors.Forbidden;
 
         var patientResponse = await patientClient.GetPatientAsync(

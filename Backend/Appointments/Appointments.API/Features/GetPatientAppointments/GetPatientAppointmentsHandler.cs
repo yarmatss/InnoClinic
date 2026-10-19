@@ -1,6 +1,7 @@
 using Appointments.Domain.Common;
 using Appointments.Infrastructure.Connection;
 using Dapper;
+using Appointments.API.Authorization;
 using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using MediatR;
@@ -9,21 +10,14 @@ namespace Appointments.API.Features.GetPatientAppointments;
 
 public class GetPatientAppointmentsHandler(
     ISqlConnectionFactory connectionFactory,
-    IUserResolver userResolver)
+    IAccessResolver accessResolver)
     : IRequestHandler<GetPatientAppointmentsQuery, Result<IEnumerable<AppointmentResponse>>>
 {
     public async Task<Result<IEnumerable<AppointmentResponse>>> Handle(
         GetPatientAppointmentsQuery request, 
         CancellationToken cancellationToken)
     {
-        var user = userResolver.Resolve(request.UserId);
-        if (user == null)
-            return AppointmentErrors.Unauthorized;
-
-        if (user.Role == UserRole.Doctor)
-            return AppointmentErrors.Forbidden;
-
-        if (user.Role == UserRole.Patient && user.PatientId != request.PatientId)
+        if (!accessResolver.Check(new PatientRef(request.PatientId), Operation.Read).IsAllowed)
             return AppointmentErrors.Forbidden;
 
         using var connection = connectionFactory.CreateConnection();

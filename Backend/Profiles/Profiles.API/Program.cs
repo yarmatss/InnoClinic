@@ -1,16 +1,13 @@
 using FluentValidation;
 using InnoClinic.AspNetCore.Authorization;
+using InnoClinic.AspNetCore.Cors;
 using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
-using InnoClinic.Core.Authorization;
 using InnoClinic.Messaging.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.DataProtection;
-using Profiles.API.Authorization;
 using Profiles.API.BackgroundJobs;
-using Profiles.API.Constants;
 using Profiles.API.Endpoints;
-using Profiles.API.Extensions;
 using Profiles.API.GrpcHandlers;
 using Profiles.API.Options;
 using Profiles.API.Validators;
@@ -27,11 +24,7 @@ TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 
 builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserResolver, ClaimsUserResolver>();
-
-builder.Services.AddAuth0Authentication(builder.Configuration);
-builder.Services.AddScopePolicies();
+builder.Services.AddClinicAuth(builder.Configuration);
 
 builder.Services.AddOutboxResilience();
 builder.Services.Configure<InnoClinic.Messaging.Outbox.OutboxOptions>(
@@ -42,15 +35,7 @@ var dataProtectionPath = builder.Configuration["DataProtection:Path"] ?? "/app/k
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath));
 
-builder.Services.AddCors(options =>
-{
-    var frontendUrl = builder.Configuration["Cors:Frontend"] ?? string.Empty;
-
-    options.AddPolicy(CorsPolicies.Frontend, policy =>
-        policy.WithOrigins(frontendUrl)
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
+builder.Services.AddFrontendCors(builder.Configuration);
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -75,8 +60,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
     await app.ApplyMigrationsAsync();
 }
 
@@ -87,7 +72,7 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-app.UseCors(CorsPolicies.Frontend);
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -96,7 +81,9 @@ app.MapPatientEndpoints();
 app.MapMedicalStaffEndpoints();
 app.MapSpecializationEndpoints();
 
-app.MapGrpcService<StaffMemberQueryHandler>();
-app.MapGrpcService<PatientQueryHandler>();
+app.MapGrpcService<StaffMemberQueryHandler>()
+    .RequireInternalScope(InternalScopes.Profiles);
+app.MapGrpcService<PatientQueryHandler>()
+    .RequireInternalScope(InternalScopes.Profiles);
 
 app.Run();

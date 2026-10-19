@@ -29,6 +29,11 @@ public static class AppointmentErrors
         "Only planned appointments can be confirmed.",
         ErrorType.Validation);
 
+    public static readonly Error CannotSubmitResult = new(
+        "Appointment.CannotSubmitResult",
+        "Results cannot be submitted for a cancelled appointment.",
+        ErrorType.Validation);
+
     public static readonly Error ResultAlreadyExists = new(
         "Appointment.ResultAlreadyExists",
         "A result already exists for this appointment.",
@@ -53,9 +58,4 @@ public static class AppointmentErrors
         "Appointment.Forbidden",
         "You do not have permission to perform this action.",
         ErrorType.Forbidden);
-
-    public static readonly Error Unauthorized = new(
-        "Appointment.Unauthorized",
-        "You must be authenticated and have a valid profile to perform this action.",
-        ErrorType.Unauthorized);
 }

@@ -7,6 +7,7 @@ using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
+using Profiles.UnitTests.Fakes;
 using Shouldly;
 using System.Linq.Expressions;
 
@@ -15,13 +16,11 @@ namespace Profiles.UnitTests.Services;
 public class SpecializationServiceTests
 {
     private readonly ISpecializationRepository _specRepo = Substitute.For<ISpecializationRepository>();
-    private readonly IUserResolver _userResolver = Substitute.For<IUserResolver>();
     private readonly SpecializationService _sut;
 
     public SpecializationServiceTests()
     {
-        _userResolver.Resolve(Arg.Any<string>()).Returns(new User("test-user", null, Guid.NewGuid(), UserRole.Administrator));
-        _sut = new SpecializationService(_specRepo, _userResolver);
+        _sut = new SpecializationService(_specRepo);
     }
 
     #region CreateAsync
@@ -38,7 +37,7 @@ public class SpecializationServiceTests
             .Returns(new List<Specialization> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -56,7 +55,7 @@ public class SpecializationServiceTests
             .Returns(Array.Empty<Specialization>());
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -104,7 +103,7 @@ public class SpecializationServiceTests
         _specRepo.GetByIdAsync(id, Arg.Any<CancellationToken>(), trackChanges: true).Returns((Specialization?)null);
 
         // Act
-        var result = await _sut.UpdateAsync(id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(id, model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -125,7 +124,7 @@ public class SpecializationServiceTests
             .Returns(new List<Specialization> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -145,7 +144,7 @@ public class SpecializationServiceTests
             .Returns(Array.Empty<Specialization>());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

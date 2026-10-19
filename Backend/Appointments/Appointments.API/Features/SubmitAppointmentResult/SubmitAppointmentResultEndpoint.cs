@@ -1,10 +1,8 @@
-using Appointments.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
-using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Filters;
 using MediatR;
-using System.Security.Claims;
 
 namespace Appointments.API.Features.SubmitAppointmentResult;
 
@@ -14,15 +12,11 @@ public class SubmitAppointmentResultEndpoint : IEndpoint
     {
         app.MapPost($"{ApiRoutes.Appointments}/{{id:guid}}/results", async (
             Guid id, 
-            ClaimsPrincipal user,
             SubmitAppointmentResultRequest request, 
             ISender sender,
             CancellationToken ct = default) =>
         {
-            var userId = user.GetUserId() ?? string.Empty;
-
             var command = new SubmitAppointmentResultCommand(
-                userId,
                 id,
                 request.Complaints,
                 request.Conclusion,
@@ -32,7 +26,7 @@ public class SubmitAppointmentResultEndpoint : IEndpoint
             return result;
         })
         .WithTags("Appointments")
-        .RequireAuthorization(Policies.WriteResults)
+        .RequirePermission(ClinicPermissions.Results.Write)
         .AddEndpointFilter<ResultFilter>();
     }
 }

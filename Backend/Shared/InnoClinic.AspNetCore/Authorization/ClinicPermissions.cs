@@ -31,4 +31,13 @@ public static class ClinicPermissions
     {
         public const string Write = "write:specializations";
     }
+
+    public static IReadOnlyList<string> All { get; } =
+    [
+        Appointments.Read, Appointments.Write, Appointments.Confirm,
+        Results.Read, Results.Write,
+        Patients.Read, Patients.Write,
+        Staff.Read, Staff.Write,
+        Specializations.Write
+    ];
 }

@@ -54,5 +54,8 @@
     "src/**/*.{css,html}": [
       "prettier --write --end-of-line lf"
     ]
+  },
+  "overrides": {
+    "handlebars": "4.7.10"
   }
 }

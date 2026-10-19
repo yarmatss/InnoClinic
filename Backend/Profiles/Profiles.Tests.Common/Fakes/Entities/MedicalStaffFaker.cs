@@ -11,6 +11,7 @@ public sealed class MedicalStaffFaker : Faker<MedicalStaff>
         UseSeed(seed);
 
         RuleFor(x => x.Id, f => f.Random.Guid());
+        RuleFor(x => x.UserId, f => $"auth0|{f.Random.AlphaNumeric(24)}");
         RuleFor(x => x.FirstName, f => f.Name.FirstName());
         RuleFor(x => x.LastName, f => f.Name.LastName());
         RuleFor(x => x.MiddleName, f => f.Name.FirstName());

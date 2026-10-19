@@ -1,4 +1,4 @@
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.DTOs.Specialization;
 using InnoClinic.Core.Common;
 using Profiles.IntegrationTests.Infrastructure;
@@ -138,11 +138,11 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
     #region Authorization
 
     [Fact]
-    public async Task CreateSpecialization_WithoutWriteScope_Returns403Forbidden()
+    public async Task CreateSpecialization_WithoutWritePermission_Returns403Forbidden()
     {
         var dto = GetValidCreateDto();
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PostAsJsonAsync(
             "/api/specializations", 
@@ -153,12 +153,12 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
     }
 
     [Fact]
-    public async Task UpdateSpecialization_WithoutWriteScope_Returns403Forbidden()
+    public async Task UpdateSpecialization_WithoutWritePermission_Returns403Forbidden()
     {
         var specId = await SeedSpecializationAsync();
         var dto = GetValidUpdateDto();
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PutAsJsonAsync(
             $"/api/specializations/{specId}", 

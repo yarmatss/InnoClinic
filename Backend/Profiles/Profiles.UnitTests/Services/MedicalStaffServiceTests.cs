@@ -1,6 +1,8 @@
 using InnoClinic.Core.Authorization;
+using InnoClinic.Core.Common;
 using InnoClinic.Messaging.Outbox;
 using NSubstitute;
+using Profiles.BLL.Authorization;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
@@ -10,6 +12,7 @@ using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
+using Profiles.UnitTests.Fakes;
 using Shouldly;
 using System.Linq.Expressions;
 
@@ -22,15 +25,19 @@ public class MedicalStaffServiceTests
     private readonly IOutboxRepository _outboxRepo = Substitute.For<IOutboxRepository>();
     private readonly IAuthManagementService _auth0Service = Substitute.For<IAuthManagementService>();
     private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
-    private readonly IUserResolver _userResolver = Substitute.For<IUserResolver>();
+    private readonly TestCurrentUser _currentUser = TestCurrentUser.Administrator();
     private readonly MedicalStaffService _sut;
 
     public MedicalStaffServiceTests()
     {
         _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(new UserProvisionResult("auth0|123", "https://invite.url"));
-        _userResolver.Resolve(Arg.Any<string>()).Returns(new User("test-user", null, Guid.NewGuid(), UserRole.Administrator));
-        _sut = new MedicalStaffService(_staffRepo, _specRepo, _outboxRepo, _auth0Service, _notificationProducer, _userResolver);
+        _auth0Service.ChangeRoleAsync(Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<UserRole>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+        _auth0Service.SetBlockedAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+        _sut = new MedicalStaffService(_staffRepo, _specRepo, _outboxRepo, _auth0Service, _notificationProducer, _currentUser,
+            new TestAccessResolver(_currentUser, new StaffAccessPolicy()));
     }
 
     #region CreateAsync
@@ -47,7 +54,7 @@ public class MedicalStaffServiceTests
             .Returns(new List<MedicalStaff> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -66,7 +73,7 @@ public class MedicalStaffServiceTests
             .Returns<IReadOnlyList<MedicalStaff>>(Array.Empty<MedicalStaff>(), [duplicate]);
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -89,7 +96,7 @@ public class MedicalStaffServiceTests
             .Returns((MedicalStaff?)null);
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -115,7 +122,7 @@ public class MedicalStaffServiceTests
             .Returns(inactiveSupervisor);
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -133,7 +140,7 @@ public class MedicalStaffServiceTests
             .Returns(Array.Empty<MedicalStaff>());
 
         // Act
-        var result = await _sut.CreateAsync(model, "test-user", CancellationToken.None);
+        var result = await _sut.CreateAsync(model, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -153,7 +160,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((MedicalStaff?)null);
 
         // Act
-        var result = await _sut.GetByIdAsync(id, "test-user", CancellationToken.None);
+        var result = await _sut.GetByIdAsync(id, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -168,7 +175,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>()).Returns(entity);
 
         // Act
-        var result = await _sut.GetByIdAsync(entity.Id, "test-user", CancellationToken.None);
+        var result = await _sut.GetByIdAsync(entity.Id, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -193,7 +200,7 @@ public class MedicalStaffServiceTests
             .Returns((entities.AsReadOnly() as IReadOnlyList<MedicalStaff>, totalCount));
 
         // Act
-        var result = await _sut.GetPagedAsync(query, "test-user", CancellationToken.None);
+        var result = await _sut.GetPagedAsync(query, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -217,7 +224,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(id, Arg.Any<CancellationToken>(), trackChanges: true).Returns((MedicalStaff?)null);
 
         // Act
-        var result = await _sut.UpdateAsync(id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(id, model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -239,7 +246,7 @@ public class MedicalStaffServiceTests
             .Returns(new List<MedicalStaff> { duplicate }.AsReadOnly());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -261,7 +268,7 @@ public class MedicalStaffServiceTests
             .Returns<IReadOnlyList<MedicalStaff>>(Array.Empty<MedicalStaff>(), [duplicate]);
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -281,7 +288,7 @@ public class MedicalStaffServiceTests
             .Returns(Array.Empty<MedicalStaff>());
 
         // Act
-        var result = await _sut.UpdateAsync(entity.Id, model, "test-user", CancellationToken.None);
+        var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -300,7 +307,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(id, Arg.Any<CancellationToken>(), trackChanges: true).Returns((MedicalStaff?)null);
 
         // Act
-        var result = await _sut.DeactivateAsync(id, "test-user", CancellationToken.None);
+        var result = await _sut.DeactivateAsync(id, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -317,7 +324,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
 
         // Act
-        var result = await _sut.DeactivateAsync(entity.Id, "test-user", CancellationToken.None);
+        var result = await _sut.DeactivateAsync(entity.Id, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -338,7 +345,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(staffId, Arg.Any<CancellationToken>(), trackChanges: true).Returns((MedicalStaff?)null);
 
         // Act
-        var result = await _sut.AssignSpecializationsAsync(staffId, [], "test-user", CancellationToken.None);
+        var result = await _sut.AssignSpecializationsAsync(staffId, [], CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -362,7 +369,7 @@ public class MedicalStaffServiceTests
             .Returns(oneSpec.AsReadOnly());
 
         // Act
-        var result = await _sut.AssignSpecializationsAsync(entity.Id, assignments, "test-user", CancellationToken.None);
+        var result = await _sut.AssignSpecializationsAsync(entity.Id, assignments, CancellationToken.None);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -387,7 +394,7 @@ public class MedicalStaffServiceTests
             .GetByConditionAsync(Arg.Any<Expression<Func<Specialization, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(specs.AsReadOnly());
         // Act
-        var result = await _sut.AssignSpecializationsAsync(entity.Id, assignments, "test-user", CancellationToken.None);
+        var result = await _sut.AssignSpecializationsAsync(entity.Id, assignments, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -405,7 +412,7 @@ public class MedicalStaffServiceTests
         _staffRepo.GetByIdAsync(entity.Id, Arg.Any<CancellationToken>(), trackChanges: true).Returns(entity);
 
         // Act
-        var result = await _sut.AssignSpecializationsAsync(entity.Id, [], "test-user", CancellationToken.None);
+        var result = await _sut.AssignSpecializationsAsync(entity.Id, [], CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
