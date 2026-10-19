@@ -1,4 +1,5 @@
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Contracts.Grpc.Auth;
 using InnoClinic.Messaging.Outbox;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,6 @@ using Profiles.DAL.Data;
 using Profiles.DAL.Interfaces;
 using Profiles.DAL.Repositories;
 using Profiles.Domain.Constants;
-using System.Net.Security;
 
 namespace Profiles.DAL;
 
@@ -45,34 +45,12 @@ public static class DependencyInjection
                 });
             });
 
-            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
-            {
-                var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl] 
-                    ?? throw new InvalidOperationException($"{ConnectionConstants.AppointmentsApiUrl} not found in configuration.");
+            var appointmentsApiUrl = configuration[ConnectionConstants.AppointmentsApiUrl]
+                ?? throw new InvalidOperationException($"{ConnectionConstants.AppointmentsApiUrl} not found in configuration.");
 
-                options.Address = new Uri(appointmentsApiUrl);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var handler = new SocketsHttpHandler
-                {
-                    EnableMultipleHttp2Connections = true,
-                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                    KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                    SslOptions = new SslClientAuthenticationOptions
-                    {
-                        RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => 
-                        {
-                            if (sslPolicyErrors == SslPolicyErrors.None)
-                                return true;
-
-                            return configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
-                        }
-                    }
-                };
-                return handler;
-            });
+            services.AddInternalGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(
+                appointmentsApiUrl,
+                configuration);
 
             return services;
         }

@@ -1,4 +1,4 @@
-using Appointments.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
 using InnoClinic.AspNetCore.Filters;
@@ -19,7 +19,7 @@ public class BookAppointmentEndpoint : IEndpoint
             return result;
         })
         .WithTags("Appointments")
-        .RequireAuthorization(Policies.WriteAppointments)
+        .RequirePermission(ClinicPermissions.Appointments.Write)
         .AddEndpointFilter<ResultFilter>();
     }
 }

@@ -1,8 +1,10 @@
 using Auth0.ManagementApi;
+using InnoClinic.Core.Authorization;
 using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Profiles.BLL.Authorization;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Options;
 using Profiles.BLL.Services;
@@ -28,7 +30,8 @@ public static class DependencyInjection
                 var options = sp.GetRequiredService<IOptions<Auth0ManagementOptions>>().Value;
                 if (!options.IsConfigured)
                 {
-                    return null!;
+                    throw new InvalidOperationException(
+                        $"{Auth0ManagementOptions.SectionName} (Domain, ClientId, ClientSecret) must be configured to provision user accounts.");
                 }
 
                 return new ManagementClient(new ManagementClientOptions
@@ -42,7 +45,12 @@ public static class DependencyInjection
                 });
             });
 
+            services.AddSingleton(sp => new Lazy<IManagementApiClient>(sp.GetRequiredService<IManagementApiClient>));
             services.AddScoped<IAuthManagementService, Auth0ManagementService>();
+
+            services.AddSingleton<IAccessPolicy<PatientRef>, PatientAccessPolicy>();
+            services.AddSingleton<IAccessPolicy<PatientDirectory>, PatientAccessPolicy>();
+            services.AddSingleton<IAccessPolicy<StaffRef>, StaffAccessPolicy>();
 
             services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<IMedicalStaffService, MedicalStaffService>();

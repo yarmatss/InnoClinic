@@ -6,6 +6,7 @@ using Appointments.Infrastructure.Data;
 using Appointments.Infrastructure.Interceptors;
 using Appointments.Infrastructure.Services;
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Contracts.Grpc.Auth;
 using InnoClinic.Messaging.Outbox;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
-using System.Net.Security;
 
 namespace Appointments.Infrastructure;
 
@@ -59,47 +59,14 @@ public static class DependencyInjection
                 });
             });
 
-            services.AddGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(options =>
-                {
-                    var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
-                        ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
+            var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
+                ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
 
-                    options.Address = new Uri(profilesApiUrl);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
-
-            services.AddGrpcClient<PatientService.PatientServiceClient>(options =>
-            {
-                var profilesApiUrl = configuration[ConnectionConstants.ProfilesApiUrl]
-                    ?? throw new InvalidOperationException($"{ConnectionConstants.ProfilesApiUrl} not found in configuration.");
-
-                options.Address = new Uri(profilesApiUrl);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => CreateSocketsHttpHandler(configuration));
+            services.AddInternalGrpcClient<StaffScheduleSyncService.StaffScheduleSyncServiceClient>(profilesApiUrl, configuration);
+            services.AddInternalGrpcClient<PatientService.PatientServiceClient>(profilesApiUrl, configuration);
 
             return services;
         }
-    }
-
-    private static SocketsHttpHandler CreateSocketsHttpHandler(IConfiguration configuration)
-    {
-        return new SocketsHttpHandler
-        {
-            EnableMultipleHttp2Connections = true,
-            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-            SslOptions = new SslClientAuthenticationOptions
-            {
-                RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
-                {
-                    if (sslPolicyErrors == SslPolicyErrors.None)
-                        return true;
-
-                    return configuration["ASPNETCORE_ENVIRONMENT"] == "Development";
-                }
-            }
-        };
     }
 
     extension(IHost host)

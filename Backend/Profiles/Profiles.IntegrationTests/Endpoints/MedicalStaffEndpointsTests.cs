@@ -1,4 +1,4 @@
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.DTOs.MedicalStaff;
 using InnoClinic.Core.Common;
 using Profiles.Domain.Enums;
@@ -393,11 +393,11 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     #region Authorization
 
     [Fact]
-    public async Task CreateStaff_WithoutWriteScope_Returns403Forbidden()
+    public async Task CreateStaff_WithoutWritePermission_Returns403Forbidden()
     {
         var dto = GetValidCreateDto();
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.PostAsJsonAsync(
             "/api/staff", 
@@ -408,12 +408,12 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     }
 
     [Fact]
-    public async Task UpdateStaff_WithoutWriteScope_Returns403Forbidden()
+    public async Task UpdateStaff_WithoutWritePermission_Returns403Forbidden()
     {
         var staffId = await SeedStaffAsync();
         var dto = GetValidUpdateDto();
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.PutAsJsonAsync(
             $"/api/staff/{staffId}", 
@@ -424,7 +424,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     }
 
     [Fact]
-    public async Task AssignSpecializations_WithoutWriteScope_Returns403Forbidden()
+    public async Task AssignSpecializations_WithoutWritePermission_Returns403Forbidden()
     {
         var (staffId, specId) = await SeedDataWithSpecAsync();
         var dto = new AssignSpecializationsDto(
@@ -435,7 +435,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
                 DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)))
         ]);
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.PutAsJsonAsync(
             $"/api/staff/{staffId}/specializations", 
@@ -446,11 +446,11 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     }
 
     [Fact]
-    public async Task DeactivateStaff_WithoutWriteScope_Returns403Forbidden()
+    public async Task DeactivateStaff_WithoutWritePermission_Returns403Forbidden()
     {
         var staffId = await SeedStaffAsync();
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadStaff);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.DeleteAsync(
             $"/api/staff/{staffId}", 
@@ -460,11 +460,11 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     }
 
     [Fact]
-    public async Task GetStaffById_WithoutReadScope_Returns403Forbidden()
+    public async Task GetStaffById_WithoutReadPermission_Returns403Forbidden()
     {
         var staffId = await SeedStaffAsync();
 
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeWriteStaff);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Write);
 
         var response = await Client.GetAsync(
             $"/api/staff/{staffId}", 

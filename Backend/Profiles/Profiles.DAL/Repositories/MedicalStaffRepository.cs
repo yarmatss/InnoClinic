@@ -60,32 +60,4 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
 
         return (items, totalCount);
     }
-
-    public async Task<MedicalStaff?> GetByUserIdAsync(
-        string userId,
-        CancellationToken ct,
-        bool trackChanges = false)
-    {
-        return await GetQuery(trackChanges)
-            .AsSplitQuery()
-            .Include(x => x.StaffSpecializations)
-                .ThenInclude(ss => ss.Specialization)
-            .Include(x => x.WorkingHours)
-            .Include(x => x.ScheduleOverrides)
-            .FirstOrDefaultAsync(m => m.UserId == userId, ct);
-    }
-
-    public async Task<MedicalStaff?> GetByEmailAsync(
-        string email,
-        CancellationToken ct,
-        bool trackChanges = false)
-    {
-        return await GetQuery(trackChanges)
-            .AsSplitQuery()
-            .Include(x => x.StaffSpecializations)
-                .ThenInclude(ss => ss.Specialization)
-            .Include(x => x.WorkingHours)
-            .Include(x => x.ScheduleOverrides)
-            .FirstOrDefaultAsync(m => m.Email == email, ct);
-    }
 }

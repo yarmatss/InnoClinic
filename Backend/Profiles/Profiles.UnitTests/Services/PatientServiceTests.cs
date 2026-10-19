@@ -1,18 +1,20 @@
+using InnoClinic.Core.Authorization;
+using InnoClinic.Messaging.Contracts;
+using InnoClinic.Messaging.Outbox;
 using NSubstitute;
+using Profiles.BLL.Authorization;
 using Profiles.BLL.Errors;
+using Profiles.BLL.Interfaces;
+using Profiles.BLL.Models;
 using Profiles.BLL.Services;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
+using Profiles.UnitTests.Fakes;
 using Shouldly;
 using System.Linq.Expressions;
-using Profiles.BLL.Interfaces;
-using InnoClinic.Messaging.Outbox;
-using InnoClinic.Messaging.Contracts;
-using Profiles.BLL.Models;
-using Profiles.Domain.Enums;
 
 namespace Profiles.UnitTests.Services;
 
@@ -22,13 +24,15 @@ public class PatientServiceTests
     private readonly IMedicalStaffRepository _staffRepo = Substitute.For<IMedicalStaffRepository>();
     private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
     private readonly IAuthManagementService _auth0Service = Substitute.For<IAuthManagementService>();
+    private readonly TestCurrentUser _currentUser = TestCurrentUser.Administrator();
     private readonly PatientService _sut;
 
     public PatientServiceTests()
     {
-        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<CancellationToken>())
+        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(new UserProvisionResult("auth0|123", "https://invite.url"));
-        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer, _auth0Service);
+        _sut = new PatientService(_patientRepo, _staffRepo, _notificationProducer, _auth0Service, _currentUser,
+            new TestAccessResolver(_currentUser, new PatientAccessPolicy()));
     }
 
     #region CreateAsync

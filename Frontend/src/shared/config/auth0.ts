@@ -11,6 +11,7 @@ export const auth0Config = {
     redirect_uri: redirectUri,
     audience,
     scope,
+    prompt: "login",
   },
   logoutReturnTo: redirectUri,
 } as const;

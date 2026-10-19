@@ -1,12 +1,9 @@
-using System.Security.Claims;
 using FluentValidation;
 using Mapster;
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
 using InnoClinic.AspNetCore.Filters;
-using InnoClinic.AspNetCore.Extensions;
-using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
@@ -29,26 +26,26 @@ public static class MedicalStaffEndpoints
 
             group.MapGet("/{id:guid}", GetStaffByIdAsync)
                 .WithName("GetStaffById")
-                .RequireAuthorization(Policies.ReadStaff);
+                .RequirePermission(ClinicPermissions.Staff.Read);
             group.MapGet("/active", GetAllActiveStaffAsync)
-                .RequireAuthorization(Policies.ReadStaff);
+                .RequirePermission(ClinicPermissions.Staff.Read);
 
             group.MapPost("/", CreateStaffAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
 
             group.MapPut("/{id:guid}", UpdateStaffAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapPut("/{id:guid}/specializations", AssignSpecializationsAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapPut("/{id:guid}/working-hours", SetWorkingHoursAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapPut("/{id:guid}/schedule-overrides", SetScheduleOverridesAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
 
             group.MapDelete("/{id:guid}/schedule-overrides/{date}", DeleteScheduleOverrideAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapDelete("/{id:guid}", DeactivateStaffAsync)
-                .RequireAuthorization(Policies.WriteStaff);
+                .RequirePermission(ClinicPermissions.Staff.Write);
             
             return group;
         }
@@ -197,15 +194,10 @@ public static class MedicalStaffEndpoints
     }
 
     private static async Task<Result<MedicalStaffResponseDto>> GetCurrentStaffAsync(
-        ClaimsPrincipal user,
         IMedicalStaffService staffService,
         CancellationToken ct = default)
     {
-        var userId = user.GetUserId();
-        if (string.IsNullOrWhiteSpace(userId))
-            return MedicalStaffErrors.Unauthorized;
-
-        var result = await staffService.GetCurrentAsync(userId, user.GetEmail(), ct);
+        var result = await staffService.GetCurrentAsync(ct);
 
         return result.Map(s => s.Adapt<MedicalStaffResponseDto>());
     }

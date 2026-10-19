@@ -1,4 +1,4 @@
-﻿using InnoClinic.Core.Common;
+using InnoClinic.Core.Common;
 using MediatR;
 
 namespace Appointments.API.Features.SubmitAppointmentResult;

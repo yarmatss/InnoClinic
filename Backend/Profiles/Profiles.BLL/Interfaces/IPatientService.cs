@@ -24,7 +24,5 @@ public interface IPatientService
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> GetCurrentAsync(
-        string userId,
-        string? email,
         CancellationToken cancellationToken);
 }

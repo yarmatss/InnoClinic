@@ -29,6 +29,11 @@ public static class AppointmentErrors
         "Only planned appointments can be confirmed.",
         ErrorType.Validation);
 
+    public static readonly Error CannotSubmitResult = new(
+        "Appointment.CannotSubmitResult",
+        "Results cannot be submitted for a cancelled appointment.",
+        ErrorType.Validation);
+
     public static readonly Error ResultAlreadyExists = new(
         "Appointment.ResultAlreadyExists",
         "A result already exists for this appointment.",
@@ -48,4 +53,9 @@ public static class AppointmentErrors
         "Appointment.ScheduleConflict",
         "The requested time slot overlaps with an existing appointment.",
         ErrorType.Conflict);
+
+    public static readonly Error Forbidden = new(
+        "Appointment.Forbidden",
+        "You do not have permission to perform this action.",
+        ErrorType.Forbidden);
 }

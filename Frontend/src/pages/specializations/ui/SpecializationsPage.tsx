@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Alert,
   Box,
@@ -15,6 +16,8 @@ import { useSpecializationsSearchParams } from "../model/useSpecializationsSearc
 import { SpecializationsSkeleton } from "./SpecializationsSkeleton";
 
 export function SpecializationsPage() {
+  const { isAuthenticated, loginWithRedirect } = useAuth0();
+
   const {
     nameFilter,
     pageNumber,
@@ -31,7 +34,16 @@ export function SpecializationsPage() {
       pageSize,
       nameFilter,
       sortOrder,
+      enabled: isAuthenticated,
     });
+
+  const handleLogin = () => {
+    void loginWithRedirect({
+      authorizationParams: {
+        prompt: "login",
+      },
+    });
+  };
 
   return (
     <Stack spacing={3}>
@@ -43,74 +55,89 @@ export function SpecializationsPage() {
         </Typography>
       </Box>
 
-      <SpecializationsFilter
-        name={nameFilter}
-        pageSize={pageSize}
-        sortOrder={sortOrder}
-        onApplyFilter={handleApplyFilter}
-        onClearFilter={handleClearFilter}
-      />
-
-      {error && (
+      {!isAuthenticated ? (
         <Alert
-          severity="error"
+          severity="info"
           action={
-            <Button color="inherit" size="small" onClick={refetch}>
-              Retry
+            <Button color="inherit" size="small" onClick={handleLogin}>
+              Sign In
             </Button>
           }
         >
-          {error}
+          Please sign in to view specializations.
         </Alert>
-      )}
+      ) : (
+        <>
+          <SpecializationsFilter
+            name={nameFilter}
+            pageSize={pageSize}
+            sortOrder={sortOrder}
+            onApplyFilter={handleApplyFilter}
+            onClearFilter={handleClearFilter}
+          />
 
-      {isLoading && specializations.length === 0 && (
-        <SpecializationsSkeleton count={pageSize} />
-      )}
-
-      {!error && (specializations.length > 0 || !isLoading) && (
-        <Stack
-          spacing={2}
-          sx={{
-            opacity: isLoading ? 0.6 : 1,
-            transition: "opacity 0.2s ease-in-out",
-            pointerEvents: isLoading ? "none" : "auto",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              minHeight: 24,
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              Total Results: {totalCount} (Showing {specializations.length}{" "}
-              items)
-            </Typography>
-            {isLoading && (
-              <Typography variant="caption" color="text.secondary">
-                Updating...
-              </Typography>
-            )}
-          </Box>
-
-          <SpecializationsGrid items={specializations} />
-
-          {totalPages > 1 && (
-            <Box sx={{ display: "flex", justifyContent: "center", pt: 2 }}>
-              <Pagination
-                count={totalPages}
-                page={pageNumber}
-                onChange={(_, value) => {
-                  handlePageChange(value);
-                }}
-                color="primary"
-              />
-            </Box>
+          {error && (
+            <Alert
+              severity="error"
+              action={
+                <Button color="inherit" size="small" onClick={refetch}>
+                  Retry
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
           )}
-        </Stack>
+
+          {isLoading && specializations.length === 0 && (
+            <SpecializationsSkeleton count={pageSize} />
+          )}
+
+          {!error && (specializations.length > 0 || !isLoading) && (
+            <Stack
+              spacing={2}
+              sx={{
+                opacity: isLoading ? 0.6 : 1,
+                transition: "opacity 0.2s ease-in-out",
+                pointerEvents: isLoading ? "none" : "auto",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  minHeight: 24,
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Total Results: {totalCount} (Showing {specializations.length}{" "}
+                  items)
+                </Typography>
+                {isLoading && (
+                  <Typography variant="caption" color="text.secondary">
+                    Updating...
+                  </Typography>
+                )}
+              </Box>
+
+              <SpecializationsGrid items={specializations} />
+
+              {totalPages > 1 && (
+                <Box sx={{ display: "flex", justifyContent: "center", pt: 2 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={pageNumber}
+                    onChange={(_, value) => {
+                      handlePageChange(value);
+                    }}
+                    color="primary"
+                  />
+                </Box>
+              )}
+            </Stack>
+          )}
+        </>
       )}
     </Stack>
   );

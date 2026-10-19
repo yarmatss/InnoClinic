@@ -1,10 +1,9 @@
 using Appointments.API.Extensions;
+using Appointments.Domain.Constants;
 using Google.Protobuf;
 using Grpc.Core;
 using InnoClinic.Contracts.Grpc;
 using StackExchange.Redis;
-
-using Appointments.Domain.Constants;
 
 namespace Appointments.API.GrpcHandlers;
 

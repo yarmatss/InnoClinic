@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
@@ -9,7 +9,8 @@ using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Services;
 
-internal class SpecializationService(ISpecializationRepository specializationRepository) : ISpecializationService
+internal class SpecializationService(
+    ISpecializationRepository specializationRepository) : ISpecializationService
 {
     public async Task<Result<SpecializationModel>> CreateAsync(
         SpecializationModel model,

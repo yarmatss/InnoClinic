@@ -1,12 +1,12 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Filters;
+using InnoClinic.Core.Common;
 using Mapster;
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Specialization;
-using InnoClinic.AspNetCore.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
-using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
@@ -22,13 +22,13 @@ public static class SpecializationEndpoints
                 .AddEndpointFilter<ResultFilter>();
 
             group.MapGet("/", GetAllSpecializationsAsync)
-                .AllowAnonymous();
+                .RequireAuthorization();
 
             group.MapPost("/", CreateSpecializationAsync)
-                .RequireAuthorization(Policies.WriteSpecializations);
+                .RequirePermission(ClinicPermissions.Specializations.Write);
             
             group.MapPut("/{id:guid}", UpdateSpecializationAsync)
-                .RequireAuthorization(Policies.WriteSpecializations);
+                .RequirePermission(ClinicPermissions.Specializations.Write);
 
             return group;
         }

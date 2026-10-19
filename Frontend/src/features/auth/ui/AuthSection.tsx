@@ -7,7 +7,11 @@ export function AuthSection() {
     useAuth0();
 
   const handleLogin = () => {
-    void loginWithRedirect();
+    void loginWithRedirect({
+      authorizationParams: {
+        prompt: "login",
+      },
+    });
   };
 
   const handleLogout = () => {

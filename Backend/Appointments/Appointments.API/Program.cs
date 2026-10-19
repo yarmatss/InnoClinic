@@ -1,13 +1,16 @@
 using Appointments.API.BackgroundJobs;
 using Appointments.API.Behaviors;
 using Appointments.API.Authorization;
-using Appointments.API.Extensions;
 using Appointments.API.GrpcHandlers;
 using Appointments.API.Options;
+using Appointments.Domain.Entities;
 using Appointments.Infrastructure;
 using FluentValidation;
+using InnoClinic.AspNetCore.Authorization;
+using InnoClinic.AspNetCore.Cors;
 using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Extensions;
 using Scalar.AspNetCore;
@@ -21,6 +24,7 @@ builder.AddAppObservability("appointments-api");
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
 builder.Services.AddOutboxResilience();
 
 builder.Services.Configure<OutboxOptions>(
@@ -28,8 +32,12 @@ builder.Services.Configure<OutboxOptions>(
 
 builder.Services.AddHostedService<NotificationWorker>();
 
-builder.Services.AddAuth0Authentication(builder.Configuration);
-builder.Services.AddScopePolicies();
+builder.Services.AddClinicAuth(builder.Configuration);
+builder.Services.AddSingleton<IAccessPolicy<Appointment>, AppointmentAccessPolicy>();
+builder.Services.AddSingleton<IAccessPolicy<PatientRef>, AppointmentAccessPolicy>();
+builder.Services.AddSingleton<IAccessPolicy<StaffRef>, AppointmentAccessPolicy>();
+
+builder.Services.AddFrontendCors(builder.Configuration);
 
 builder.Services.Configure<ClinicOptions>(
     builder.Configuration.GetSection(ClinicOptions.SectionName));
@@ -56,13 +64,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
     await app.ApplyMigrationsAsync();
 }
 
+app.UseHttpsRedirection();
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -71,8 +83,7 @@ app.MapEndpoints();
 
 app.MapAppHealthChecks();
 
-app.UseHttpsRedirection();
-
-app.MapGrpcService<StaffScheduleSyncHandler>();
+app.MapGrpcService<StaffScheduleSyncHandler>()
+    .RequireInternalScope(InternalScopes.Appointments);
 
 app.Run();

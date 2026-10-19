@@ -55,12 +55,12 @@ public static class HealthCheckExtensions
             app.MapHealthChecks(HealthCheckConstants.LiveEndpoint, new HealthCheckOptions
             {
                 Predicate = r => r.Tags.Contains(HealthCheckConstants.LiveTag)
-            });
+            }).AllowAnonymous();
 
             app.MapHealthChecks(HealthCheckConstants.ReadyEndpoint, new HealthCheckOptions
             {
                 Predicate = r => r.Tags.Contains(HealthCheckConstants.ReadyTag)
-            });
+            }).AllowAnonymous();
 
             return app;
         }

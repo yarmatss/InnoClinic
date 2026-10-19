@@ -1,3 +1,4 @@
+using InnoClinic.Core.Authorization;
 using NSubstitute;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Services;
@@ -6,6 +7,7 @@ using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
+using Profiles.UnitTests.Fakes;
 using Shouldly;
 using System.Linq.Expressions;
 
@@ -151,3 +153,4 @@ public class SpecializationServiceTests
 
     #endregion
 }
+

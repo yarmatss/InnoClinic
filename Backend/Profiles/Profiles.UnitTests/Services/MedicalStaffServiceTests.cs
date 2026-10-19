@@ -1,17 +1,20 @@
+using InnoClinic.Core.Authorization;
+using InnoClinic.Core.Common;
 using InnoClinic.Messaging.Outbox;
 using NSubstitute;
-using Profiles.BLL.Interfaces;
+using Profiles.BLL.Authorization;
 using Profiles.BLL.Errors;
+using Profiles.BLL.Interfaces;
+using Profiles.BLL.Models;
 using Profiles.BLL.Services;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
 using Profiles.UnitTests.Fakes.Models;
+using Profiles.UnitTests.Fakes;
 using Shouldly;
 using System.Linq.Expressions;
-using Profiles.BLL.Models;
-using Profiles.Domain.Enums;
 
 namespace Profiles.UnitTests.Services;
 
@@ -22,13 +25,19 @@ public class MedicalStaffServiceTests
     private readonly IOutboxRepository _outboxRepo = Substitute.For<IOutboxRepository>();
     private readonly IAuthManagementService _auth0Service = Substitute.For<IAuthManagementService>();
     private readonly INotificationProducer _notificationProducer = Substitute.For<INotificationProducer>();
+    private readonly TestCurrentUser _currentUser = TestCurrentUser.Administrator();
     private readonly MedicalStaffService _sut;
 
     public MedicalStaffServiceTests()
     {
-        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<CancellationToken>())
+        _auth0Service.ProvisionUserAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(new UserProvisionResult("auth0|123", "https://invite.url"));
-        _sut = new MedicalStaffService(_staffRepo, _specRepo, _outboxRepo, _auth0Service, _notificationProducer);
+        _auth0Service.ChangeRoleAsync(Arg.Any<string>(), Arg.Any<UserRole>(), Arg.Any<UserRole>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+        _auth0Service.SetBlockedAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+        _sut = new MedicalStaffService(_staffRepo, _specRepo, _outboxRepo, _auth0Service, _notificationProducer, _currentUser,
+            new TestAccessResolver(_currentUser, new StaffAccessPolicy()));
     }
 
     #region CreateAsync

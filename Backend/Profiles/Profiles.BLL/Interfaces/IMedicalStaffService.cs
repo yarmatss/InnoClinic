@@ -48,7 +48,5 @@ public interface IMedicalStaffService
         CancellationToken cancellationToken);
 
     Task<Result<MedicalStaffModel>> GetCurrentAsync(
-        string userId,
-        string? email,
         CancellationToken cancellationToken);
 }

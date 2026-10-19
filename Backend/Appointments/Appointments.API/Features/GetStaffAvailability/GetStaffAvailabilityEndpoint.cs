@@ -1,4 +1,4 @@
-using Appointments.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
 using InnoClinic.AspNetCore.Filters;
@@ -23,7 +23,7 @@ public class GetStaffAvailabilityEndpoint : IEndpoint
             return result;
         })
         .WithTags("Appointments")
-        .RequireAuthorization(Policies.ReadAppointments)
+        .RequirePermission(ClinicPermissions.Appointments.Read)
         .AddEndpointFilter<ResultFilter>();
     }
 }

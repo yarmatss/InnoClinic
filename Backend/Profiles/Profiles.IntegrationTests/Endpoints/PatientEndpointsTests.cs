@@ -1,4 +1,4 @@
-using Profiles.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.DTOs.Patient;
 using InnoClinic.Core.Common;
 using Profiles.Domain.Enums;
@@ -249,12 +249,12 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
     #region Authorization
 
     [Fact]
-    public async Task CreatePatient_WithoutWriteScope_Returns403Forbidden()
+    public async Task CreatePatient_WithoutWritePermission_Returns403Forbidden()
     {
         var dto = GetValidCreateDto();
 
         // Arrange: Missing "write:patients" scope
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PostAsJsonAsync(
             "/api/patients", 
@@ -265,13 +265,13 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
     }
 
     [Fact]
-    public async Task UpdatePatient_WithoutWriteScope_Returns403Forbidden()
+    public async Task UpdatePatient_WithoutWritePermission_Returns403Forbidden()
     {
         var patientId = await SeedPatientAsync();
         var dto = GetValidUpdateDto();
 
         // Arrange: Missing "write:patients" scope
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeReadPatients);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PutAsJsonAsync(
             $"/api/patients/{patientId}", 
@@ -282,12 +282,12 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
     }
 
     [Fact]
-    public async Task GetPatientById_WithoutReadScope_Returns403Forbidden()
+    public async Task GetPatientById_WithoutReadPermission_Returns403Forbidden()
     {
         var patientId = await SeedPatientAsync();
 
         // Arrange: Missing "read:patients" scope
-        Client.DefaultRequestHeaders.Add("X-Test-Scope", Policies.ScopeWritePatients);
+        Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Write);
 
         var response = await Client.GetAsync(
             $"/api/patients/{patientId}", 

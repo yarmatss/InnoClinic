@@ -109,6 +109,7 @@ namespace Profiles.DAL.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -116,8 +117,7 @@ namespace Profiles.DAL.Migrations
                     b.HasIndex("SupervisorId");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("\"UserId\" IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Staff");
                 });
@@ -197,6 +197,7 @@ namespace Profiles.DAL.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -204,8 +205,7 @@ namespace Profiles.DAL.Migrations
                     b.HasIndex("PrimaryDoctorId");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("\"UserId\" IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Patients");
                 });

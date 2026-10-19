@@ -17,7 +17,6 @@ public sealed class MedicalStaffConfiguration : IEntityTypeConfiguration<Medical
         builder.HasQueryFilter(ms => ms.IsActive);
 
         builder.HasIndex(ms => ms.UserId)
-            .IsUnique()
-            .HasFilter("\"UserId\" IS NOT NULL");
+            .IsUnique();
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Profiles.BLL.Interfaces;
 using Profiles.DAL.Data;
 using Microsoft.AspNetCore.Authorization;
 
@@ -16,6 +17,8 @@ public sealed class ProfilesApiFactory(PostgresContainerFixture db)
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing"); // Prevents migration on start
+        builder.UseSetting("Auth0:Services:ClientId", "test-client");
+        builder.UseSetting("Auth0:Services:ClientSecret", "test-secret");
         
         builder.ConfigureTestServices(services =>
         {
@@ -27,6 +30,9 @@ public sealed class ProfilesApiFactory(PostgresContainerFixture db)
                 .SetFallbackPolicy(new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .Build());
+
+            services.RemoveAll<IAuthManagementService>();
+            services.AddScoped<IAuthManagementService, FakeAuthManagementService>();
 
             services.RemoveAll<DbContextOptions<ProfilesDbContext>>();
             services.RemoveAll<ProfilesDbContext>();

@@ -8,7 +8,7 @@
     <Title>InnoClinic AspNetCore</Title>
     <Authors>yarmatss</Authors>
     <Description>Middleware, filters, and API extensions.</Description>
-	<Version>1.0.6</Version>
+	<Version>2.0.3</Version>
 	<NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" />
     <PackageReference Include="Npgsql.OpenTelemetry" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />

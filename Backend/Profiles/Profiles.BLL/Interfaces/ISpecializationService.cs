@@ -1,4 +1,4 @@
-﻿using Profiles.BLL.Models;
+using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 

@@ -20,6 +20,7 @@ public class MedicalStaffRegister : IRegister
             .Ignore(dest => dest.StaffSpecializations)
             .Ignore(dest => dest.WorkingHours)
             .Ignore(dest => dest.ScheduleOverrides)
-            .Ignore(dest => dest.IsActive);
+            .Ignore(dest => dest.IsActive)
+            .Ignore(dest => dest.UserId);
     }
 }

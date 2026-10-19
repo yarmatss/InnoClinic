@@ -1,3 +1,7 @@
+using InnoClinic.Core.Authorization;
+using InnoClinic.Core.Common;
+using InnoClinic.Messaging.Contracts;
+using InnoClinic.Messaging.Outbox;
 using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
@@ -5,11 +9,6 @@ using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
-using InnoClinic.Core.Common;
-
-using InnoClinic.Messaging.Contracts;
-using InnoClinic.Messaging.Outbox;
-using Profiles.Domain.Enums;
 
 namespace Profiles.BLL.Services;
 
@@ -17,31 +16,38 @@ internal class PatientService(
     IPatientRepository patientRepository,
     IMedicalStaffRepository staffRepository,
     INotificationProducer notificationProducer,
-    IAuthManagementService auth0Service) : IPatientService
+    IAuthManagementService auth0Service,
+    ICurrentUser currentUser,
+    IAccessResolver accessResolver) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
         PatientModel model, 
         CancellationToken cancellationToken)
     {
+        var id = Guid.NewGuid();
+        if (!accessResolver.Check(new PatientRef(id), Operation.Create).IsAllowed)
+            return PatientErrors.Forbidden;
+
         var validationError = await ValidateUniquenessAsync(model, null, cancellationToken);
         if (validationError is not null)
             return validationError;
 
         var entity = model.Adapt<Patient>();
+        entity.Id = id;
 
         var provisionResult = await auth0Service.ProvisionUserAsync(
             model.Email,
             model.FirstName,
             model.LastName,
             UserRole.Patient,
+            entity.Id,
             cancellationToken);
 
-        if (provisionResult.IsSuccess)
-        {
-            entity.UserId = provisionResult.Value.UserId;
-        }
+        if (provisionResult.IsFailure)
+            return provisionResult.Error;
 
-        var invitationUrl = provisionResult.IsSuccess ? provisionResult.Value.InvitationUrl : null;
+        var (accountId, invitationUrl) = provisionResult.Value;
+        entity.UserId = accountId;
 
         patientRepository.MarkAdd(entity);
 
@@ -53,48 +59,54 @@ internal class PatientService(
             invitationUrl
         ));
 
-        await patientRepository.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await patientRepository.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            await auth0Service.DeleteUserAsync(accountId, CancellationToken.None);
+            throw;
+        }
 
         return entity.Adapt<PatientModel>();
     }
 
     public async Task<Result<PatientModel>> GetCurrentAsync(
-        string userId,
-        string? email,
         CancellationToken cancellationToken)
     {
-        var entity = await patientRepository.GetByUserIdAsync(userId, cancellationToken);
-        if (entity is not null)
-        {
-            return entity.Adapt<PatientModel>();
-        }
+        var entity = await patientRepository.GetByIdAsync(currentUser.ProfileId, cancellationToken);
+        if (entity is null)
+            return PatientErrors.NotFound;
 
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            var existingByEmail = await patientRepository.GetByEmailAsync(email, cancellationToken, trackChanges: true);
-            if (existingByEmail is not null && existingByEmail.UserId is null)
-            {
-                existingByEmail.UserId = userId;
-                patientRepository.MarkUpdate(existingByEmail);
-                await patientRepository.SaveChangesAsync(cancellationToken);
-                return existingByEmail.Adapt<PatientModel>();
-            }
-        }
-
-        return PatientErrors.NotFound;
+        return entity.Adapt<PatientModel>();
     }
 
     public async Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
         PatientQueryParameters queryModel,
         CancellationToken cancellationToken)
     {
+        var access = accessResolver.Check(new PatientDirectory(), Operation.Read);
+        if (!access.IsAllowed)
+            return PatientErrors.Forbidden;
+
         var (entities, totalCount) = await patientRepository.GetPagedAsync(
             queryModel,
             cancellationToken);
 
+        var models = entities.Adapt<IReadOnlyList<PatientModel>>();
+
+        if (access == AccessLevel.Masked)
+        {
+            foreach (var model in models)
+            {
+                MaskSensitivePatientFields(model);
+            }
+        }
+
         var pagedResult = new PagedResponse<PatientModel>
         {
-            Items = entities.Adapt<IReadOnlyList<PatientModel>>(),
+            Items = models,
             TotalCount = totalCount,
             PageNumber = queryModel.PageNumber!.Value,
             PageSize = queryModel.PageSize!.Value
@@ -107,12 +119,21 @@ internal class PatientService(
         Guid id, 
         CancellationToken cancellationToken)
     {
+        var access = accessResolver.Check(new PatientRef(id), Operation.Read);
+        if (!access.IsAllowed)
+            return PatientErrors.Forbidden;
+
         var entity = await patientRepository.GetByIdAsync(id, cancellationToken);
 
         if (entity is null) 
             return PatientErrors.NotFound;
 
-        return entity.Adapt<PatientModel>();
+        var model = entity.Adapt<PatientModel>();
+
+        if (access == AccessLevel.Masked)
+            MaskSensitivePatientFields(model);
+
+        return model;
     }
 
     public async Task<Result<PatientModel>> UpdateAsync(
@@ -120,6 +141,9 @@ internal class PatientService(
         PatientModel model, 
         CancellationToken cancellationToken)
     {
+        if (!accessResolver.Check(new PatientRef(id), Operation.Update).IsAllowed)
+            return PatientErrors.Forbidden;
+
         var existingEntity = await patientRepository.GetByIdAsync(id, cancellationToken, trackChanges: true);
         if (existingEntity is null)
             return PatientErrors.NotFound;
@@ -135,6 +159,12 @@ internal class PatientService(
         await patientRepository.SaveChangesAsync(cancellationToken);
 
         return existingEntity.Adapt<PatientModel>();
+    }
+
+    private static void MaskSensitivePatientFields(PatientModel model)
+    {
+        model.NationalId = string.Empty;
+        model.InsuranceNumber = string.Empty;
     }
 
     private async Task<Error?> ValidateUniquenessAsync(

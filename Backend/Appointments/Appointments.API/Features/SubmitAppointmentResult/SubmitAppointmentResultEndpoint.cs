@@ -1,4 +1,4 @@
-using Appointments.API.Authorization;
+using InnoClinic.AspNetCore.Authorization;
 using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
 using InnoClinic.AspNetCore.Filters;
@@ -26,7 +26,7 @@ public class SubmitAppointmentResultEndpoint : IEndpoint
             return result;
         })
         .WithTags("Appointments")
-        .RequireAuthorization(Policies.WriteResults)
+        .RequirePermission(ClinicPermissions.Results.Write)
         .AddEndpointFilter<ResultFilter>();
     }
 }
