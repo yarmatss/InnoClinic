@@ -485,3 +485,7 @@ $RECYCLE.BIN/
 
 # Data Protection keys
 Backend/keys/
+
+# Claude Code personal files
+.claude/settings.local.json
+CLAUDE.local.md
