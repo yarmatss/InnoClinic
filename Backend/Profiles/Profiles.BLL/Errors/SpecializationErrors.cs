@@ -1,5 +1,5 @@
-using Profiles.DAL.Entities;
 using InnoClinic.Core.Common;
+using Profiles.DAL.Entities;
 
 namespace Profiles.BLL.Errors;
 

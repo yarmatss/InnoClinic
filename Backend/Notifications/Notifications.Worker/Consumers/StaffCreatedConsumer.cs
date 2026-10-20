@@ -8,7 +8,7 @@ namespace Notifications.Worker.Consumers;
 public class StaffCreatedConsumer(
     IEmailSenderService emailSender,
     EmailComposer emailComposer,
-    ILogger<StaffCreatedConsumer> logger) 
+    ILogger<StaffCreatedConsumer> logger)
     : IConsumer<StaffCreated>
 {
     public async Task Consume(ConsumeContext<StaffCreated> context)

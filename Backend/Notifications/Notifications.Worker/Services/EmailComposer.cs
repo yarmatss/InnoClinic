@@ -1,9 +1,9 @@
-using System.Reflection;
 using InnoClinic.Messaging.Contracts;
 using Microsoft.Extensions.Options;
 using Notifications.Worker.Models;
 using Notifications.Worker.Options;
 using Scriban;
+using System.Reflection;
 
 namespace Notifications.Worker.Services;
 

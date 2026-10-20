@@ -1,8 +1,8 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Authorization;
 using InnoClinic.AspNetCore.Filters;
 using InnoClinic.Core.Common;
 using Mapster;
-using InnoClinic.AspNetCore.Authorization;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Specialization;
 using Profiles.BLL.Interfaces;
@@ -26,7 +26,7 @@ public static class SpecializationEndpoints
 
             group.MapPost("/", CreateSpecializationAsync)
                 .RequirePermission(ClinicPermissions.Specializations.Write);
-            
+
             group.MapPut("/{id:guid}", UpdateSpecializationAsync)
                 .RequirePermission(ClinicPermissions.Specializations.Write);
 
@@ -49,7 +49,7 @@ public static class SpecializationEndpoints
         var model = dto.Adapt<SpecializationModel>();
         var result = await specializationService.CreateAsync(model, ct);
 
-        return result.Map(m => 
+        return result.Map(m =>
         {
             var responseDto = m.Adapt<SpecializationResponseDto>();
             return Result.Created(responseDto, $"{ApiRoutes.Specializations}/{responseDto.Id}");

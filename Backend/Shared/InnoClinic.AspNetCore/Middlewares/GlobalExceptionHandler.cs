@@ -1,9 +1,9 @@
+using InnoClinic.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using InnoClinic.AspNetCore.Extensions;
 using System.Diagnostics;
 
 namespace InnoClinic.AspNetCore.Middlewares;

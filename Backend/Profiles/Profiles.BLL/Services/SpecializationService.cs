@@ -1,10 +1,10 @@
+using InnoClinic.Core.Common;
 using Mapster;
 using Profiles.BLL.Errors;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
-using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Services;
@@ -79,7 +79,7 @@ internal class SpecializationService(
         CancellationToken cancellationToken)
     {
         var existingName = await specializationRepository.GetByConditionAsync(
-            s => s.Name == model.Name && (!currentId.HasValue || s.Id != currentId.Value), 
+            s => s.Name == model.Name && (!currentId.HasValue || s.Id != currentId.Value),
             cancellationToken);
 
         if (existingName.Any())

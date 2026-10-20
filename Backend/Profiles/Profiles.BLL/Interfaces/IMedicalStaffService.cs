@@ -1,5 +1,5 @@
-using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
+using Profiles.BLL.Models;
 using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Interfaces;
@@ -7,7 +7,7 @@ namespace Profiles.BLL.Interfaces;
 public interface IMedicalStaffService
 {
     Task<Result<MedicalStaffModel>> CreateAsync(
-        MedicalStaffModel model, 
+        MedicalStaffModel model,
         CancellationToken cancellationToken);
 
     Task<Result<MedicalStaffModel>> GetByIdAsync(
@@ -22,11 +22,11 @@ public interface IMedicalStaffService
         Guid id,
         MedicalStaffModel model,
         CancellationToken cancellationToken);
-    
+
     Task<Result> DeactivateAsync(
         Guid id,
         CancellationToken cancellationToken);
-    
+
     Task<Result> AssignSpecializationsAsync(
         Guid staffId,
         IReadOnlyList<StaffSpecializationModel> assignments,

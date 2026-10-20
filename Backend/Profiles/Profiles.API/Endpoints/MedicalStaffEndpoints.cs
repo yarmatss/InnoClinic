@@ -1,12 +1,12 @@
 using FluentValidation;
-using Mapster;
 using InnoClinic.AspNetCore.Authorization;
+using InnoClinic.AspNetCore.Filters;
+using InnoClinic.Core.Common;
+using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.MedicalStaff;
-using InnoClinic.AspNetCore.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
-using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
@@ -46,7 +46,7 @@ public static class MedicalStaffEndpoints
                 .RequirePermission(ClinicPermissions.Staff.Write);
             group.MapDelete("/{id:guid}", DeactivateStaffAsync)
                 .RequirePermission(ClinicPermissions.Staff.Write);
-            
+
             return group;
         }
     }
@@ -66,7 +66,7 @@ public static class MedicalStaffEndpoints
         var model = dto.Adapt<MedicalStaffModel>();
         var result = await staffService.CreateAsync(model, ct);
 
-        return result.Map(s => 
+        return result.Map(s =>
         {
             var responseDto = s.Adapt<MedicalStaffResponseDto>();
             return Result.Created(responseDto, $"{ApiRoutes.MedicalStaff}/{responseDto.Id}");

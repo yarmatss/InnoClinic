@@ -11,8 +11,8 @@ using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
-using Profiles.UnitTests.Fakes.Models;
 using Profiles.UnitTests.Fakes;
+using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
 
@@ -136,8 +136,8 @@ public class PatientServiceTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.InsuranceNumber.ShouldBe(model.InsuranceNumber);
-        
-        _notificationProducer.Received(1).Enqueue(Arg.Is<PatientCreated>(e => 
+
+        _notificationProducer.Received(1).Enqueue(Arg.Is<PatientCreated>(e =>
             e.FirstName == model.FirstName &&
             e.LastName == model.LastName &&
             e.Email == model.Email));
@@ -259,7 +259,7 @@ public class PatientServiceTests
         _patientRepo
             .GetByConditionAsync(Arg.Any<Expression<Func<Patient, bool>>>(), Arg.Any<CancellationToken>())
             .Returns<IReadOnlyList<Patient>>(Array.Empty<Patient>(), [duplicate]);
-            
+
         // Act
         var result = await _sut.UpdateAsync(entity.Id, model, CancellationToken.None);
 

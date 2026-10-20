@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Appointments.API.Features.CancelAppointment;
 
-public record CancelAppointmentCommand(Guid AppointmentId) 
+public record CancelAppointmentCommand(Guid AppointmentId)
     : IRequest<Result>;

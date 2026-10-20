@@ -1,6 +1,6 @@
 using MassTransit;
-using Notifications.Worker.Consumers;
 using Notifications.Worker.Constants;
+using Notifications.Worker.Consumers;
 
 namespace Notifications.Worker.Extensions;
 
