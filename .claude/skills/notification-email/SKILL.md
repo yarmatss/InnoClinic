@@ -32,7 +32,7 @@ dotnet build InnoClinic.Notifications.slnx --no-restore
 dotnet build InnoClinic.<ProducerService>.slnx --no-restore
 ```
 
-Notifications has no tests. For an end-to-end check, run docker compose: emails land in MailHog at http://localhost:8025. Say so if you didn't run it.
+Notifications has no tests. For an end-to-end check, run docker compose: emails land in Mailpit at http://localhost:8025. Say so if you didn't run it.
 
 ## 5. Deployment order (tell the user)
 

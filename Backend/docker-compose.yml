@@ -148,7 +148,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mailhog:
+      mailpit:
         condition: service_started
     environment:
       - ConnectionStrings__RabbitMQ=${ConnectionStrings__RabbitMQ}
@@ -161,12 +161,15 @@ services:
       - Email__UseSsl=${SMTP_USE_SSL}
       - Frontend__BaseUrl=${FRONTEND_URL:-http://localhost:5500}
 
-  mailhog:
-    image: mailhog/mailhog
-    container_name: innoclinic_mailhog
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: innoclinic_mailpit
     ports:
       - "1025:1025"
       - "8025:8025"
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=1
+      - MP_SMTP_AUTH_ALLOW_INSECURE=1
     restart: unless-stopped
 
 volumes:
