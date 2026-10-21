@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Playwright MCP snapshots and logs
+.playwright-mcp/
+
 # User-specific files
 *.rsuser
 *.suo
