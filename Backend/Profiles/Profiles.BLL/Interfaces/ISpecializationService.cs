@@ -1,5 +1,5 @@
-using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
+using Profiles.BLL.Models;
 using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Interfaces;
@@ -7,7 +7,7 @@ namespace Profiles.BLL.Interfaces;
 public interface ISpecializationService
 {
     Task<Result<SpecializationModel>> CreateAsync(
-        SpecializationModel model, 
+        SpecializationModel model,
         CancellationToken cancellationToken);
 
     Task<Result<PagedResponse<SpecializationModel>>> GetPagedAsync(

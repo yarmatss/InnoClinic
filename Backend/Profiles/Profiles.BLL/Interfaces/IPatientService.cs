@@ -1,5 +1,5 @@
-using Profiles.BLL.Models;
 using InnoClinic.Core.Common;
+using Profiles.BLL.Models;
 using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Interfaces;
@@ -7,7 +7,7 @@ namespace Profiles.BLL.Interfaces;
 public interface IPatientService
 {
     Task<Result<PatientModel>> CreateAsync(
-        PatientModel model, 
+        PatientModel model,
         CancellationToken cancellationToken);
 
     Task<Result<PagedResponse<PatientModel>>> GetAllAsync(
@@ -15,12 +15,12 @@ public interface IPatientService
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> GetByIdAsync(
-        Guid id, 
+        Guid id,
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> UpdateAsync(
-        Guid id, 
-        PatientModel model, 
+        Guid id,
+        PatientModel model,
         CancellationToken cancellationToken);
 
     Task<Result<PatientModel>> GetCurrentAsync(

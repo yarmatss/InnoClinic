@@ -1,13 +1,13 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Profiles.BLL.Interfaces;
 using Profiles.DAL.Data;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Profiles.IntegrationTests.Infrastructure;
 
@@ -19,7 +19,7 @@ public sealed class ProfilesApiFactory(PostgresContainerFixture db)
         builder.UseEnvironment("Testing"); // Prevents migration on start
         builder.UseSetting("Auth0:Services:ClientId", "test-client");
         builder.UseSetting("Auth0:Services:ClientSecret", "test-secret");
-        
+
         builder.ConfigureTestServices(services =>
         {
             services.AddAuthentication(defaultScheme: TestAuthHandler.AuthenticationScheme)
@@ -36,7 +36,7 @@ public sealed class ProfilesApiFactory(PostgresContainerFixture db)
 
             services.RemoveAll<DbContextOptions<ProfilesDbContext>>();
             services.RemoveAll<ProfilesDbContext>();
-            
+
             services.AddDbContext<ProfilesDbContext>(options =>
                 options.UseNpgsql(db.ConnectionString));
         });

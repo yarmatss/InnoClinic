@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using Profiles.Domain.Models;
 using Profiles.API.Validators.Common;
+using Profiles.Domain.Models;
 
 namespace Profiles.API.Validators.MedicalStaff;
 

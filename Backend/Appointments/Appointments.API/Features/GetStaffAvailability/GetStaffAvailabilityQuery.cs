@@ -1,5 +1,5 @@
-using MediatR;
 using InnoClinic.Core.Common;
+using MediatR;
 
 namespace Appointments.API.Features.GetStaffAvailability;
 

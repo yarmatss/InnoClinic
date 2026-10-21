@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Profiles.DAL.Builders;
 using Profiles.DAL.Data;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Extensions;
 using Profiles.DAL.Interfaces;
-using Profiles.DAL.Builders;
 using Profiles.Domain.Models;
 
 namespace Profiles.DAL.Repositories;
 
-public class SpecializationRepository(ProfilesDbContext context) : 
+public class SpecializationRepository(ProfilesDbContext context) :
     BaseRepository<Specialization>(context), ISpecializationRepository
 {
     public async Task<(IReadOnlyList<Specialization> Items, int TotalCount)> GetPagedAsync(

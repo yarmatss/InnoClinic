@@ -11,8 +11,8 @@ using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
 using Profiles.Tests.Common.Fakes.Entities;
-using Profiles.UnitTests.Fakes.Models;
 using Profiles.UnitTests.Fakes;
+using Profiles.UnitTests.Fakes.Models;
 using Shouldly;
 using System.Linq.Expressions;
 

@@ -14,7 +14,7 @@ public static class NotificationExtensions
         {
             services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
             services.Configure<FrontendOptions>(configuration.GetSection(FrontendOptions.SectionName));
-            
+
             services.AddSingleton<IEmailSenderService, EmailSenderService>();
             services.AddSingleton<EmailComposer>();
 

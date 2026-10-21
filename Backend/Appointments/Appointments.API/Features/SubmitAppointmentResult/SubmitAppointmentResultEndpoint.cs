@@ -1,6 +1,6 @@
-using InnoClinic.AspNetCore.Authorization;
 using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
+using InnoClinic.AspNetCore.Authorization;
 using InnoClinic.AspNetCore.Filters;
 using MediatR;
 
@@ -11,8 +11,8 @@ public class SubmitAppointmentResultEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost($"{ApiRoutes.Appointments}/{{id:guid}}/results", async (
-            Guid id, 
-            SubmitAppointmentResultRequest request, 
+            Guid id,
+            SubmitAppointmentResultRequest request,
             ISender sender,
             CancellationToken ct = default) =>
         {

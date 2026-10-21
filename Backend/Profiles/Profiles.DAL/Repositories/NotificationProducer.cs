@@ -1,6 +1,6 @@
-using System.Text.Json;
 using InnoClinic.Messaging.Outbox;
 using Profiles.DAL.Data;
+using System.Text.Json;
 
 namespace Profiles.DAL.Repositories;
 

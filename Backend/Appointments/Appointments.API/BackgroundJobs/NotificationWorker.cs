@@ -9,9 +9,9 @@ public class NotificationWorker(
     IServiceScopeFactory scopeFactory,
     IOptionsMonitor<OutboxOptions> options,
     ILogger<NotificationWorker> logger,
-    ResiliencePipelineProvider<string> pipelineProvider) 
+    ResiliencePipelineProvider<string> pipelineProvider)
     : PostgresOutboxProcessor(
-        configuration.GetConnectionString("DefaultConnection")!, 
+        configuration.GetConnectionString("DefaultConnection")!,
         scopeFactory,
         options,
         logger,

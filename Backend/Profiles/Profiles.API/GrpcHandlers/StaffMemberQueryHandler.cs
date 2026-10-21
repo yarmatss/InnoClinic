@@ -23,7 +23,7 @@ public class StaffMemberQueryHandler(
         var staff = await staffRepository.GetByIdAsync(staffId, context.CancellationToken);
 
         if (staff is null)
-            throw new RpcException(new Status(StatusCode.NotFound, 
+            throw new RpcException(new Status(StatusCode.NotFound,
                 $"MedicalStaff with ID {request.MedicalStaffId} not found."));
 
         return staff.Adapt<SyncStaffProfileRequest>();

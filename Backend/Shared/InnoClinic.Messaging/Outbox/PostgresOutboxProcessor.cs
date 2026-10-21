@@ -1,17 +1,17 @@
 using Dapper;
+using InnoClinic.Messaging.Constants;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using System.Text.Json;
 using Polly;
 using Polly.Registry;
-using Polly.Timeout;
 using Polly.Retry;
-using InnoClinic.Messaging.Constants;
+using Polly.Timeout;
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace InnoClinic.Messaging.Outbox;
 
@@ -85,7 +85,7 @@ public abstract class PostgresOutboxProcessor(
 
         var messages = (await connection.QueryAsync<NotificationOutbox>(command)).ToList();
 
-        if (messages.Count == 0) 
+        if (messages.Count == 0)
             return;
 
         foreach (var message in messages)
@@ -95,8 +95,8 @@ public abstract class PostgresOutboxProcessor(
                 var type = Type.GetType(message.MessageType)
                     ?? throw new InvalidOperationException($"Could not resolve message type: {message.MessageType}");
                 var payload = JsonSerializer.Deserialize(message.Payload, type);
-                
-                await _pipeline!.ExecuteAsync(async ct => 
+
+                await _pipeline!.ExecuteAsync(async ct =>
                 {
                     await publishEndpoint.Publish(payload!, type, context =>
                     {
@@ -107,12 +107,12 @@ public abstract class PostgresOutboxProcessor(
                 var updateCommand = new CommandDefinition($@"
                     UPDATE ""{sanitizedTableName}""
                     SET ""Status"" = @Status, ""ProcessedAtUtc"" = @Now
-                    WHERE ""Id"" = @Id", new 
-                    { 
-                        Status = OutboxStatus.Processed.ToString(), 
-                        Now = DateTime.UtcNow, 
-                        message.Id 
-                    },
+                    WHERE ""Id"" = @Id", new
+                {
+                    Status = OutboxStatus.Processed.ToString(),
+                    Now = DateTime.UtcNow,
+                    message.Id
+                },
                     cancellationToken: stoppingToken);
 
                 await connection.ExecuteAsync(updateCommand);
@@ -120,10 +120,10 @@ public abstract class PostgresOutboxProcessor(
             catch (Exception ex)
             {
                 var isInfrastructureError = IsInfrastructureError(ex);
-                
+
                 if (isInfrastructureError)
                 {
-                    logger.LogWarning("Transient infrastructure error while publishing message {Id}. Will retry on next poll. Error: {Message}", 
+                    logger.LogWarning("Transient infrastructure error while publishing message {Id}. Will retry on next poll. Error: {Message}",
                         message.Id, ex.Message);
                 }
                 else
@@ -142,11 +142,11 @@ public abstract class PostgresOutboxProcessor(
                             ELSE @PendingStatus 
                         END
                     WHERE ""Id"" = @Id",
-                    new 
+                    new
                     {
                         message.Id,
                         Increment = retryIncrement,
-                        Error = ex.Message, 
+                        Error = ex.Message,
                         MaxRetry = Config.MaxRetryCount,
                         FailedStatus = OutboxStatus.Failed.ToString(),
                         PendingStatus = OutboxStatus.Pending.ToString()
@@ -160,11 +160,11 @@ public abstract class PostgresOutboxProcessor(
 
     private static bool IsInfrastructureError(Exception ex)
     {
-        return ex is TimeoutRejectedException || 
-               ex is OperationCanceledException || 
-               ex is SocketException || 
-               ex.GetType().Name.Contains("BrokerUnreachableException") || 
-               ex.GetType().Name.Contains("RabbitMqConnectionException") || 
+        return ex is TimeoutRejectedException ||
+               ex is OperationCanceledException ||
+               ex is SocketException ||
+               ex.GetType().Name.Contains("BrokerUnreachableException") ||
+               ex.GetType().Name.Contains("RabbitMqConnectionException") ||
                (ex.InnerException != null && IsInfrastructureError(ex.InnerException));
     }
 }

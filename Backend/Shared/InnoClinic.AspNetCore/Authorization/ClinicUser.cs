@@ -1,6 +1,6 @@
+using InnoClinic.Core.Authorization;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
-using InnoClinic.Core.Authorization;
 
 namespace InnoClinic.AspNetCore.Authorization;
 

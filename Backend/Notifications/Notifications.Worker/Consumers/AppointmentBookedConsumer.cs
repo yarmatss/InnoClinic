@@ -8,7 +8,7 @@ namespace Notifications.Worker.Consumers;
 
 public class AppointmentBookedConsumer(
     IEmailSenderService emailSender,
-    ILogger<AppointmentBookedConsumer> logger) 
+    ILogger<AppointmentBookedConsumer> logger)
     : IConsumer<AppointmentBooked>
 {
     public async Task Consume(ConsumeContext<AppointmentBooked> context)

@@ -13,11 +13,11 @@ public class GetStaffAvailabilityHandler(
     : IRequestHandler<GetStaffAvailabilityQuery, Result<StaffAvailabilityResponse>>
 {
     public async Task<Result<StaffAvailabilityResponse>> Handle(
-        GetStaffAvailabilityQuery request, 
+        GetStaffAvailabilityQuery request,
         CancellationToken cancellationToken)
     {
         var scheduleResult = await sender.Send(
-            new GetStaffScheduleQuery(request.MedicalStaffId), 
+            new GetStaffScheduleQuery(request.MedicalStaffId),
             cancellationToken);
 
         if (scheduleResult.IsFailure)
@@ -28,7 +28,7 @@ public class GetStaffAvailabilityHandler(
         var schedule = scheduleResult.Value;
 
         using var connection = connectionFactory.CreateConnection();
-        
+
         const string sql = @"
             SELECT ""StartTime"", ""EndTime""
             FROM ""Appointments""

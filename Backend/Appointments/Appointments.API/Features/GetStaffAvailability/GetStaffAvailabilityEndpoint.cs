@@ -1,6 +1,6 @@
-using InnoClinic.AspNetCore.Authorization;
 using Appointments.API.Constants;
 using InnoClinic.AspNetCore.Abstract;
+using InnoClinic.AspNetCore.Authorization;
 using InnoClinic.AspNetCore.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

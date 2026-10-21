@@ -23,7 +23,7 @@ public abstract class BaseRepository<T>(ProfilesDbContext context) : IBaseReposi
     }
 
     public virtual async Task<IReadOnlyList<T>> GetByConditionAsync(
-        Expression<Func<T, bool>> expression, 
+        Expression<Func<T, bool>> expression,
         CancellationToken ct,
         bool trackChanges = false)
     {
@@ -31,7 +31,7 @@ public abstract class BaseRepository<T>(ProfilesDbContext context) : IBaseReposi
     }
 
     public virtual async Task<T?> GetByIdAsync(
-        Guid id, 
+        Guid id,
         CancellationToken ct,
         bool trackChanges = false)
     {

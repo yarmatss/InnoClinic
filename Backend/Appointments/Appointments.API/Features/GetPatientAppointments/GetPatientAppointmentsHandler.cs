@@ -1,7 +1,6 @@
 using Appointments.Domain.Common;
 using Appointments.Infrastructure.Connection;
 using Dapper;
-using Appointments.API.Authorization;
 using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using MediatR;
@@ -14,7 +13,7 @@ public class GetPatientAppointmentsHandler(
     : IRequestHandler<GetPatientAppointmentsQuery, Result<IEnumerable<AppointmentResponse>>>
 {
     public async Task<Result<IEnumerable<AppointmentResponse>>> Handle(
-        GetPatientAppointmentsQuery request, 
+        GetPatientAppointmentsQuery request,
         CancellationToken cancellationToken)
     {
         if (!accessResolver.Check(new PatientRef(request.PatientId), Operation.Read).IsAllowed)
@@ -29,8 +28,8 @@ public class GetPatientAppointmentsHandler(
             ORDER BY ""StartTime"" DESC";
 
         var appointments = await connection.QueryAsync<AppointmentResponse>(new CommandDefinition(
-            sql, 
-            new { request.PatientId }, 
+            sql,
+            new { request.PatientId },
             cancellationToken: cancellationToken));
 
         return Result.Success(appointments);

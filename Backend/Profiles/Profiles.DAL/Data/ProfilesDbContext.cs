@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using InnoClinic.Messaging.Outbox;
+using Microsoft.EntityFrameworkCore;
 using Profiles.DAL.Entities;
 using System.Reflection;
-
-using InnoClinic.Messaging.Outbox;
 
 namespace Profiles.DAL.Data;
 
