@@ -1,5 +1,5 @@
-using Profiles.DAL.Entities;
 using InnoClinic.Core.Common;
+using Profiles.DAL.Entities;
 
 namespace Profiles.BLL.Errors;
 
@@ -8,11 +8,11 @@ public class MedicalStaffErrors : DomainErrors
     public static readonly Error NotFound = CreateNotFound(nameof(MedicalStaff));
 
     public static readonly Error DuplicateNationalId = CreateConflict(
-        "MedicalStaff.DuplicateNationalId", 
+        "MedicalStaff.DuplicateNationalId",
         "A medical staff member with this National ID already exists.");
 
     public static readonly Error DuplicateLicenseNumber = CreateConflict(
-        "MedicalStaff.DuplicateLicenseNumber", 
+        "MedicalStaff.DuplicateLicenseNumber",
         "A medical staff member with this License Number already exists.");
 
     public static readonly Error DuplicateEmail = CreateConflict(
@@ -22,11 +22,11 @@ public class MedicalStaffErrors : DomainErrors
     public static readonly Error SupervisorNotFound = CreateNotFound("ActiveSupervisor");
 
     public static readonly Error InvalidSpecialization = CreateConflict(
-        "MedicalStaff.InvalidSpecialization", 
+        "MedicalStaff.InvalidSpecialization",
         "One or more assigned specializations do not exist.");
 
     public static readonly Error InvalidWorkingHours = CreateConflict(
-        "WorkingHours.InvalidTimes", 
+        "WorkingHours.InvalidTimes",
         "StartTime must be before EndTime.");
 
     public static readonly Error OverrideNotFound = CreateNotFound("ScheduleOverride");

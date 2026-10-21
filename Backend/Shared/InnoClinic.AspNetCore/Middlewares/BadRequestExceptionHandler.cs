@@ -1,10 +1,10 @@
+using InnoClinic.AspNetCore.Extensions;
+using InnoClinic.Core.Constants;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using InnoClinic.AspNetCore.Extensions;
-using InnoClinic.Core.Constants;
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace InnoClinic.AspNetCore.Middlewares;
 
@@ -43,8 +43,8 @@ public sealed class BadRequestExceptionHandler(
         if (exception.InnerException is System.Text.Json.JsonException jsonException
             && !string.IsNullOrEmpty(jsonException.Path))
         {
-            var fieldName = jsonException.Path == "$" 
-                ? "body" 
+            var fieldName = jsonException.Path == "$"
+                ? "body"
                 : jsonException.Path.Replace("$.", "");
 
             errors[fieldName] = [$"Invalid data format. Expected a valid value."];

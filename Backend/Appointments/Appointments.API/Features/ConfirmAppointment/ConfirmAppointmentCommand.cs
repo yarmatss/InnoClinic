@@ -3,5 +3,5 @@ using MediatR;
 
 namespace Appointments.API.Features.ConfirmAppointment;
 
-public record ConfirmAppointmentCommand(Guid AppointmentId) 
+public record ConfirmAppointmentCommand(Guid AppointmentId)
     : IRequest<Result>;

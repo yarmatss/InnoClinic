@@ -1,8 +1,8 @@
-using System.Net.Security;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Net.Security;
 
 namespace InnoClinic.Contracts.Grpc.Auth;
 

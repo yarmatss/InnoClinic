@@ -1,12 +1,12 @@
 using FluentValidation;
-using Mapster;
 using InnoClinic.AspNetCore.Authorization;
+using InnoClinic.AspNetCore.Filters;
+using InnoClinic.Core.Common;
+using Mapster;
 using Profiles.API.Constants;
 using Profiles.API.DTOs.Patient;
-using InnoClinic.AspNetCore.Filters;
 using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
-using InnoClinic.Core.Common;
 using Profiles.Domain.Models;
 
 namespace Profiles.API.Endpoints;
@@ -31,7 +31,7 @@ public static class PatientEndpoints
 
             group.MapPost("/", CreatePatientAsync)
                 .RequirePermission(ClinicPermissions.Patients.Write);
-            
+
             group.MapPut("/{id:guid}", UpdatePatientAsync)
                 .RequirePermission(ClinicPermissions.Patients.Write);
 
@@ -54,7 +54,7 @@ public static class PatientEndpoints
         var model = dto.Adapt<PatientModel>();
         var result = await patientService.CreateAsync(model, ct);
 
-        return result.Map(p => 
+        return result.Map(p =>
         {
             var responseDto = p.Adapt<PatientResponseDto>();
             return Result.Created(responseDto, $"{ApiRoutes.Patients}/{responseDto.Id}");

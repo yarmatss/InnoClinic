@@ -1,8 +1,8 @@
+using Appointments.API.Authorization;
 using Appointments.Domain.Common;
 using Appointments.Domain.Entities;
 using Appointments.Domain.Enums;
 using Appointments.Infrastructure.Data;
-using Appointments.API.Authorization;
 using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using MediatR;

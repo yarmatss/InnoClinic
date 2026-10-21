@@ -1,10 +1,10 @@
 using FluentValidation;
+using InnoClinic.AspNetCore.Extensions;
+using InnoClinic.Core.Constants;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using InnoClinic.AspNetCore.Extensions;
-using InnoClinic.Core.Constants;
 using System.Diagnostics;
 using System.Text.Json;
 

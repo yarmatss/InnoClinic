@@ -9,7 +9,7 @@ namespace Notifications.Worker.Consumers;
 public class PatientCreatedConsumer(
     IEmailSenderService emailSender,
     EmailComposer emailComposer,
-    ILogger<PatientCreatedConsumer> logger) 
+    ILogger<PatientCreatedConsumer> logger)
     : IConsumer<PatientCreated>
 {
     public async Task Consume(ConsumeContext<PatientCreated> context)

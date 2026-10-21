@@ -1,5 +1,6 @@
 using Google.Protobuf;
 using InnoClinic.Contracts.Grpc;
+using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using InnoClinic.Messaging.Contracts;
 using InnoClinic.Messaging.Outbox;
@@ -9,9 +10,8 @@ using Profiles.BLL.Interfaces;
 using Profiles.BLL.Models;
 using Profiles.DAL.Entities;
 using Profiles.DAL.Interfaces;
-using Profiles.Domain.Models;
 using Profiles.Domain.Extensions;
-using InnoClinic.Core.Authorization;
+using Profiles.Domain.Models;
 
 namespace Profiles.BLL.Services;
 
@@ -25,7 +25,7 @@ internal class MedicalStaffService(
     IAccessResolver accessResolver) : IMedicalStaffService
 {
     public async Task<Result<MedicalStaffModel>> CreateAsync(
-        MedicalStaffModel model, 
+        MedicalStaffModel model,
         CancellationToken cancellationToken)
     {
         var id = Guid.NewGuid();
@@ -89,7 +89,7 @@ internal class MedicalStaffService(
     }
 
     public async Task<Result<MedicalStaffModel>> GetByIdAsync(
-        Guid id, 
+        Guid id,
         CancellationToken cancellationToken)
     {
         var existingEntity = await staffRepository.GetByIdAsync(
@@ -132,8 +132,8 @@ internal class MedicalStaffService(
     }
 
     public async Task<Result<MedicalStaffModel>> UpdateAsync(
-        Guid id, 
-        MedicalStaffModel model, 
+        Guid id,
+        MedicalStaffModel model,
         CancellationToken cancellationToken)
     {
         if (!CanModify(id, Operation.Update))
@@ -429,14 +429,14 @@ internal class MedicalStaffService(
         CancellationToken cancellationToken)
     {
         var existingLicense = await staffRepository.GetByConditionAsync(
-            s => s.LicenseNumber == model.LicenseNumber && (!currentId.HasValue || s.Id != currentId.Value), 
+            s => s.LicenseNumber == model.LicenseNumber && (!currentId.HasValue || s.Id != currentId.Value),
             cancellationToken);
 
         if (existingLicense.Any())
             return MedicalStaffErrors.DuplicateLicenseNumber;
 
         var existingNationalId = await staffRepository.GetByConditionAsync(
-            s => s.NationalId == model.NationalId && (!currentId.HasValue || s.Id != currentId.Value), 
+            s => s.NationalId == model.NationalId && (!currentId.HasValue || s.Id != currentId.Value),
             cancellationToken);
 
         if (existingNationalId.Any())

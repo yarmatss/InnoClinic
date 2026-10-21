@@ -1,6 +1,6 @@
 using InnoClinic.AspNetCore.Authorization;
-using Profiles.API.DTOs.Patient;
 using InnoClinic.Core.Common;
+using Profiles.API.DTOs.Patient;
 using Profiles.Domain.Enums;
 using Profiles.IntegrationTests.Infrastructure;
 using Profiles.Tests.Common.Fakes.Entities;
@@ -58,8 +58,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         var dto = GetValidCreateDto();
 
         var response = await Client.PostAsJsonAsync(
-            "/api/patients", 
-            dto, 
+            "/api/patients",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         var body = await response.Content.ReadFromJsonAsync<PatientResponseDto>(
@@ -87,8 +87,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         };
 
         var response = await Client.PostAsJsonAsync(
-            "/api/patients", 
-            dto, 
+            "/api/patients",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -103,8 +103,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         };
 
         var response = await Client.PostAsJsonAsync(
-            "/api/patients", 
-            dto, 
+            "/api/patients",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -116,8 +116,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         var dto = GetValidCreateDto() with { InsuranceNumber = "" };
 
         var response = await Client.PostAsJsonAsync(
-            "/api/patients", 
-            dto, 
+            "/api/patients",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -133,7 +133,7 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         var patientId = await SeedPatientAsync();
 
         var response = await Client.GetAsync(
-            $"/api/patients/{patientId}", 
+            $"/api/patients/{patientId}",
             TestContext.Current.CancellationToken);
 
         var body = await response.Content.ReadFromJsonAsync<PatientResponseDto>(
@@ -148,7 +148,7 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
     public async Task GetPatientById_WhenNotFound_Returns404()
     {
         var response = await Client.GetAsync(
-            $"/api/patients/{Guid.NewGuid()}", 
+            $"/api/patients/{Guid.NewGuid()}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -161,7 +161,7 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         await SeedPatientAsync(seed: 101);
 
         var response = await Client.GetAsync(
-            "/api/patients?PageNumber=1&PageSize=10", 
+            "/api/patients?PageNumber=1&PageSize=10",
             TestContext.Current.CancellationToken);
 
         var body = await response.Content.ReadFromJsonAsync<PagedResponse<PatientResponseDto>>(
@@ -181,7 +181,7 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
     public async Task GetAllPatients_WithInvalidQueryParams_Returns400(string queryParam)
     {
         var response = await Client.GetAsync(
-            $"/api/patients?{queryParam}", 
+            $"/api/patients?{queryParam}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -198,8 +198,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         var dto = GetValidUpdateDto();
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/patients/{patientId}", 
-            dto, 
+            $"/api/patients/{patientId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         var body = await response.Content.ReadFromJsonAsync<PatientResponseDto>(
@@ -217,8 +217,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         var dto = GetValidUpdateDto();
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/patients/{Guid.NewGuid()}", 
-            dto, 
+            $"/api/patients/{Guid.NewGuid()}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -237,8 +237,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         };
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/patients/{patientId}", 
-            dto, 
+            $"/api/patients/{patientId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -257,8 +257,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PostAsJsonAsync(
-            "/api/patients", 
-            dto, 
+            "/api/patients",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -274,8 +274,8 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/patients/{patientId}", 
-            dto, 
+            $"/api/patients/{patientId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -290,7 +290,7 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Write);
 
         var response = await Client.GetAsync(
-            $"/api/patients/{patientId}", 
+            $"/api/patients/{patientId}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -303,7 +303,7 @@ public class PatientEndpointsTests(PostgresContainerFixture dbFixture) : Integra
         Client.DefaultRequestHeaders.Add("X-Test-Anonymous", "true");
 
         var response = await Client.GetAsync(
-            "/api/patients?PageNumber=1&PageSize=10", 
+            "/api/patients?PageNumber=1&PageSize=10",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);

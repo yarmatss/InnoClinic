@@ -21,7 +21,7 @@ internal class PatientService(
     IAccessResolver accessResolver) : IPatientService
 {
     public async Task<Result<PatientModel>> CreateAsync(
-        PatientModel model, 
+        PatientModel model,
         CancellationToken cancellationToken)
     {
         var id = Guid.NewGuid();
@@ -116,7 +116,7 @@ internal class PatientService(
     }
 
     public async Task<Result<PatientModel>> GetByIdAsync(
-        Guid id, 
+        Guid id,
         CancellationToken cancellationToken)
     {
         var access = accessResolver.Check(new PatientRef(id), Operation.Read);
@@ -125,7 +125,7 @@ internal class PatientService(
 
         var entity = await patientRepository.GetByIdAsync(id, cancellationToken);
 
-        if (entity is null) 
+        if (entity is null)
             return PatientErrors.NotFound;
 
         var model = entity.Adapt<PatientModel>();
@@ -137,8 +137,8 @@ internal class PatientService(
     }
 
     public async Task<Result<PatientModel>> UpdateAsync(
-        Guid id, 
-        PatientModel model, 
+        Guid id,
+        PatientModel model,
         CancellationToken cancellationToken)
     {
         if (!accessResolver.Check(new PatientRef(id), Operation.Update).IsAllowed)
@@ -173,14 +173,14 @@ internal class PatientService(
         CancellationToken cancellationToken)
     {
         var existingInsurance = await patientRepository.GetByConditionAsync(
-            p => p.InsuranceNumber == model.InsuranceNumber && (!currentId.HasValue || p.Id != currentId.Value), 
+            p => p.InsuranceNumber == model.InsuranceNumber && (!currentId.HasValue || p.Id != currentId.Value),
             cancellationToken);
 
         if (existingInsurance.Any())
             return PatientErrors.DuplicateInsuranceNumber;
 
         var existingNationalId = await patientRepository.GetByConditionAsync(
-            p => p.NationalId == model.NationalId && (!currentId.HasValue || p.Id != currentId.Value), 
+            p => p.NationalId == model.NationalId && (!currentId.HasValue || p.Id != currentId.Value),
             cancellationToken);
 
         if (existingNationalId.Any())

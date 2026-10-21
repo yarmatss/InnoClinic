@@ -1,6 +1,6 @@
 using InnoClinic.AspNetCore.Authorization;
-using Profiles.API.DTOs.Specialization;
 using InnoClinic.Core.Common;
+using Profiles.API.DTOs.Specialization;
 using Profiles.IntegrationTests.Infrastructure;
 using Profiles.Tests.Common.Fakes.Entities;
 using Shouldly;
@@ -39,8 +39,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         var dto = GetValidCreateDto();
 
         var response = await Client.PostAsJsonAsync(
-            "/api/specializations", 
-            dto, 
+            "/api/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -60,8 +60,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         var dto = GetValidCreateDto() with { Name = name };
 
         var response = await Client.PostAsJsonAsync(
-            "/api/specializations", 
-            dto, 
+            "/api/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -77,7 +77,7 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         await SeedSpecializationAsync();
 
         var response = await Client.GetAsync(
-            "/api/specializations?PageNumber=1&PageSize=10", 
+            "/api/specializations?PageNumber=1&PageSize=10",
             TestContext.Current.CancellationToken);
 
         var body = await response.Content.ReadFromJsonAsync<PagedResponse<SpecializationResponseDto>>(
@@ -99,8 +99,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         var dto = GetValidUpdateDto();
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/specializations/{specId}", 
-            dto, 
+            $"/api/specializations/{specId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -112,8 +112,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         var dto = GetValidUpdateDto();
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/specializations/{Guid.NewGuid()}", 
-            dto, 
+            $"/api/specializations/{Guid.NewGuid()}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -126,8 +126,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         var dto = GetValidUpdateDto() with { Name = "" };
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/specializations/{specId}", 
-            dto, 
+            $"/api/specializations/{specId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -145,8 +145,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PostAsJsonAsync(
-            "/api/specializations", 
-            dto, 
+            "/api/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -161,8 +161,8 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Patients.Read);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/specializations/{specId}", 
-            dto, 
+            $"/api/specializations/{specId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -176,7 +176,7 @@ public class SpecializationEndpointsTests(PostgresContainerFixture dbFixture) : 
         await SeedSpecializationAsync();
 
         var response = await Client.GetAsync(
-            "/api/specializations?PageNumber=1&PageSize=10", 
+            "/api/specializations?PageNumber=1&PageSize=10",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);

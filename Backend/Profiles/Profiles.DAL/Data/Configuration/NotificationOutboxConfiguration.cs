@@ -1,5 +1,5 @@
-using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Constants;
+using InnoClinic.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,6 +1,6 @@
 using InnoClinic.AspNetCore.Authorization;
-using Profiles.API.DTOs.MedicalStaff;
 using InnoClinic.Core.Common;
+using Profiles.API.DTOs.MedicalStaff;
 using Profiles.Domain.Enums;
 using Profiles.IntegrationTests.Infrastructure;
 using Profiles.Tests.Common.Fakes.Entities;
@@ -70,8 +70,8 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = GetValidCreateDto();
 
         var response = await Client.PostAsJsonAsync(
-            "/api/staff", 
-            dto, 
+            "/api/staff",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -79,7 +79,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
 
         var body = await response.Content.ReadFromJsonAsync<MedicalStaffResponseDto>(
             TestContext.Current.CancellationToken);
-            
+
         body.ShouldNotBeNull();
         body.LicenseNumber.ShouldBe(dto.LicenseNumber);
         body.IsActive.ShouldBeTrue();
@@ -91,14 +91,14 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         // First create
         var dto = GetValidCreateDto();
         await Client.PostAsJsonAsync(
-            "/api/staff", 
-            dto, 
+            "/api/staff",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         // Try duplicate
         var response = await Client.PostAsJsonAsync(
-            "/api/staff", 
-            dto, 
+            "/api/staff",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
@@ -121,10 +121,10 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         };
 
         var response = await Client.PostAsJsonAsync(
-            "/api/staff", 
-            dto, 
+            "/api/staff",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
-            
+
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
@@ -148,10 +148,10 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         };
 
         var response = await Client.PostAsJsonAsync(
-            "/api/staff", 
-            dto, 
+            "/api/staff",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
-            
+
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
@@ -165,14 +165,14 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var staffId = await SeedStaffAsync();
 
         var response = await Client.GetAsync(
-            $"/api/staff/{staffId}", 
+            $"/api/staff/{staffId}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        
+
         var body = await response.Content.ReadFromJsonAsync<MedicalStaffResponseDto>(
             TestContext.Current.CancellationToken);
-            
+
         body.ShouldNotBeNull();
         body.Id.ShouldBe(staffId);
     }
@@ -181,9 +181,9 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     public async Task GetStaffById_WhenNotFound_Returns404()
     {
         var response = await Client.GetAsync(
-            $"/api/staff/{Guid.NewGuid()}", 
+            $"/api/staff/{Guid.NewGuid()}",
             TestContext.Current.CancellationToken);
-            
+
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
@@ -193,14 +193,14 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         await SeedStaffAsync();
 
         var response = await Client.GetAsync(
-            "/api/staff/active?PageNumber=1&PageSize=10", 
+            "/api/staff/active?PageNumber=1&PageSize=10",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        
+
         var body = await response.Content.ReadFromJsonAsync<PagedResponse<MedicalStaffResponseDto>>(
             TestContext.Current.CancellationToken);
-            
+
         body.ShouldNotBeNull();
         body.TotalCount.ShouldBeGreaterThanOrEqualTo(1);
     }
@@ -211,9 +211,9 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     public async Task GetActiveStaff_WithInvalidQueryParams_Returns400(string param)
     {
         var response = await Client.GetAsync(
-            $"/api/staff/active?{param}", 
+            $"/api/staff/active?{param}",
             TestContext.Current.CancellationToken);
-            
+
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 
@@ -228,15 +228,15 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = GetValidUpdateDto();
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}", 
-            dto, 
+            $"/api/staff/{staffId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        
+
         var body = await response.Content.ReadFromJsonAsync<MedicalStaffResponseDto>(
             TestContext.Current.CancellationToken);
-            
+
         body.ShouldNotBeNull();
         body.FirstName.ShouldBe(dto.FirstName);
         body.LicenseNumber.ShouldBe(dto.LicenseNumber);
@@ -246,12 +246,12 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
     public async Task UpdateStaff_WhenNotFound_Returns404()
     {
         var dto = GetValidUpdateDto();
-        
+
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{Guid.NewGuid()}", 
-            dto, 
+            $"/api/staff/{Guid.NewGuid()}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
-            
+
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
@@ -268,8 +268,8 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         };
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}", 
-            dto, 
+            $"/api/staff/{staffId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -286,14 +286,14 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = new AssignSpecializationsDto(
         [
             new StaffSpecializationDto(
-                specId, 
-                true, 
+                specId,
+                true,
                 DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)))
         ]);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}/specializations", 
-            dto, 
+            $"/api/staff/{staffId}/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -306,14 +306,14 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = new AssignSpecializationsDto(
         [
             new StaffSpecializationDto(
-                Guid.NewGuid(), 
-                true, 
+                Guid.NewGuid(),
+                true,
                 DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)))
         ]);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}/specializations", 
-            dto, 
+            $"/api/staff/{staffId}/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
@@ -326,8 +326,8 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = new AssignSpecializationsDto([]);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}/specializations", 
-            dto, 
+            $"/api/staff/{staffId}/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
@@ -367,22 +367,22 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var staffId = await SeedStaffAsync();
 
         var deleteResponse = await Client.DeleteAsync(
-            $"/api/staff/{staffId}", 
+            $"/api/staff/{staffId}",
             TestContext.Current.CancellationToken);
 
         var getResponse = await Client.GetAsync(
-            $"/api/staff/{staffId}", 
+            $"/api/staff/{staffId}",
             TestContext.Current.CancellationToken);
 
         deleteResponse.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-        getResponse.StatusCode.ShouldBe(HttpStatusCode.NotFound); 
+        getResponse.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task DeactivateStaff_WhenNotFound_Returns404()
     {
         var response = await Client.DeleteAsync(
-            $"/api/staff/{Guid.NewGuid()}", 
+            $"/api/staff/{Guid.NewGuid()}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -400,8 +400,8 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.PostAsJsonAsync(
-            "/api/staff", 
-            dto, 
+            "/api/staff",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -416,8 +416,8 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}", 
-            dto, 
+            $"/api/staff/{staffId}",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -430,16 +430,16 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         var dto = new AssignSpecializationsDto(
         [
             new StaffSpecializationDto(
-                specId, 
-                true, 
+                specId,
+                true,
                 DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)))
         ]);
 
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.PutAsJsonAsync(
-            $"/api/staff/{staffId}/specializations", 
-            dto, 
+            $"/api/staff/{staffId}/specializations",
+            dto,
             cancellationToken: TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -453,7 +453,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Read);
 
         var response = await Client.DeleteAsync(
-            $"/api/staff/{staffId}", 
+            $"/api/staff/{staffId}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -467,7 +467,7 @@ public class MedicalStaffEndpointsTests(PostgresContainerFixture dbFixture) : In
         Client.DefaultRequestHeaders.Add("X-Test-Permission", ClinicPermissions.Staff.Write);
 
         var response = await Client.GetAsync(
-            $"/api/staff/{staffId}", 
+            $"/api/staff/{staffId}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);

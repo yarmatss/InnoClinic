@@ -1,14 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using Profiles.DAL.Builders;
 using Profiles.DAL.Data;
 using Profiles.DAL.Entities;
-using Profiles.DAL.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Profiles.DAL.Extensions;
+using Profiles.DAL.Interfaces;
 using Profiles.Domain.Models;
-using Profiles.DAL.Builders;
 
 namespace Profiles.DAL.Repositories;
 
-public class PatientRepository(ProfilesDbContext context) : 
+public class PatientRepository(ProfilesDbContext context) :
     BaseRepository<Patient>(context), IPatientRepository
 {
     public async Task<(IReadOnlyList<Patient> Items, int TotalCount)> GetPagedAsync(

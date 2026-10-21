@@ -9,12 +9,12 @@ using System.Linq.Expressions;
 
 namespace Profiles.DAL.Repositories;
 
-public class MedicalStaffRepository(ProfilesDbContext context) : 
+public class MedicalStaffRepository(ProfilesDbContext context) :
     BaseRepository<MedicalStaff>(context), IMedicalStaffRepository
 {
     public override async Task<IReadOnlyList<MedicalStaff>> GetByConditionAsync(
-        Expression<Func<MedicalStaff, bool>> expression, 
-        CancellationToken ct, 
+        Expression<Func<MedicalStaff, bool>> expression,
+        CancellationToken ct,
         bool trackChanges = false)
     {
         return await GetQuery(trackChanges)
@@ -25,8 +25,8 @@ public class MedicalStaffRepository(ProfilesDbContext context) :
     }
 
     public override async Task<MedicalStaff?> GetByIdAsync(
-        Guid id, 
-        CancellationToken ct, 
+        Guid id,
+        CancellationToken ct,
         bool trackChanges = false)
     {
         return await GetQuery(trackChanges)

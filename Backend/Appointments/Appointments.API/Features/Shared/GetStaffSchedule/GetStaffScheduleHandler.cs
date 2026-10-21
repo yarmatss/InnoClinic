@@ -17,7 +17,7 @@ public class GetStaffScheduleHandler(
     : IRequestHandler<GetStaffScheduleQuery, Result<SyncStaffProfileRequest>>
 {
     public async Task<Result<SyncStaffProfileRequest>> Handle(
-        GetStaffScheduleQuery request, 
+        GetStaffScheduleQuery request,
         CancellationToken cancellationToken)
     {
         var redisKey = CacheConstants.MedicalStaffScheduleKey(request.MedicalStaffId);

@@ -21,7 +21,7 @@ public class PostgresExceptionInterceptor : SaveChangesInterceptor
 
     private static void CheckAndThrow(Exception? exception)
     {
-        if (exception is DbUpdateException { InnerException: PostgresException pgEx } && 
+        if (exception is DbUpdateException { InnerException: PostgresException pgEx } &&
             pgEx.SqlState == PostgresErrorCodes.ExclusionViolation)
         {
             throw new ScheduleConflictException("A schedule conflict occurred.");

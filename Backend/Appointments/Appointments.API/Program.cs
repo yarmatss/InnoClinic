@@ -1,6 +1,6 @@
+using Appointments.API.Authorization;
 using Appointments.API.BackgroundJobs;
 using Appointments.API.Behaviors;
-using Appointments.API.Authorization;
 using Appointments.API.GrpcHandlers;
 using Appointments.API.Options;
 using Appointments.Domain.Entities;
@@ -11,8 +11,8 @@ using InnoClinic.AspNetCore.Cors;
 using InnoClinic.AspNetCore.Extensions;
 using InnoClinic.AspNetCore.Middlewares;
 using InnoClinic.Core.Authorization;
-using InnoClinic.Messaging.Outbox;
 using InnoClinic.Messaging.Extensions;
+using InnoClinic.Messaging.Outbox;
 using Scalar.AspNetCore;
 using System.Reflection;
 

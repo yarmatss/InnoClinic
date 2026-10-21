@@ -7,7 +7,7 @@ public record AppointmentReminder(
 
     DateTime StartTime,
     DateTime EndTime,
-    
+
     string PatientEmail,
     string PatientName,
     string MedicalStaffName);

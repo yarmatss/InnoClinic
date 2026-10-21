@@ -22,10 +22,10 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(
         EventId = 1002,
-        Level = LogLevel.Information, 
+        Level = LogLevel.Information,
         Message = "Email successfully sent to {Recipient}")]
     public static partial void LogEmailSent(
-        this ILogger logger, 
+        this ILogger logger,
         string recipient);
 
     [LoggerMessage(

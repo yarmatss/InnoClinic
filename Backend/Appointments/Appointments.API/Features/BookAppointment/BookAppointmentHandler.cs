@@ -1,3 +1,4 @@
+using Appointments.API.Authorization;
 using Appointments.API.Extensions;
 using Appointments.API.Features.Shared.GetStaffSchedule;
 using Appointments.API.Options;
@@ -7,7 +8,6 @@ using Appointments.Domain.Enums;
 using Appointments.Domain.Exceptions;
 using Appointments.Infrastructure.Data;
 using InnoClinic.Contracts.Grpc;
-using Appointments.API.Authorization;
 using InnoClinic.Core.Authorization;
 using InnoClinic.Core.Common;
 using InnoClinic.Messaging.Contracts;
@@ -43,7 +43,7 @@ public class BookAppointmentHandler(
         }
 
         var scheduleResult = await sender.Send(
-            new GetStaffScheduleQuery(request.MedicalStaffId), 
+            new GetStaffScheduleQuery(request.MedicalStaffId),
             cancellationToken);
 
         if (scheduleResult.IsFailure)
@@ -102,7 +102,7 @@ public class BookAppointmentHandler(
     }
 
     private static Result ValidateAgainstSchedule(
-        BookAppointmentCommand request, 
+        BookAppointmentCommand request,
         SyncStaffProfileRequest schedule,
         TimeZoneInfo clinicTimeZone)
     {

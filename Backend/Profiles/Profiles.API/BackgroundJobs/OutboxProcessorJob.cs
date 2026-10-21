@@ -45,7 +45,7 @@ public class OutboxProcessorJob(
 
         var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, stoppingToken);
 
-        if (messages.Count == 0) 
+        if (messages.Count == 0)
             return;
 
         foreach (var message in messages)
@@ -55,22 +55,22 @@ public class OutboxProcessorJob(
                 switch (message.Type)
                 {
                     case nameof(SyncStaffProfileRequest):
-                    {
-                        var request = JsonParser.Default.Parse<SyncStaffProfileRequest>(message.Content);
-                        var response = await scheduleGrpcClient.SyncStaffProfileAsync(request, cancellationToken: stoppingToken);
-                        if (response.Success)
+                        {
+                            var request = JsonParser.Default.Parse<SyncStaffProfileRequest>(message.Content);
+                            var response = await scheduleGrpcClient.SyncStaffProfileAsync(request, cancellationToken: stoppingToken);
+                            if (response.Success)
+                            {
+                                message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
+                                logger.LogOutboxSyncSuccess(request.MedicalStaffId);
+                            }
+                            break;
+                        }
+                    default:
                         {
                             message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
-                            logger.LogOutboxSyncSuccess(request.MedicalStaffId);
+                            message.Error = $"Unknown outbox message type: {message.Type}";
+                            break;
                         }
-                        break;
-                    }
-                    default:
-                    {
-                        message.ProcessedOnUtc = timeProvider.GetUtcNow().UtcDateTime;
-                        message.Error = $"Unknown outbox message type: {message.Type}";
-                        break;
-                    }
                 }
             }
             catch (RpcException rpcEx)
