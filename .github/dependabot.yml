@@ -1,0 +1,84 @@
+version: 2
+
+registries:
+  github-nuget:
+    type: nuget-feed
+    url: https://nuget.pkg.github.com/yarmatss/index.json
+    username: ${{ secrets.NUGET_USER }}
+    password: ${{ secrets.NUGET_TOKEN }}
+  nuget-org:
+    type: nuget-feed
+    url: https://api.nuget.org/v3/index.json
+
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories:
+      - "/Backend/Profiles/Profiles.API"
+      - "/Backend/Appointments/Appointments.API"
+      - "/Backend/Notifications/Notifications.Worker"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker:
+        patterns: ["*"]
+
+  - package-ecosystem: docker-compose
+    directory: "/Backend"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-compose:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: "/Frontend"
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # typescript-eslint doesn't support TypeScript 7 yet
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # Keep in line with the Node 26 LTS runtime
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: nuget
+    directory: "/Backend"
+    registries: "*"
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+    groups:
+      nuget-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Our own packages are bumped by hand when Shared is published; an unrelated
+      # InnoClinic.Messaging also exists on nuget.org
+      - dependency-name: "InnoClinic.*"
+      # v9 has a commercial license
+      - dependency-name: "MassTransit*"
+        update-types: ["version-update:semver-major"]
+      # Microsoft.AspNetCore.OpenApi 10.x is built on 2.x
+      - dependency-name: Microsoft.OpenApi
+        update-types: ["version-update:semver-major"]

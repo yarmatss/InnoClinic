@@ -24,7 +24,7 @@ docker compose up -d                              # full stack; copy .env.exampl
 - Only Profiles has tests (`Profiles.UnitTests`, `Profiles.IntegrationTests`). Integration tests use Testcontainers (PostgreSQL) + Respawn, so Docker Desktop must be running, or every integration test fails with a "failed to connect to the docker API" error. They go through `ProfilesApiFactory` with a `TestAuthHandler` and `FakeAuthManagementService` in place of Auth0.
 - EF Core migrations are applied automatically on startup in Development (`ApplyMigrationsAsync`). Migrations live in `Profiles.DAL/Migrations` and `Appointments.Infrastructure/Data/Migrations`; use the `ef-migration` skill for the exact commands.
 - Package versions are managed centrally in `Directory.Packages.props`; csproj `PackageReference`s have no versions.
-- Local compose ports: Profiles API 5000/5001, Appointments API 6000/6001, Postgres 5433, Redis 6379, RabbitMQ 5672 (UI 15672), MailHog 8025. In Development, OpenAPI and Scalar are mapped anonymously.
+- Local compose ports: Profiles API 5000/5001, Appointments API 6000/6001, Postgres 5433, Redis 6379, RabbitMQ 5672 (UI 15672), Mailpit 8025. In Development, OpenAPI and Scalar are mapped anonymously.
 
 ### Frontend (run from `Frontend/`)
 
@@ -49,7 +49,7 @@ There are no frontend tests. CI runs `audit`, `format:check`, `lint`, `lint:fsd`
 - **Profiles** (`Profiles.API` → `BLL` → `DAL` → `Domain`): classic layered design. Minimal-API endpoint groups in `Profiles.API/Endpoints`, FluentValidation validators, Mapster mapping (`Mapping/Registers`, scanned at startup), services in BLL, EF Core repositories in DAL. Owns patients, medical staff, and specializations, and creates Auth0 users and roles through the Auth0 Management API (`Auth0.ManagementApi`).
 - **Appointments** (`Appointments.API` + `Domain` + `Infrastructure`): vertical slices (new ones via the `appointments-feature` skill). Each `Features/<UseCase>/` folder holds Command/Query, Handler (MediatR), Validator (run by `ValidationBehavior`), and an `IEndpoint` class discovered by `AddEndpoints(assembly)`. Writes use EF Core (`AppointmentsDbContext`); read-side queries use Dapper via `ISqlConnectionFactory`. Redis is used for caching.
 - **Appointments.Functions**: an Azure Functions (isolated worker) timer job, `AppointmentReminderFunction`, that reuses `Appointments.Infrastructure` and calls Profiles over gRPC to enqueue reminder emails.
-- **Notifications.Worker**: a MassTransit/RabbitMQ consumer that renders Scriban HTML templates (`Templates/`) and sends mail via MailKit (MailHog locally).
+- **Notifications.Worker**: a MassTransit/RabbitMQ consumer that renders Scriban HTML templates (`Templates/`) and sends mail via MailKit (Mailpit locally).
 
 ### Inter-service communication
 
@@ -73,7 +73,7 @@ The frontend follows Feature-Sliced Design: `app → pages → widgets → featu
 
 The app runs in two places with different wiring. Keep both working when you change config, ports, or hosting code.
 
-**Local: `Backend/docker-compose.yml`.** Postgres, Redis, RabbitMQ, and MailHog run in containers. The APIs serve HTTPS with a dev cert mounted from `HOST_CERT_PATH`, and gRPC calls use `Grpc__AllowUntrustedServerCertificate=true`. The Functions project isn't part of compose.
+**Local: `Backend/docker-compose.yml`.** Postgres, Redis, RabbitMQ, and Mailpit run in containers. The APIs serve HTTPS with a dev cert mounted from `HOST_CERT_PATH`, and gRPC calls use `Grpc__AllowUntrustedServerCertificate=true`. The Functions project isn't part of compose.
 
 **Azure Container Apps.** The APIs, the worker, and Redis run as container apps, and `Appointments.Functions` runs in a Function App. The infrastructure was created by hand, with no IaC in the repo, so new settings must also be added in Azure. The SPA isn't hosted; it runs locally on port 5500 against either backend.
 
